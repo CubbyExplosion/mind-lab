@@ -315,21 +315,21 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
 
   // ---------------- UI ----------------
   function open() {
-    S = load() || fresh(); if (!S.design) S.design = fresh().design; const f0 = fresh(); ["company", "visited", "sat", "debt"].forEach(k => { if (!S[k]) S[k] = f0[k]; }); S.contracts = (S.contracts || []).filter(c => DESTS[c.dest]); S.design.boost = S.design.boost || { eng: "srb", count: 0 }; S.design.extras = S.design.extras || {}; (S.designs || []).forEach(d => { d.boost = d.boost || { eng: "srb", count: 0 }; d.extras = d.extras || {}; }); refill(); save();
+    S = load() || fresh(); if (!S.design) S.design = fresh().design; const f0 = fresh(); ["company", "visited", "sat", "debt", "fj"].forEach(k => { if (!S[k]) S[k] = f0[k]; }); S.contracts = (S.contracts || []).filter(c => DESTS[c.dest]); S.design.boost = S.design.boost || { eng: "srb", count: 0 }; S.design.extras = S.design.extras || {}; (S.designs || []).forEach(d => { d.boost = d.boost || { eng: "srb", count: 0 }; d.extras = d.extras || {}; }); refill(); save();
     app = document.getElementById("app"); tab = "contracts"; sel = null; render();
   }
   function head() {
     const t = tier();
     return `<button class="back" id="rcHome">← All subjects</button><div class="rc-head"><h1>${esc(S.company)}</h1><div class="rc-stats"><span>Cash <b>${money(S.cash)}</b></span>${S.debt > 0 ? `<span>Debt <b class="badc">${money(S.debt)}</b></span>` : ""}<span>${esc(TIERNAMES[t])}</span><span>Launches <b>${S.ok}</b> good / ${S.tries}</span></div></div>
       <p class="sub">You run a launch company: customers order a ride into space for their satellites. Play money only! Build rockets, take orders, and launch heavier and heavier satellites. <label class="rc-co">Company name <input id="rcCo" maxlength="20" value="${esc(S.company)}"></label></p>
-      <div class="rc-tabs">${[["contracts", "Orders"], ["build", "Build"], ["places", "100 Places"], ["research", "Shop & research"], ["eng", "Engineer job"], ["bank", "Loans"], ["stocks", "Stocks"], ["learn", "Rocket science"], ["log", "Records"]].map(a => `<button type="button" class="rc-tab ${tab === a[0] ? "on" : ""}" data-t="${a[0]}">${a[1]}</button>`).join("")}</div>`;
+      <div class="rc-tabs">${[["contracts", "Orders"], ["build", "Build"], ["places", "100 Places"], ["research", "Shop & research"], ["eng", "Engineer job"], ["fun", "Fun jobs"], ["bank", "Loans"], ["stocks", "Stocks"], ["learn", "Rocket science"], ["log", "Records"]].map(a => `<button type="button" class="rc-tab ${tab === a[0] ? "on" : ""}" data-t="${a[0]}">${a[1]}</button>`).join("")}</div>`;
   }
   function render() {
-    if (!app) return; const t = { contracts, build, places, research, eng, bank, stocks, learn, log }[tab] || contracts;
+    if (!app) return; const t = { contracts, build, places, research, eng, fun, bank, stocks, learn, log }[tab] || contracts;
     app.innerHTML = head() + '<div class="rc-body" id="rcBody"></div>';
     document.getElementById("rcCo").onchange = e => { S.company = e.target.value.replace(/[^\p{L}\p{N} _&'-]/gu, "").trim().slice(0, 20) || "My Rocket Co"; save(); render(); };
     document.getElementById("rcHome").onclick = () => { if (typeof home === "function") home(); };
-    app.querySelectorAll(".rc-tab").forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
+    app.querySelectorAll(".rc-tab").forEach(b => b.onclick = () => { tab = b.dataset.t; fjOn = null; fjClear(); render(); });
     t(document.getElementById("rcBody")); window.scrollTo(0, 0);
   }
   const cur = () => S.contracts.find(c => c.id === sel) || null;
@@ -509,6 +509,66 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
       if (o.ok) { S.cash += pay; S.earned += pay; engMsg = `<b class="okc">Correct! You earned ${money(pay)}.</b> ${esc(q.why)}`; snd("star"); } else { const r = q.a.find(x => x.ok); engMsg = `<b class="badc">Not quite, no pay this time.</b> The answer was <b>${esc(r.t)}</b>. ${esc(q.why)}`; snd("tick"); }
       save(); render();
     });
+  }
+
+  // ---------------- fun jobs (100 mini jobs) ----------------
+  const FJA = ["Tiny", "Speedy", "Giant", "Sparkly", "Sleepy", "Super", "Wobbly", "Golden", "Frosty", "Cosmic", "Bouncy", "Mighty", "Silly", "Neon", "Fluffy"];
+  const FJB = [["Pop the bubbles", "🫧", "tap"], ["Copy the lights", "💡", "memory"], ["Stop the rocket", "🚀", "timing"], ["Count the stars", "⭐", "count"], ["Line up the moons", "🌙", "sort"], ["Pour the sand", "⏳", "sand"], ["Find the odd one", "🔍", "odd"]];
+  const FJ = []; for (let i = 0; i < 100; i++) { const b = FJB[i % 7], L = Math.floor(i / 7); FJ.push({ id: i, name: b[0] + " (" + FJA[L] + ")", icon: b[1], kind: b[2], L, pay: Math.round((20000 + i * 4800) / 1000) * 1000 }); }
+  let fjOn = null, fjTimers = [];
+  const fjClear = () => { fjTimers.forEach(t => { clearInterval(t); clearTimeout(t); }); fjTimers = []; };
+  const fjT = (f, ms, once) => { const t = once ? setTimeout(f, ms) : setInterval(f, ms); fjTimers.push(t); return t; };
+  function fun(el) {
+    fjClear(); S.fj = S.fj || {}; const done = Object.keys(S.fj).length;
+    if (fjOn != null) return fjPlay(el, FJ[fjOn]);
+    el.innerHTML = `<p class="note">100 fun little jobs! Each one is quick and easy. Finish a job to get paid, up to <b>${money(FJ[99].pay)}</b>. You get paid once per job, so try them all! Done: <b>${done}/100</b>. If you miss, just try again.</p>
+      <div class="rc-fj">${FJ.map(j => `<button type="button" class="rc-fjc ${S.fj[j.id] ? "done" : ""}" data-j="${j.id}"><span>${j.icon}</span><b>${esc(j.name)}</b><em>${S.fj[j.id] ? "Done!" : money(j.pay)}</em></button>`).join("")}</div>`;
+    el.querySelectorAll("[data-j]").forEach(b => b.onclick = () => { fjOn = +b.dataset.j; fun(el); });
+  }
+  function fjPlay(el, j) {
+    const L = j.L, again = !!S.fj[j.id], pay = again ? Math.round(j.pay * .1 / 1000) * 1000 : j.pay;
+    el.innerHTML = `<div class="rc-fjp"><h3>${j.icon} ${esc(j.name)}</h3><p class="rc-sm">Prize: <b>${money(pay)}</b>${again ? " (you already did this one, so it pays a little)" : ""}</p><div id="fjBox" class="rc-fjbox"></div><p id="fjMsg" class="rc-fjmsg"></p><div><button class="hintbtn" type="button" id="fjBack">Back to jobs</button> <button class="close" type="button" id="fjRetry">Try again</button></div></div>`;
+    const box = el.querySelector("#fjBox"), msg = el.querySelector("#fjMsg"); let over = false;
+    const say = t => { msg.innerHTML = t; };
+    const end = ok => { if (over) return; over = true; fjClear(); if (ok) { S.cash += pay; S.earned += pay; S.fj[j.id] = 1; save(); snd("star"); say(`<b class="okc">You did it! You earned ${money(pay)}!</b>`); const h = app && app.querySelector(".rc-stats b"); if (h) h.textContent = money(S.cash); } else { snd("tick"); say('<b class="badc">Oops! Try again, you can do it.</b>'); } };
+    el.querySelector("#fjBack").onclick = () => { fjClear(); fjOn = null; render(); };
+    el.querySelector("#fjRetry").onclick = () => { fjClear(); fun(el); };
+    const R = (a, b) => a + Math.floor(Math.random() * (b - a + 1)), shuf = a => a.sort(() => Math.random() - .5);
+    if (j.kind === "tap") {
+      const need = 5 + Math.min(L, 10), secs = Math.max(6, 11 - L * .3); let n = 0, left = secs; box.innerHTML = '<div class="rc-fjf"><button type="button" class="rc-fjt">' + j.icon + '</button></div>';
+      const f = box.firstChild, t = f.firstChild, mv = () => { t.style.left = R(2, 82) + "%"; t.style.top = R(2, 76) + "%"; }; mv(); say(`Tap it ${need} times! <b>0/${need}</b> · ${Math.ceil(left)}s`);
+      t.onclick = () => { if (over) return; n++; snd("clink"); mv(); say(`Tap it ${need} times! <b>${n}/${need}</b> · ${Math.ceil(left)}s`); if (n >= need) end(true); };
+      fjT(() => { if (over) return; left -= .2; say(`Tap it ${need} times! <b>${n}/${need}</b> · ${Math.max(0, Math.ceil(left))}s`); if (left <= 0) end(false); }, 200);
+    } else if (j.kind === "memory") {
+      const len = 3 + Math.min(6, Math.floor(L / 2)), cols = ["#ff5a5a", "#5aff8a", "#5aa8ff", "#ffd34e"], seq = Array.from({ length: len }, () => R(0, 3)); let at = 0, show = true;
+      box.innerHTML = '<div class="rc-fjpads">' + cols.map((c, i) => `<button type="button" data-p="${i}" style="background:${c}"></button>`).join("") + "</div>"; const pads = [...box.querySelectorAll("[data-p]")];
+      const flash = i => { pads[i].classList.add("lit"); setTimeout(() => pads[i].classList.remove("lit"), 380); };
+      say("Watch the lights..."); seq.forEach((v, k) => fjT(() => { flash(v); snd("tick"); }, 700 + k * 700, true)); fjT(() => { show = false; say(`Now press them in the same order! (${len} lights)`); }, 700 + len * 700, true);
+      pads.forEach(b => b.onclick = () => { if (show || over) return; const v = +b.dataset.p; flash(v); if (v !== seq[at]) return end(false); at++; if (at >= len) end(true); });
+    } else if (j.kind === "timing") {
+      const zw = Math.max(9, 34 - L * 1.8), zs = R(8, 92 - zw), sp = .7 + L * .12; let x = 0, d = 1;
+      box.innerHTML = `<div class="rc-dbar"><div class="zone" style="left:${zs}%;width:${zw}%"></div><div class="mk" id="fjMk"></div></div><button class="close rc-big" type="button" id="fjStop">STOP!</button>`; const mk = box.querySelector("#fjMk");
+      say("Press STOP when the white line is in the green!"); fjT(() => { x += d * sp; if (x >= 100) { x = 100; d = -1; } if (x <= 0) { x = 0; d = 1; } mk.style.left = x + "%"; }, 16);
+      box.querySelector("#fjStop").onclick = () => { if (over) return; const ok = x >= zs && x <= zs + zw; end(ok); };
+    } else if (j.kind === "count") {
+      const n = 4 + Math.min(L, 12); box.innerHTML = '<div class="rc-fjf"></div><div class="rc-fjopts"></div>'; const f = box.firstChild, o = box.lastChild;
+      for (let i = 0; i < n; i++) { const e = document.createElement("span"); e.className = "rc-fjs"; e.textContent = j.icon; e.style.left = (4 + (i % 6) * 15 + R(0, 4)) + "%"; e.style.top = (6 + Math.floor(i / 6) * 28 + R(0, 6)) + "%"; f.appendChild(e); }
+      say("Count them! You have 3 seconds..."); fjT(() => { f.innerHTML = '<div class="rc-fjq">?</div>'; say("How many were there?"); const opts = [...new Set([n, n + 1, n - 1, n + 2].filter(v => v > 0))]; shuf(opts).forEach(v => { const b = document.createElement("button"); b.className = "close"; b.type = "button"; b.textContent = v; b.onclick = () => end(v === n); o.appendChild(b); }); }, 3000 + L * 100, true);
+    } else if (j.kind === "sort") {
+      const n = 4 + Math.min(5, Math.floor(L / 2)), nums = shuf([...Array(50).keys()].map(v => v + 1)).slice(0, n), order = nums.slice().sort((a, b) => a - b); let at = 0;
+      box.innerHTML = '<div class="rc-fjopts">' + nums.map(v => `<button type="button" class="close rc-fjn" data-n="${v}">${v}</button>`).join("") + "</div>"; say("Tap the numbers from the smallest to the biggest!");
+      box.querySelectorAll("[data-n]").forEach(b => b.onclick = () => { if (over || b.disabled) return; if (+b.dataset.n !== order[at]) return end(false); b.disabled = true; at++; snd("clink"); if (at >= n) end(true); });
+    } else if (j.kind === "sand") {
+      const tg = R(35, 90), tol = Math.max(3, 12 - L * .6); let lv = 0, hold = null, used = false;
+      box.innerHTML = `<div class="rc-jar"><div class="line" style="bottom:${tg}%"></div><div class="sand" id="fjSand"></div></div><button class="close rc-big" type="button" id="fjPour">Hold to pour sand</button>`; const sd = box.querySelector("#fjSand"), pb = box.querySelector("#fjPour");
+      say("Hold the button to pour sand up to the yellow line, then let go!");
+      const stop = () => { if (hold == null) return; clearInterval(hold); hold = null; used = true; end(Math.abs(lv - tg) <= tol); };
+      pb.onpointerdown = e => { if (used || over) return; hold = setInterval(() => { lv = Math.min(100, lv + 1); sd.style.height = lv + "%"; }, 25); fjTimers.push(hold); }; pb.onpointerup = stop; pb.onpointerleave = stop; pb.onpointercancel = stop;
+    } else {
+      const g = 3 + Math.min(4, Math.floor(L / 3)), pairs = [["🌕", "🌖"], ["🚀", "🛸"], ["⭐", "🌟"], ["🪐", "🌍"], ["🔴", "🟠"], ["🛰️", "📡"]], pr = pairs[R(0, pairs.length - 1)], odd = R(0, g * g - 1);
+      box.innerHTML = `<div class="rc-fjgrid" style="grid-template-columns:repeat(${g},1fr)">` + Array.from({ length: g * g }, (_, i) => `<button type="button" data-o="${i}">${i === odd ? pr[1] : pr[0]}</button>`).join("") + "</div>"; say("One is different. Tap it!");
+      box.querySelectorAll("[data-o]").forEach(b => b.onclick = () => { if (!over) end(+b.dataset.o === odd); });
+    }
   }
   // ---------------- loans ----------------
   const LIMITS = [300000, 600000, 1200000, 2500000, 5000000, 10000000, 25000000], RATE = .04;
