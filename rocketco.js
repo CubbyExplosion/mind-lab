@@ -428,21 +428,21 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
   }
   function pics(el) { el.querySelectorAll("canvas[data-pid]").forEach(cv => { try { drawPlace(cv.getContext("2d"), cv.dataset.pid, cv.width, cv.height, "orb"); } catch (e) {} }); }
   // ---------------- stock market (pretend companies, pretend money) ----------------
-  const STOCKS = [["ROKT", "Skyward Rockets", 42, .035], ["FUEL", "Cryo Fuel Co", 18, .03], ["SATS", "Orbit Satellites", 65, .04], ["TOUR", "Moon Tours Ltd", 12, .07], ["MINE", "Asteroid Mining Inc", 8, .09], ["COMM", "Nova Telecom", 55, .025], ["FOOD", "Space Snacks", 6, .05], ["ROBO", "Rover Robotics", 30, .045], ["SOLR", "Sun Energy", 22, .04], ["MARS", "Mars Colony Corp", 5, .12]];
+  const STOCKS = [["ROKT", "Skyward Rockets", 2400, .035], ["FUEL", "Cryo Fuel Co", 900, .03], ["SATS", "Orbit Satellites", 3800, .04], ["TOUR", "Moon Tours Ltd", 650, .07], ["MINE", "Asteroid Mining Inc", 420, .09], ["COMM", "Nova Telecom", 3100, .025], ["FOOD", "Space Snacks", 300, .05], ["ROBO", "Rover Robotics", 1700, .045], ["SOLR", "Sun Energy", 1200, .04], ["MARS", "Mars Colony Corp", 250, .12]];
   const NEWS = [["ROKT", "Skyward Rockets wins a big launch deal", .06], ["ROKT", "Skyward Rockets has a rocket failure", -.07], ["FUEL", "Cryo Fuel Co finds a cheaper fuel recipe", .06], ["FUEL", "A fuel factory has a fire", -.06], ["SATS", "Orbit Satellites launches 100 new satellites", .06], ["SATS", "Orbit Satellites loses a satellite", -.06], ["TOUR", "Moon Tours sells out its first trip", .1], ["TOUR", "Moon Tours has a safety scare", -.1], ["MINE", "Asteroid Mining finds gold in a rock", .15], ["MINE", "Asteroid Mining's probe breaks", -.12], ["COMM", "Nova Telecom signs a giant phone deal", .05], ["FOOD", "Space Snacks adds a new flavour", .04], ["ROBO", "Rover Robotics wins a Mars order", .08], ["SOLR", "Sun Energy builds a bigger solar farm", .05], ["MARS", "Mars Colony Corp plans a new base", .18], ["MARS", "Mars Colony Corp runs out of money", -.2], ["*", "The whole space industry is booming!", .03], ["*", "Worried news makes everyone sell", -.03]];
   const gauss = () => { let u = 0; while (!u) u = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(6.283 * Math.random()); };
   function mktStep(launchOk, quiet) {
     if (!quiet) S.shifts = 5;
     const m = S.mkt; m.day++; const ev = Math.random() < (quiet ? .06 : .35) ? pick(NEWS) : null;
-    STOCKS.forEach(st => { const h = m.hist[st[0]], p = h[h.length - 1]; let r = Math.log(st[2] / p) * .004 + st[3] * gauss();
+    STOCKS.forEach(st => { const h = m.hist[st[0]], p = h[h.length - 1]; let r = Math.log(st[2] / p) * .004 + .007 + st[3] * .6 * gauss();
       if (ev && (ev[0] === st[0] || ev[0] === "*")) r += ev[2]; if (launchOk === true || launchOk === false) { if (st[0] === "ROKT" || st[0] === "SATS") r += launchOk ? .012 : -.012; }
       h.push(Math.max(1, Math.round(p * Math.exp(r) * 100) / 100)); if (h.length > 120) h.shift(); });
     if (ev && !quiet) { m.news.unshift("Day " + m.day + ": " + ev[1]); m.news = m.news.slice(0, 8); }
   }
-  function mktInit() { const m = { day: 0, hist: {}, hold: {}, news: [] }; STOCKS.forEach(st => { m.hist[st[0]] = [st[2]]; }); S.mkt = m; for (let i = 0; i < 60; i++) mktStep(null, true); m.day = 0; }
+  function mktInit() { if (S.mkt && S.mkt.hold) { Object.values(S.mkt.hold).forEach(h => { if (h) S.cash += h.cost; }); } const m = { day: 0, hist: {}, hold: {}, news: [] }; STOCKS.forEach(st => { m.hist[st[0]] = [st[2]]; }); S.mkt = m; for (let i = 0; i < 60; i++) mktStep(null, true); m.day = 0; }
   const px = sym => { const h = S.mkt.hist[sym]; return h[h.length - 1]; };
   function stocks(el) {
-    if (!S.mkt) { mktInit(); save(); } const m = S.mkt; let val = 0, cost = 0; STOCKS.forEach(st => { const h = m.hold[st[0]]; if (h) { val += h.n * px(st[0]); cost += h.cost; } });
+    if (!S.mkt || S.mkt.v !== 2) { mktInit(); S.mkt.v = 2; save(); } const m = S.mkt; let val = 0, cost = 0; STOCKS.forEach(st => { const h = m.hold[st[0]]; if (h) { val += h.n * px(st[0]); cost += h.cost; } });
     el.innerHTML = `<p class="note">The Space Stock Market! These are <b>pretend companies</b> and <b>pretend money</b>. Prices change every time you launch, or when you press "Wait a day". Real stocks can go down as well as up, and real investing is a job for grown-ups.</p>
       <div class="rc-bankbox"><div>Cash <b>${money(S.cash)}</b></div><div>Market day <b>${m.day}</b></div><div>Shares you own are worth <b>${money(val)}</b> (you paid ${money(cost)}) · profit <b class="${val - cost >= 0 ? "okc" : "badc"}">${money(val - cost)}</b></div><div class="rc-sm">Every trade costs a 0.5% fee. Spreading your money over several companies is safer than putting it all in one.</div></div>
       <button class="close" id="mkWait" type="button">Wait a day</button>
@@ -545,7 +545,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
         if (S.sat.insure) paidBy = o.liab; else { owed = o.liab; S.cash -= owed; }
         text = res === "short" ? "ran out of speed before reaching " + D.name + "." : res === "boom" ? why : res === "forgot" ? "never let go of the satellite \"" + sname + "\"." : "dropped the satellite \"" + sname + "\" when deploying.";
       }
-      if (!S.mkt) mktInit(); mktStep(okk);
+      if (!S.mkt || S.mkt.v !== 2) { mktInit(); S.mkt.v = 2; } mktStep(okk);
       let interest = 0; if (S.debt > 0) { interest = Math.round(S.debt * RATE); S.debt += interest; }
       refill(); S.sat.name = pick(SATNAMES) + " " + (1 + R(99)); S.sat.pieces = {};
       S.log.push({ name: des.look.name, ok: okk, text }); S.log = S.log.slice(-40); save(); snd(okk ? "finish" : "sad");
