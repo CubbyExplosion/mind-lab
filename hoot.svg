@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220" role="img" aria-label="Hoot the owl tutor">
+<defs>
+<linearGradient id="body" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b98a5a"/><stop offset="1" stop-color="#8a5a32"/></linearGradient>
+<linearGradient id="belly" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe9c2"/><stop offset="1" stop-color="#f3c987"/></linearGradient>
+<radialGradient id="eye"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#f4f1ff"/></radialGradient>
+</defs>
+<!-- feet -->
+<g fill="#ffb02e"><ellipse cx="78" cy="206" rx="20" ry="8"/><ellipse cx="122" cy="206" rx="20" ry="8"/></g>
+<!-- wings -->
+<path d="M32 108 C6 126 10 176 44 190 C54 170 52 130 46 112Z" fill="#7a4a26"/>
+<path d="M168 108 C194 126 190 176 156 190 C146 170 148 130 154 112Z" fill="#7a4a26"/>
+<!-- body -->
+<ellipse cx="100" cy="132" rx="64" ry="72" fill="url(#body)"/>
+<ellipse cx="100" cy="150" rx="40" ry="52" fill="url(#belly)"/>
+<g fill="none" stroke="#e0a965" stroke-width="3" stroke-linecap="round" opacity=".9">
+<path d="M82 132 q6 6 12 0"/><path d="M96 132 q6 6 12 0"/><path d="M110 132 q6 6 12 0"/>
+<path d="M76 152 q6 6 12 0"/><path d="M90 152 q6 6 12 0"/><path d="M104 152 q6 6 12 0"/><path d="M118 152 q6 6 12 0"/>
+<path d="M86 172 q6 6 12 0"/><path d="M100 172 q6 6 12 0"/>
+</g>
+<!-- ear tufts -->
+<path d="M44 46 L58 78 L78 56Z" fill="#8a5a32"/><path d="M156 46 L142 78 L122 56Z" fill="#8a5a32"/>
+<!-- face -->
+<ellipse cx="100" cy="82" rx="62" ry="50" fill="#a87244"/>
+<!-- eyes -->
+<circle cx="72" cy="82" r="27" fill="url(#eye)" stroke="#e0a965" stroke-width="5"/>
+<circle cx="128" cy="82" r="27" fill="url(#eye)" stroke="#e0a965" stroke-width="5"/>
+<circle cx="76" cy="84" r="13" fill="#2b2146"/><circle cx="124" cy="84" r="13" fill="#2b2146"/>
+<circle cx="81" cy="78" r="5" fill="#fff"/><circle cx="129" cy="78" r="5" fill="#fff"/>
+<!-- beak -->
+<path d="M100 92 L88 108 L100 122 L112 108Z" fill="#ffb02e" stroke="#d98a00" stroke-width="2" stroke-linejoin="round"/>
+<!-- graduation cap -->
+<path d="M30 40 L100 12 L170 40 L100 66Z" fill="#2a2a5a" stroke="#14143a" stroke-width="3" stroke-linejoin="round"/>
+<path d="M62 54 V74 Q100 92 138 74 V54 L100 68Z" fill="#3a3a7a" stroke="#14143a" stroke-width="3" stroke-linejoin="round"/>
+<path d="M164 42 V80" stroke="#ffd34e" stroke-width="4" stroke-linecap="round"/><circle cx="164" cy="84" r="6" fill="#ffd34e"/>
+</svg>

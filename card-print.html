@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mind Card print file</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: #0b0f26; color: #fff; font-family: "Comic Sans MS", "Trebuchet MS", system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 24px 12px; }
+  .bar { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; }
+  button, a.btn { padding: 12px 20px; border-radius: 14px; border: 3px solid #1a1240; background: #ffd34e; color: #1a1240; font-weight: 800; font-size: 16px; cursor: pointer; text-decoration: none; }
+  .note { max-width: 480px; text-align: center; color: #b9c2ff; font-size: 14px; }
+  /* the card: exactly 63.5 x 88.9 mm (2.5 x 3.5 inch, a normal playing-card size) */
+  .sheet { width: 63.5mm; height: 88.9mm; position: relative; overflow: hidden; border-radius: 3.5mm; color: #fff; text-align: center; padding: 4mm 4.5mm 3.5mm; background: linear-gradient(160deg, var(--gc), var(--gd)); border: 1.1mm solid #1a1240; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+  .sheet.exam { border: 1.4mm solid #f5c518; outline: .5mm solid #1a1240; outline-offset: -1.9mm; background: linear-gradient(155deg, #3a2a00, var(--gc) 35%, var(--gd) 70%, #2a1d00); }
+  .wm { position: absolute; left: 50%; top: 50%; width: 46mm; height: 46mm; margin: -23mm 0 0 -23mm; opacity: .13; border-radius: 50%; }
+  .top { display: flex; justify-content: space-between; font-size: 2.6mm; font-weight: 800; letter-spacing: .5mm; opacity: .9; position: relative; }
+  .ribbon { position: relative; margin: 1.6mm -4.5mm 0; padding: .9mm 0; background: linear-gradient(90deg, #8a6200, #ffd34e, #8a6200); color: #3a2a00; font-weight: 900; letter-spacing: 1.2mm; font-size: 3mm; }
+  .grade { font-size: 27mm; line-height: 1; font-weight: 900; text-shadow: 0 1.4mm 0 rgba(0,0,0,.35); margin-top: 1mm; position: relative; }
+  .grade.long { font-size: 21mm; }
+  .title { font-weight: 800; font-size: 4.4mm; line-height: 1.15; position: relative; }
+  .sub { font-size: 3mm; opacity: .9; margin-top: .6mm; position: relative; }
+  .pct { font-size: 7mm; font-weight: 900; margin-top: 1.4mm; position: relative; }
+  .stars { font-size: 6mm; color: rgba(255,255,255,.3); letter-spacing: .6mm; position: relative; }
+  .stars i { font-style: normal; } .stars i.on { color: #ffd34e; text-shadow: 0 0 1mm #1a1240; }
+  .spacer { flex: 1; }
+  .mark { display: flex; align-items: center; justify-content: center; gap: 1.6mm; background: rgba(0,0,0,.35); border-radius: 99mm; padding: .8mm 2mm; font-size: 2.6mm; font-weight: 800; position: relative; }
+  .mark img { width: 6mm; height: 6mm; border-radius: 50%; }
+  .foot { display: flex; justify-content: space-between; font-size: 2.6mm; border-top: .3mm dashed rgba(255,255,255,.4); padding-top: 1mm; margin-top: 1.4mm; position: relative; }
+  .sheet.backside { background: radial-gradient(circle at 50% 38%, #26262e, #0b0b0f 75%); border: 1.4mm solid #f5c518; outline: .5mm solid #1a1240; outline-offset: -1.9mm; align-items: center; justify-content: center; gap: 2mm; }
+  .bk-logo { width: 44mm; height: 44mm; border-radius: 50%; box-shadow: 0 0 6mm rgba(245,197,24,.5); }
+  .bk-name { font-size: 11mm; font-weight: 900; letter-spacing: 2mm; color: #f5c518; margin-top: 2mm; }
+  .bk-sub { font-size: 3.6mm; letter-spacing: 1.6mm; color: #f5c518; }
+  .bk-line { width: 30mm; height: .4mm; background: #f5c518; margin: 1mm 0; }
+  .bk-small { font-size: 2.6mm; color: #c9b36a; line-height: 1.5; }
+  .sheet.exam::after { content: ""; position: absolute; inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.22) 45%, rgba(255,210,255,.18) 50%, rgba(160,255,255,.2) 55%, transparent 70%); pointer-events: none; }
+  .g-A { --gc: #f5c518; --gd: #c77d00; } .g-B { --gc: #3fc46b; --gd: #14783a; } .g-C { --gc: #4cc3ff; --gd: #1c62b0; }
+  .g-D { --gc: #ff9a3c; --gd: #b34e00; } .g-E { --gc: #ff6fb5; --gd: #a0206a; } .g-F { --gc: #8a93b8; --gd: #2e3558; }
+  @page { size: 63.5mm 88.9mm; margin: 0; }
+  @media print {
+    body { background: #fff; padding: 0; display: block; min-height: 0; }
+    .bar, .note { display: none; }
+    .sheet + .sheet { break-before: page; page-break-before: always; }
+    .sheet { box-shadow: none; border-radius: 0; margin: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<div class="bar"><button id="print">Print front and back</button><a class="btn" href="./">Back to Mind Lab</a></div>
+<div class="note">Print on thick card at 100% size (no scaling). The card is the size of a playing card: 63.5 x 88.9 mm.</div>
+<div class="sheet" id="sheet">
+  <img class="wm" src="img/sip-logo.png" alt="">
+  <div class="top"><span>S.I.P. MIND CARD</span><span id="no"></span></div>
+  <div class="ribbon" id="ribbon" hidden>EXAM CARD</div>
+  <div class="grade" id="grade"></div>
+  <div class="title" id="title"></div>
+  <div class="sub" id="sub"></div>
+  <div class="pct" id="pct"></div>
+  <div class="stars" id="stars"></div>
+  <div class="spacer"></div>
+  <div class="mark"><img src="img/sip-logo.png" alt=""><span>Marked by the S.I.P.</span></div>
+  <div class="foot"><span id="nick"></span><span id="date"></span></div>
+</div>
+<div class="sheet backside" id="back"><img class="bk-logo" src="img/sip-logo.png" alt=""><div class="bk-name">S.I.P.</div><div class="bk-sub">MIND CARD</div><div class="bk-line"></div><div class="bk-small">Marked by the S.I.P.<br>Original since 2024</div></div>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search), $ = function (id) { return document.getElementById(id); };
+  // text only is ever shown (textContent), so nothing in the link can inject anything
+  var mark = (q.get("m") || "A").slice(0, 3); if (!/^[A-F](\+\+|\+|-)?$/.test(mark)) mark = "F";
+  var kind = q.get("k") === "exam" ? "exam" : "lesson";
+  var pct = Math.max(0, Math.min(100, parseInt(q.get("p"), 10) || 0)), stars = Math.max(0, Math.min(3, parseInt(q.get("st"), 10) || 0));
+  var sheet = $("sheet"); sheet.classList.add("g-" + mark[0]); if (kind === "exam") { sheet.classList.add("exam"); $("ribbon").hidden = false; }
+  $("grade").textContent = mark; if (mark.length > 2) $("grade").classList.add("long");
+  $("title").textContent = (q.get("t") || "Mind Lab").slice(0, 60);
+  $("sub").textContent = (q.get("s") || "").slice(0, 30) + (q.get("l") ? " · Level " + (parseInt(q.get("l"), 10) || 1) : "") + (kind === "exam" ? " · Exam" : "");
+  $("pct").textContent = pct + "%";
+  $("stars").innerHTML = "<i class='" + (stars > 0 ? "on" : "") + "'>★</i><i class='" + (stars > 1 ? "on" : "") + "'>★</i><i class='" + (stars > 2 ? "on" : "") + "'>★</i>";
+  $("nick").textContent = (q.get("n") || "").slice(0, 16);
+  $("date").textContent = (q.get("d") || "").slice(0, 10);
+  $("no").textContent = "";
+  $("print").onclick = function () { window.print(); };
+})();
+</script>
+</body>
+</html>

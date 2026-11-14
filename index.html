@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mind Lab</title>
+<style>
+  :root { --bg:#10142b; --card:#1b2145; --text:#f4f6ff; --muted:#a9b0d6; --accent:#ffd34e; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: "Segoe UI", system-ui, sans-serif; background: radial-gradient(1200px 600px at 20% -10%, #28306b, var(--bg)); color:var(--text); min-height:100vh; }
+  header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:16px 22px; flex-wrap:wrap; }
+  .logo { font-size:28px; font-weight:800; letter-spacing:.5px; cursor:pointer; }
+  .logo span { color: var(--accent); }
+  .head-right { display:flex; align-items:center; gap:10px; }
+  .streak { background:var(--card); border-radius:999px; padding:10px 14px; font-weight:700; }
+  .music-btn { background:var(--card); color:var(--text); border:2px solid #3a4390; border-radius:999px; padding:10px 16px; font-size:16px; cursor:pointer; }
+  .music-btn:hover { border-color: var(--accent); }
+  main { max-width:1100px; margin:0 auto; padding:0 22px 60px; }
+  h1 { font-size:34px; margin:10px 0 4px; }
+  .sub { color:var(--muted); margin:0 0 22px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; }
+  .subject { background:var(--card); border-radius:20px; padding:18px; cursor:pointer; border:3px solid transparent; transition:transform .12s, border-color .12s; position:relative; overflow:hidden; }
+  .subject:hover { transform:translateY(-4px); border-color:var(--c); }
+  .subject::before { content:""; position:absolute; inset:0 0 auto 0; height:8px; background:var(--c); }
+  .subject .emoji { font-size:44px; }
+  .subject h3 { margin:8px 0 4px; font-size:20px; }
+  .subject p { margin:0; color:var(--muted); font-size:14px; }
+  .subject .meta { margin-top:12px; font-size:12px; color:var(--muted); }
+  .back { background:none; border:none; color:var(--accent); font-size:16px; cursor:pointer; padding:0; margin-bottom:10px; }
+  .section { margin:26px 0; }
+  .sec-title { font-size:24px; font-weight:800; margin-bottom:10px; }
+  .sec-title span { font-size:14px; font-weight:600; color:var(--muted); margin-left:12px; }
+  .levels { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px; }
+  .level { background:var(--card); border-radius:16px; padding:14px; cursor:pointer; border:3px solid transparent; }
+  .level:hover { border-color:var(--c); }
+  .level b { font-size:22px; }
+  .level small { display:block; color:var(--muted); margin-top:4px; }
+  .level .prog { color:var(--accent); }
+  .price { display:inline-block; margin-top:8px; padding:3px 10px; border-radius:999px; font-weight:700; background:#2a3270; }
+  .price.free { background:#1f7a4a; }
+  .note { background:var(--card); border-radius:16px; padding:18px; margin:10px 0 18px; }
+  .note.lock { border:2px dashed var(--accent); }
+  .lesson-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:10px; }
+  .lesson-list.locked { opacity:.55; pointer-events:none; }
+  .lesson-card { background:var(--card); border-radius:14px; padding:12px 14px; display:flex; align-items:center; gap:12px; cursor:pointer; border:3px solid transparent; }
+  .lesson-card:hover { border-color:var(--accent); }
+  .lesson-card .num { background:#2a3270; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; font-weight:800; flex:none; }
+  .lesson-card .t { flex:1; font-weight:600; }
+  .lesson-card .stars { font-size:14px; }
+  .modal-bg { position:fixed; inset:0; background:rgba(5,8,25,.7); display:none; align-items:center; justify-content:center; padding:16px; z-index:10; }
+  .modal-bg.open { display:flex; }
+  .modal { background:var(--card); border-radius:22px; padding:22px; width:min(520px,100%); max-height:90vh; overflow:auto; }
+  .modal h2 { margin-top:0; }
+  .track { display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:#252d62; color:var(--text); border:3px solid transparent; border-radius:14px; padding:12px 14px; margin:8px 0; font-size:18px; cursor:pointer; }
+  .track.on { border-color:var(--accent); }
+  .track:hover { border-color:#6a76d8; }
+  .vol { display:flex; align-items:center; gap:10px; margin-top:14px; }
+  .vol input { flex:1; }
+  .close { background:var(--accent); color:#201a00; border:none; border-radius:12px; padding:10px 18px; font-size:16px; font-weight:700; cursor:pointer; }
+  .modal .close { margin-top:14px; }
+  .note .close { margin-top:12px; }
+  /* lesson player */
+  .lesson-head { font-size:22px; font-weight:800; display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .lesson-head span { font-size:15px; color:var(--muted); font-weight:600; }
+  .bar { height:12px; background:#252d62; border-radius:99px; margin:12px 0 18px; overflow:hidden; }
+  .bar div { height:100%; background:var(--accent); border-radius:99px; transition:width .3s; }
+  .q-card { background:var(--card); border-radius:22px; padding:26px 22px; text-align:center; }
+  .visual { font-size:38px; line-height:1.5; margin-bottom:12px; word-break:break-word; }
+  .q-text { font-size:30px; font-weight:800; margin-bottom:18px; }
+  .answer-row { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .answer-row input { font-size:26px; width:200px; text-align:center; border-radius:14px; border:3px solid #3a4390; background:#10142b; color:var(--text); padding:10px; }
+  .answer-row input:focus { outline:none; border-color:var(--accent); }
+  .choices { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .choice { font-size:28px; font-weight:800; min-width:120px; padding:14px 22px; border-radius:16px; border:3px solid #3a4390; background:#252d62; color:var(--text); cursor:pointer; }
+  .choice:hover:not(:disabled) { border-color:var(--accent); }
+  .choice.right { border-color:#2ecc71; background:#1f7a4a; }
+  .choice.wrongc { border-color:#e74c3c; }
+  .tutor { display:flex; align-items:flex-start; gap:14px; margin-top:20px; }
+  .owl { font-size:54px; line-height:1; }
+  .bubble { position:relative; background:#252d62; border-radius:18px; padding:14px 18px; font-size:18px; flex:1; line-height:1.4; }
+  .bubble::before { content:""; position:absolute; left:-10px; top:20px; border:10px solid transparent; border-right-color:#252d62; border-left:0; }
+  .bubble.hint { background:#3b3a14; border:2px solid var(--accent); }
+  .bubble.hint::before { display:none; }
+  .bubble.good { background:#1b5e3a; }
+  .bubble.bad { background:#5e2330; }
+  .tutor-actions { margin-top:16px; display:flex; gap:12px; flex-wrap:wrap; }
+  .hintbtn { background:#252d62; color:var(--text); border:3px solid var(--accent); border-radius:14px; padding:10px 18px; font-size:16px; font-weight:700; cursor:pointer; }
+  .hintbtn:hover { background:#323b7c; }
+  .hintbtn.say { margin-bottom:14px; }
+  .swatch { display:inline-block; width:90px; height:90px; border-radius:16px; border:3px solid rgba(255,255,255,.35); vertical-align:middle; }
+  .swatch.small { width:44px; height:44px; border-radius:10px; }
+  .swatch.tiny { width:22px; height:22px; border-radius:6px; vertical-align:middle; }
+  .word { display:inline-block; cursor:pointer; padding:4px 10px; margin:3px 0; border-radius:10px; font-size:24px; background:#1b2145; }
+  .word:hover { background:#2a3270; }
+  .coin { display:inline-flex; align-items:center; justify-content:center; border-radius:50%; color:#2b1b00; font-weight:800; font-size:12px; border:3px solid rgba(0,0,0,.28); margin:4px; box-shadow:inset 0 0 0 3px rgba(255,255,255,.35); text-transform:capitalize; }
+  .bill { display:inline-flex; align-items:center; justify-content:center; min-width:84px; height:44px; margin:4px; padding:0 10px; border-radius:6px; background:#7bc47f; color:#0d3b14; font-weight:800; font-size:22px; border:3px solid #3f8f4a; }
+  .bill.b5 { background:#9ec7e8; border-color:#4a7fb0; color:#10304f; }
+  .bill.b10 { background:#e8c77a; border-color:#b08a2e; color:#4a3300; }
+  .bill.b20 { background:#c9b8ee; border-color:#7a5fc0; color:#2a1a5e; }
+  .exam-card { margin-top:22px; background:linear-gradient(135deg,#3b2a8a,#7a3fa6); border-radius:18px; padding:18px 20px; cursor:pointer; border:3px solid var(--accent); }
+  .exam-card:hover { filter:brightness(1.12); }
+  .exam-card.locked { opacity:.55; pointer-events:none; }
+  .exam-card b { font-size:22px; }
+  .exam-card small { display:block; margin-top:4px; color:#e0dcff; }
+  .exam-miss { background:var(--card); border-radius:14px; padding:12px 14px; margin:8px 0; text-align:left; }
+  .exam-miss .vis { font-size:26px; }
+  .pass { color:#6be28f; font-weight:800; }
+  .q-card.teach { text-align:left; }
+  .teach-h { font-size:28px; font-weight:800; margin-bottom:10px; color:var(--accent); }
+  .teach .visual { text-align:center; background:#10142b; border-radius:16px; padding:16px; font-size:34px; }
+  .teach-t { font-size:21px; line-height:1.5; margin-top:12px; }
+  .back.review { margin-top:18px; display:block; }
+  .finish { text-align:center; padding-top:30px; }
+  .finish .big { font-size:64px; }
+  .finish-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:18px; }
+</style>
+<link rel="stylesheet" href="playful.css">
+<link rel="stylesheet" href="anim.css">
+<link rel="stylesheet" href="hover.css">
+<link rel="stylesheet" href="games.css">
+<style>
+#loader { position: fixed; inset: 0; z-index: 100000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; background: radial-gradient(circle at 50% 30%, #2a3270, #0b0f26 75%); color: #fff; font-family: "Comic Sans MS","Trebuchet MS",system-ui,sans-serif; transition: opacity .6s ease, visibility .6s; }
+#loader.gone { opacity: 0; visibility: hidden; }
+#loader .ld-orbit { position: relative; width: 190px; height: 190px; }
+#loader .ld-orbit::before, #loader .ld-orbit::after { content: ""; position: absolute; inset: 0; border-radius: 50%; border: 3px dashed rgba(255,255,255,.22); animation: ldSpin 9s linear infinite; }
+#loader .ld-orbit::after { inset: 22px; animation-duration: 6s; animation-direction: reverse; }
+#loader .ld-orbit i { position: absolute; left: 50%; top: 50%; width: 16px; height: 16px; margin: -8px; border-radius: 50%; border: 2px solid #1a1240; animation: ldSpin 3s linear infinite; }
+#loader .ld-orbit i:nth-child(1) { background: #ffd34e; transform-origin: 8px 95px; margin-top: -95px; }
+#loader .ld-orbit i:nth-child(2) { background: #ff6fb5; transform-origin: 8px 73px; margin-top: -73px; animation-duration: 2.2s; animation-direction: reverse; }
+#loader .ld-orbit i:nth-child(3) { background: #4cc3ff; transform-origin: 8px 50px; margin-top: -50px; animation-duration: 1.6s; }
+#loader .ld-owl { position: absolute; left: 50%; top: 50%; width: 88px; height: 96px; margin: -48px 0 0 -44px; animation: ldBob 1.2s ease-in-out infinite alternate; filter: drop-shadow(0 6px 0 rgba(0,0,0,.35)); }
+#loader h1 { margin: 0; font-size: 42px; letter-spacing: 1px; text-shadow: 0 4px 0 #1a1240; }
+#loader h1 b { color: #ffd34e; }
+#loader .ld-bar { width: min(320px, 78vw); height: 18px; border-radius: 999px; background: rgba(255,255,255,.15); border: 3px solid #1a1240; overflow: hidden; }
+#loader .ld-bar div { height: 100%; width: 4%; border-radius: 999px; background: repeating-linear-gradient(45deg, #ffd34e 0 12px, #ffb81f 12px 24px); background-size: 34px 34px; animation: ldStripe .6s linear infinite; transition: width .35s ease-out; }
+#loader .ld-tip { min-height: 26px; padding: 0 20px; text-align: center; font-size: 17px; color: #cfd6ff; }
+#loader .ld-tip.swap { animation: ldTip .5s ease-out; }
+@keyframes ldSpin { to { transform: rotate(360deg); } }
+@keyframes ldBob { from { transform: translateY(-5px) rotate(-4deg); } to { transform: translateY(5px) rotate(4deg); } }
+@keyframes ldStripe { to { background-position: 34px 0; } }
+@keyframes ldTip { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { #loader *, #loader *::before, #loader *::after { animation: none !important; } }
+</style>
+</head>
+<body>
+<div id="loader" role="status" aria-live="polite">
+  <div class="ld-orbit"><i></i><i></i><i></i><img class="ld-owl" src="hoot.svg" alt=""></div>
+  <h1><b>Mind</b> Lab</h1>
+  <div class="ld-bar"><div id="ldfill"></div></div>
+  <div class="ld-sipline"><img src="img/sip-logo.png" alt="S.I.P. logo"><span>Marked by the S.I.P.</span></div>
+  <div class="ld-tip" id="ldtip">Hoot is getting your lessons ready...</div>
+</div>
+<script>
+(function () {
+  var fill = document.getElementById("ldfill"), tip = document.getElementById("ldtip"), pct = 4, done = false, t0 = Date.now();
+  var tips = ["Hoot is getting your lessons ready...", "Tip: every lesson teaches first, then asks questions.", "Tip: tap the pictures to hear animals.", "Tip: press Play again to watch an animation twice.", "Tip: the Full screen button makes books bigger.", "Warming up the brain cells..."];
+  var ti = 0;
+  var tipTimer = setInterval(function () { ti = (ti + 1) % tips.length; tip.textContent = tips[ti]; tip.classList.remove("swap"); void tip.offsetWidth; tip.classList.add("swap"); }, 1700);
+  var barTimer = setInterval(function () { if (done) return; pct += (92 - pct) * 0.08; fill.style.width = pct + "%"; }, 120);
+  function finish() {
+    if (done) return; done = true;
+    var wait = Math.max(0, 1100 - (Date.now() - t0));
+    setTimeout(function () {
+      fill.style.width = "100%"; tip.textContent = "Ready!";
+      setTimeout(function () { var l = document.getElementById("loader"); l.classList.add("gone"); clearInterval(tipTimer); clearInterval(barTimer); setTimeout(function () { l.remove(); }, 900); }, 350);
+    }, wait);
+  }
+  window.addEventListener("load", finish);
+  setTimeout(finish, 9000);
+  window.hideMindLoader = finish;
+})();
+</script>
+<header>
+  <img class="hd-sip" src="img/sip-logo.png" alt="S.I.P. logo" title="Marked by the S.I.P.">
+  <div class="logo" id="logo">🧠 Mind <span>Lab</span></div>
+  <div class="head-right">
+    <div class="streak" id="streak" title="Days in a row you've finished a lesson">🔥 0</div>
+    <button class="music-btn" id="fsBtn" title="Full screen" aria-label="Full screen">⛶ Full screen</button>
+    <button class="music-btn" id="musicBtn">🎵 Music: Off</button>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<div class="modal-bg" id="musicModal">
+  <div class="modal">
+    <h2>🎵 Pick your music</h2>
+    <div id="trackList"></div>
+    <div class="vol">🔈 <input type="range" id="vol" min="0" max="1" step="0.05"> 🔊</div>
+    <button class="close" id="musicClose">Done</button>
+  </div>
+</div>
+
+<script src="subjects.js"></script>
+<script src="math.js"></script>
+<script src="spelling.js"></script>
+<script src="money.js"></script>
+<script src="spanish.js"></script>
+<!-- Subject lesson files. A subject shows "coming soon" until its file exists. -->
+<script src="reading.js"></script><script src="writing.js"></script><script src="hand.js"></script>
+<script src="life.js"></script><script src="animals.js"></script><script src="earth.js"></script>
+<script src="chem.js"></script><script src="physics.js"></script><script src="engineer.js"></script>
+<script src="history.js"></script><script src="geo.js"></script><script src="civics.js"></script>
+<script src="coding.js"></script><script src="logic.js"></script><script src="typing.js"></script>
+<script src="music-lessons.js"></script><script src="art.js"></script><script src="drama.js"></script>
+<script src="health.js"></script><script src="pe.js"></script><script src="homeec.js"></script>
+<script src="french.js"></script><script src="sign.js"></script><script src="library.js"></script><script src="speaking.js"></script>
+<script src="ext-manifest.js"></script>
+<script>EXT_FILES.forEach(function (f) { document.write('<script src="' + f + '"><\/script>'); });</script>
+<script src="music.js"></script>
+<script src="hoot-art.js"></script>
+<script src="cover-icons.js"></script>
+<script src="pics/pics-0.js"></script>
+<script src="pics/pics-1.js"></script>
+<script src="pics/pics-2.js"></script>
+<script src="pics/pics-3.js"></script>
+<script src="pics/pics-4.js"></script>
+<script src="pics/pics-5.js"></script>
+<script src="pics/pics-6.js"></script>
+<script src="pics/pics-7.js"></script>
+<script src="pics/pics-8.js"></script>
+<script src="pics/pics-9.js"></script>
+<script src="pics/pics-10.js"></script>
+<script src="pics/pics-11.js"></script>
+<script src="pics/pics-12.js"></script>
+<script src="pics/pics-13.js"></script>
+<script src="pics/pics-14.js"></script>
+<script src="pics/pics-15.js"></script>
+<script src="pics/pics-16.js"></script>
+<script src="pics/pics-17.js"></script>
+<script src="pics/animals-A0.js"></script>
+<script src="pics/animals-A1.js"></script>
+<script src="pics/animals-A2.js"></script>
+<script src="pics/animals-A3.js"></script>
+<script src="pics/animals-A4.js"></script>
+<script src="animal-sounds.js"></script>
+<script src="noemoji.js"></script>
+<script src="sfx.js"></script>
+<script src="anim.js"></script>
+<script src="interact.js"></script>
+<script src="shop.js"></script>
+<script src="bookfx.js"></script>
+<script src="paper.js"></script>
+<script src="variety.js"></script>
+<script src="hover.js"></script>
+<script src="games.js"></script>
+<script src="games/set-0.js"></script>
+<script src="games/set-1.js"></script>
+<script src="games/set-2.js"></script>
+<script src="games/set-3.js"></script>
+<script src="games/set-4.js"></script>
+<script src="games/set-5.js"></script>
+<script src="games/set-6.js"></script>
+<script src="games/set-7.js"></script>
+<script src="games/set-8.js"></script>
+<script src="games/sandbox.js"></script>
+<script src="games/set-9.js"></script>
+<script src="games/set-10.js"></script>
+<script src="games/set-11.js"></script>
+<script src="games/set-12.js"></script>
+<script src="games/set-13.js"></script>
+<script src="games/set-14.js"></script>
+<script src="games/set-15.js"></script>
+<script src="games/set-16.js"></script>
+<!--GAMEFILES-->
+<script src="playful.js"></script>
+<script src="books.js"></script>
+<script src="requests.js"></script>
+<script src="config.js"></script>
+<script src="profiles.js"></script>
+<script src="app.js"></script>
+<script src="hoot-chat.js"></script>
+<script src="hoot-fun.js"></script>
+<script src="break.js"></script>
+<script>
+(function(){var b=document.getElementById("fsBtn");if(!b)return;var d=document,e=d.documentElement;
+function on(){return d.fullscreenElement||d.webkitFullscreenElement}
+b.onclick=function(){try{if(on()){(d.exitFullscreen||d.webkitExitFullscreen).call(d)}else{(e.requestFullscreen||e.webkitRequestFullscreen).call(e)}}catch(x){}};
+function upd(){b.textContent=on()?"⛶ Exit full screen":"⛶ Full screen"}
+d.addEventListener("fullscreenchange",upd);d.addEventListener("webkitfullscreenchange",upd);
+if(!(e.requestFullscreen||e.webkitRequestFullscreen))b.style.display="none";})();
+</script>
+<footer class="sip-foot"><img src="img/sip-logo.png" alt="S.I.P. logo"><span>Marked by the S.I.P. &middot; Original since 2024</span></footer>
+</body>
+</html>
