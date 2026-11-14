@@ -7,7 +7,7 @@
   const PER_USER = { "mindlab-progress": 1, "mindlab-exams": 1, "mindlab-streak": 1, "mindlab-cards": 1 };
   const ME = raw("mindlab-profile"); // id of the signed-in person ("" = guest)
   // app.js asks this for every save key, so each person gets their own progress
-  window.mindKey = k => (ME && (PER_USER[k] || /^mindlab-break-(save|best|diff|pics)/.test(k)) ? "u:" + ME + ":" + k : k);
+  window.mindKey = k => (ME && (PER_USER[k] || /^mindlab-break-(save|best|diff|pics)|^mindlab-rocketco$/.test(k)) ? "u:" + ME + ":" + k : k);
   const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const users = () => get("mindlab-users", {});
   const slug = n => n.trim().toLowerCase().replace(/\s+/g, " ");

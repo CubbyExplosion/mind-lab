@@ -82,6 +82,7 @@ function home() {
     <button class="close" id="requestBtn" style="margin:0 0 18px 10px">➕ Request a new subject</button>
     <button class="close" id="cardsBtn" style="margin:0 0 18px 10px">My Mind Cards</button>
     <button class="close" id="scrollBtn" style="margin:0 0 18px 10px">My Grade Scroll</button>
+    <button class="close" id="rocketBtn" style="margin:0 0 18px 10px">Rocket Company</button>
     <button class="close bg-home-btn" id="breakBtn" style="margin:0 0 18px 10px">Break Time Games</button>
     <div class="grid">${SUBJECTS.map(s => {
       const done = Object.keys(progress).filter(k => k.startsWith(s.id + "-")).reduce((n, k) => n + Object.keys(progress[k]).length, 0);
@@ -95,6 +96,7 @@ function home() {
   document.getElementById("requestBtn").onclick = requestModal;
   document.getElementById("cardsBtn").onclick = () => (window.cardsPage ? window.cardsPage() : 0);
   document.getElementById("scrollBtn").onclick = () => (window.scrollPage ? window.scrollPage() : 0);
+  document.getElementById("rocketBtn").onclick = () => (window.RocketCo ? window.RocketCo.open() : 0);
   document.getElementById("breakBtn").onclick = () => (window.BreakGames ? window.BreakGames.open() : 0);
   window.scrollTo(0, 0);
 }
