@@ -322,10 +322,10 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
     const t = tier();
     return `<button class="back" id="rcHome">← All subjects</button><div class="rc-head"><h1>${esc(S.company)}</h1><div class="rc-stats"><span>Cash <b>${money(S.cash)}</b></span>${S.debt > 0 ? `<span>Debt <b class="badc">${money(S.debt)}</b></span>` : ""}<span>${esc(TIERNAMES[t])}</span><span>Launches <b>${S.ok}</b> good / ${S.tries}</span></div></div>
       <p class="sub">You run a launch company: customers order a ride into space for their satellites. Play money only! Build rockets, take orders, and launch heavier and heavier satellites. <label class="rc-co">Company name <input id="rcCo" maxlength="20" value="${esc(S.company)}"></label></p>
-      <div class="rc-tabs">${[["contracts", "Orders"], ["build", "Build"], ["places", "100 Places"], ["research", "Shop & research"], ["bank", "Loans"], ["stocks", "Stocks"], ["learn", "Rocket science"], ["log", "Records"]].map(a => `<button type="button" class="rc-tab ${tab === a[0] ? "on" : ""}" data-t="${a[0]}">${a[1]}</button>`).join("")}</div>`;
+      <div class="rc-tabs">${[["contracts", "Orders"], ["build", "Build"], ["places", "100 Places"], ["research", "Shop & research"], ["eng", "Engineer job"], ["bank", "Loans"], ["stocks", "Stocks"], ["learn", "Rocket science"], ["log", "Records"]].map(a => `<button type="button" class="rc-tab ${tab === a[0] ? "on" : ""}" data-t="${a[0]}">${a[1]}</button>`).join("")}</div>`;
   }
   function render() {
-    if (!app) return; const t = { contracts, build, places, research, bank, stocks, learn, log }[tab] || contracts;
+    if (!app) return; const t = { contracts, build, places, research, eng, bank, stocks, learn, log }[tab] || contracts;
     app.innerHTML = head() + '<div class="rc-body" id="rcBody"></div>';
     document.getElementById("rcCo").onchange = e => { S.company = e.target.value.replace(/[^\p{L}\p{N} _&'-]/gu, "").trim().slice(0, 20) || "My Rocket Co"; save(); render(); };
     document.getElementById("rcHome").onclick = () => { if (typeof home === "function") home(); };
@@ -432,6 +432,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
   const NEWS = [["ROKT", "Skyward Rockets wins a big launch deal", .06], ["ROKT", "Skyward Rockets has a rocket failure", -.07], ["FUEL", "Cryo Fuel Co finds a cheaper fuel recipe", .06], ["FUEL", "A fuel factory has a fire", -.06], ["SATS", "Orbit Satellites launches 100 new satellites", .06], ["SATS", "Orbit Satellites loses a satellite", -.06], ["TOUR", "Moon Tours sells out its first trip", .1], ["TOUR", "Moon Tours has a safety scare", -.1], ["MINE", "Asteroid Mining finds gold in a rock", .15], ["MINE", "Asteroid Mining's probe breaks", -.12], ["COMM", "Nova Telecom signs a giant phone deal", .05], ["FOOD", "Space Snacks adds a new flavour", .04], ["ROBO", "Rover Robotics wins a Mars order", .08], ["SOLR", "Sun Energy builds a bigger solar farm", .05], ["MARS", "Mars Colony Corp plans a new base", .18], ["MARS", "Mars Colony Corp runs out of money", -.2], ["*", "The whole space industry is booming!", .03], ["*", "Worried news makes everyone sell", -.03]];
   const gauss = () => { let u = 0; while (!u) u = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(6.283 * Math.random()); };
   function mktStep(launchOk, quiet) {
+    if (!quiet) S.shifts = 5;
     const m = S.mkt; m.day++; const ev = Math.random() < (quiet ? .06 : .35) ? pick(NEWS) : null;
     STOCKS.forEach(st => { const h = m.hist[st[0]], p = h[h.length - 1]; let r = Math.log(st[2] / p) * .004 + st[3] * gauss();
       if (ev && (ev[0] === st[0] || ev[0] === "*")) r += ev[2]; if (launchOk === true || launchOk === false) { if (st[0] === "ROKT" || st[0] === "SATS") r += launchOk ? .012 : -.012; }
@@ -452,6 +453,39 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
     el.querySelector("#mkWait").onclick = () => { mktStep(null, false); save(); snd("tick"); render(); };
     el.querySelectorAll("[data-buy]").forEach(b => b.onclick = () => { const [sym, n] = b.dataset.buy.split(":"), q = +n, c = q * px(sym) * 1.005; if (S.cash < c) return; S.cash -= c; const h = m.hold[sym] || (m.hold[sym] = { n: 0, cost: 0 }); h.n += q; h.cost += c; save(); snd("clink"); const y = window.scrollY; render(); window.scrollTo(0, y); });
     el.querySelectorAll("[data-sell]").forEach(b => b.onclick = () => { const [sym, n] = b.dataset.sell.split(":"), h = m.hold[sym]; if (!h) return; const q = n === "all" ? h.n : +n; if (q > h.n || q < 1) return; const get = q * px(sym) * .995; S.cash += get; h.cost *= (h.n - q) / h.n; h.n -= q; if (!h.n) delete m.hold[sym]; save(); snd("pop"); const y = window.scrollY; render(); window.scrollTo(0, y); });
+  }
+
+  // ---------------- engineer job ----------------
+  let engQ = null, engMsg = "";
+  const engPay = () => 10000 + 1000 * tier();
+  function engMake() {
+    const R = (a, b) => Math.round(rr(a, b)), shuf = a => a.sort(() => Math.random() - .5);
+    const opts = (right, spread, fmt) => { const set = [right]; let g = 0; while (set.length < 4 && g++ < 60) { const v = Math.round(right * (1 + (Math.random() < .5 ? -1 : 1) * rr(.15, .6) * (1 + g / 30))); if (v > 0 && !set.some(x => Math.abs(x - v) < right * .08)) set.push(v); } return shuf(set).map(v => ({ t: fmt(v), ok: v === right })); };
+    const kind = Math.floor(Math.random() * 6);
+    if (kind === 0) { const isp = pick([280, 300, 320, 350, 380, 420]), r = pick([2, 3, 4, 5, 6, 8]), m0 = R(60, 400) * 10, dv = Math.round(isp * 9.81 * Math.log(r) / 10) * 10;
+      return { q: `A rocket stage has Isp ${isp} s. Full it weighs ${m0} kg and empty it weighs ${Math.round(m0 / r)} kg (a ratio of ${r}). Using Δv = Isp × 9.81 × ln(full ÷ empty), what is its Δv?`, a: opts(dv, 0, v => v.toLocaleString() + " m/s"), why: `ln(${r}) = ${Math.log(r).toFixed(2)}, and ${isp} × 9.81 × ${Math.log(r).toFixed(2)} ≈ ${dv.toLocaleString()} m/s.` }; }
+    if (kind === 1) { const w = R(40, 400), tw = pick([1.1, 1.3, 1.5, 1.8, 2]), th = Math.round(w * 9.81 * tw);
+      return { q: `A rocket weighs ${w} tonnes at liftoff and its engines make ${th.toLocaleString()} kN of thrust. Its weight is about ${w} × 9.81 kN. What is its TWR (thrust ÷ weight)?`, a: shuf([tw, +(tw / 2).toFixed(2), +(tw * 1.7).toFixed(1), +(tw * .7).toFixed(2)]).map(v => ({ t: v.toFixed(2).replace(/0$/, ""), ok: v === tw })), why: `${th.toLocaleString()} ÷ (${w} × 9.81) ≈ ${tw}.` }; }
+    if (kind === 2) { const lift = Math.random() < .5, w = R(50, 300), th = Math.round(w * 9.81 * (lift ? rr(1.2, 1.7) : rr(.5, .9)));
+      return { q: `A ${w} tonne rocket has engines with ${th.toLocaleString()} kN of thrust. Will it leave the launch pad?`, a: shuf([{ t: "Yes, TWR is above 1", ok: lift }, { t: "No, TWR is below 1", ok: !lift }]), why: `Weight is about ${Math.round(w * 9.81).toLocaleString()} kN. Thrust ${lift ? "is bigger" : "is smaller"}, so TWR ${lift ? "> 1" : "< 1"}.` }; }
+    if (kind === 3) { const q = [["Which fuel gives the best efficiency (Isp) for an upper stage?", "Hydrogen + oxygen", ["Kerosene + oxygen", "Gunpowder", "Water"], "Hydrogen gives about 380 s of Isp, but needs big, heavy tanks, so it is best high up."], ["Why do rockets drop empty stages?", "Empty tanks are dead weight, so dropping them makes the rest lighter", ["To make noise", "To save the fuel", "The engines get cold"], "Less weight to speed up means more Δv for the same fuel."], ["About how much Δv do you need to reach low Earth orbit?", "About 9,400 m/s", ["About 100 m/s", "About 940 m/s", "About 94,000 m/s"], "Orbit speed is 7,800 m/s, plus what gravity and air take away."], ["What does a higher Isp mean?", "The engine uses fuel more efficiently", ["The rocket is heavier", "The rocket is cheaper", "The engine is louder"], "You get more speed from each kilogram of fuel."], ["When is a rocket's TWR good for liftoff?", "Around 1.2 to 1.5", ["Exactly 0", "Below 1", "Always 100"], "Under 1.0 it can't leave the ground, and much more just wastes weight."], ["Why can a reusable first stage save money?", "Engines and tanks are the expensive parts, so landing them lets you fly them again", ["It makes the rocket faster", "It needs no fuel", "Customers pay double"], "You only pay to refuel and check it."]][Math.floor(Math.random() * 6)];
+      return { q: q[0], a: shuf([{ t: q[1], ok: true }, ...q[2].map(t => ({ t, ok: false }))]), why: q[3] }; }
+    if (kind === 4) { const a = pick([[300, "kerosene"], [380, "hydrogen"], [240, "a solid booster"], [330, "methane"]]), b = pick([[300, "kerosene"], [380, "hydrogen"], [240, "a solid booster"], [330, "methane"]]); if (a[0] === b[0]) return engMake();
+      return { q: `Engine A uses ${a[1]} (Isp ${a[0]} s). Engine B uses ${b[1]} (Isp ${b[0]} s). Which is more fuel-efficient?`, a: shuf([{ t: "Engine A", ok: a[0] > b[0] }, { t: "Engine B", ok: b[0] > a[0] }]), why: `A higher Isp means more speed from each kg of fuel. ${Math.max(a[0], b[0])} beats ${Math.min(a[0], b[0])}.` }; }
+    const m = R(20, 90) * 10, f = R(2, 9) * m, tot = m + f, r = +(tot / m).toFixed(2);
+    return { q: `A stage has ${m} kg of empty rocket and ${f.toLocaleString()} kg of fuel. What is its mass ratio (full weight ÷ empty weight)?`, a: opts(Math.round(r * 100), 0, v => (v / 100).toFixed(2)), why: `Full = ${m} + ${f.toLocaleString()} = ${tot.toLocaleString()} kg, and ${tot.toLocaleString()} ÷ ${m} = ${r}.` };
+  }
+  function eng(el) {
+    if (S.shifts == null) S.shifts = 5; const left = S.shifts, pay = engPay();
+    if (!engQ && left > 0) engQ = engMake();
+    el.innerHTML = `<p class="note">Short of money? Work as a <b>rocket engineer</b> for other companies! Solve a rocket-science task and earn <b>${money(pay)}</b> each (more as your company grows). You can do <b>${left}</b> more tasks. Your shift is refilled after your next launch, or when you press <b>Wait a day</b> in Stocks.</p>
+      ${engMsg ? `<div class="rc-job">${engMsg}</div>` : ""}
+      ${left > 0 && engQ ? `<div class="rc-bankbox"><b>Task: ${esc(engQ.q)}</b>${engQ.a.map((o, i) => `<button class="close" type="button" data-a="${i}">${esc(o.t)}</button>`).join("")}</div>` : `<div class="rc-bankbox">You are all done for this shift. Go launch a rocket, or press Wait a day in the Stocks tab, then come back!</div>`}`;
+    el.querySelectorAll("[data-a]").forEach(b => b.onclick = () => {
+      const o = engQ.a[+b.dataset.a], q = engQ; engQ = null; S.shifts = Math.max(0, left - 1);
+      if (o.ok) { S.cash += pay; S.earned += pay; engMsg = `<b class="okc">Correct! You earned ${money(pay)}.</b> ${esc(q.why)}`; snd("star"); } else { const r = q.a.find(x => x.ok); engMsg = `<b class="badc">Not quite, no pay this time.</b> The answer was <b>${esc(r.t)}</b>. ${esc(q.why)}`; snd("tick"); }
+      save(); render();
+    });
   }
   // ---------------- loans ----------------
   const LIMITS = [300000, 600000, 1200000, 2500000, 5000000, 10000000, 25000000], RATE = .04;
