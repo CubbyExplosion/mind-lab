@@ -33,24 +33,131 @@
     const s = STYLES[si], b = BASES[bi], fx = s[1];
     def(s[0] + " " + b[0], mix(b[3], s[2], .68), b[1], b[2] + (fx === "dense" ? 3 : 0), { fx, heat: fx === "heat" ? 1 : 0, cold: fx === "freeze" ? 1 : 0, boom: fx === "boom" ? 1 : 0, sticky: fx === "sticky" ? 1 : 0, glow: fx === "glow" ? 1 : 0, flam: b[1] === "V" ? .3 : 0, life: b[1] === "G" ? 1 : 0, gen: 1 });
   });
-  const TOTAL = M.length - 1, START = 9;   // you begin with the first 9 core materials unlocked
+  const TOTAL = M.length - 1, START = 9;
+  // --- 100 BOMBS (their own tab). Row: name | colour | P falls / S stays put | trigger | blast shape | size | what it leaves | fuse
+  // triggers: F fire, T lands/hits something, W water, I timer, A touched by anything, C cold, P plants, S sand, O oil, X acid, M metal/stone
+  // shapes: c circle, d diamond, q square, p plus, x cross, h row, v column, o ring, D shaft down, U geyser up, s scatter, t star
+  const BOMB_ROWS = `TNT|#d9382b|P|F|c|6|fire
+Mini TNT|#e85d4a|P|F|c|3|fire
+Mega TNT|#a01818|P|F|c|12|fire
+Super TNT|#7a0f0f|P|F|c|18|fire
+Dynamite|#c0392b|P|I|c|7|fire|90
+Short Fuse Dynamite|#e0553a|P|I|c|5|fire|40
+Long Fuse Dynamite|#8e2b20|P|I|c|9|fire|240
+Firecracker|#ff4d4d|P|F|c|2|fire
+Cherry Bomb|#d1163f|P|T|c|4|fire
+Black Bomb|#2a2a30|P|T|c|6|fire
+Round Bomb|#3a3a44|P|I|c|6|fire|120
+Impact Bomb|#55555f|P|T|c|8|fire
+Mega Impact Bomb|#44444e|P|T|c|14|fire
+Ticker Bomb|#c9a227|P|I|c|5|fire|60
+Land Mine|#6b6b3a|S|A|c|7|fire
+Pressure Mine|#7d7d4a|S|A|d|8|fire
+Sticky Mine|#6be28f|S|A|c|6|slime
+Ice Mine|#9fe3ff|S|A|d|7|ice
+Gold Mine|#ffd34e|S|A|c|5|gold
+Rainbow Mine|#ff9ad0|S|A|c|7|rain
+Mud Mine|#6b4a2e|S|A|c|6|mud
+Acid Mine|#7dff3a|S|A|c|6|acid
+Flower Mine|#ff6fb5|S|A|c|7|flower
+Sea Mine|#3a6fd0|S|W|c|9|water
+Deep Mine|#444466|S|A|D|16|clr
+Water Balloon|#3a8fe0|P|T|c|5|water
+Big Water Balloon|#2a6fc0|P|T|c|9|water
+Splash Bomb|#5fb0ff|P|W|c|7|water
+Flood Bomb|#1f5fb0|P|W|h|1|water
+Ice Bomb|#bfe9ff|P|T|c|6|ice
+Snow Bomb|#ffffff|P|T|c|7|snow
+Blizzard Bomb|#dff3ff|P|T|s|10|snow
+Freeze Bomb|#8fd6ff|P|C|c|8|ice
+Cold Snap Bomb|#a8d8ff|P|C|c|7|fire
+Lava Bomb|#ff5a1f|P|F|c|5|lava
+Magma Bomb|#e03a10|P|F|c|9|lava
+Volcano Bomb|#b02a0a|P|T|U|22|lava
+Glass Bomb|#bfe9ff|P|F|c|6|glass
+Crystal Bomb|#99ddee|P|F|s|8|glass
+Confetti Bomb|#ff6fb5|P|T|c|7|conf
+Party Popper|#ffb36f|P|T|U|16|conf
+Glitter Bomb|#ff7ad9|P|T|c|6|glit
+Rainbow Bomb|#ffffff|P|T|c|8|rain
+Star Bomb|#fff0a0|P|T|t|10|star
+Disco Bomb|#b48cff|P|I|s|9|conf|100
+Smoke Bomb|#585b66|P|T|c|8|smoke
+Stink Bomb|#9fd36b|P|T|c|7|gas
+Steam Bomb|#dfe9f5|P|T|c|7|steam
+Fog Bomb|#cfd8e6|P|T|c|12|steam
+Bubble Bomb|#bdf3ff|P|T|c|8|bub
+Seed Bomb|#b7d36b|P|T|c|6|seed
+Flower Bomb|#ff8ac8|P|T|c|7|flower
+Moss Bomb|#6aa04a|P|T|c|6|moss
+Forest Bomb|#3fae57|P|T|c|9|plant
+Vine Bomb|#2f8f4a|P|T|D|15|plant
+Sand Bomb|#e6c47a|P|T|c|7|sand
+Mud Bomb|#5a3d24|P|T|c|6|mud
+Slime Bomb|#6be28f|P|T|c|7|slime
+Honey Bomb|#f5b21b|P|T|c|6|honey
+Oil Bomb|#3b2a1a|P|T|c|7|oil
+Milk Bomb|#fff7ea|P|T|c|6|milk
+Ink Bomb|#1b1240|P|T|c|7|ink
+Salt Bomb|#f4f4f4|P|T|c|6|salt
+Gold Bomb|#ffd34e|P|T|c|5|gold
+Metal Bomb|#aab4c4|P|T|c|6|metal
+Brick Bomb|#b5483a|P|T|q|6|brick
+Stone Bomb|#7d7d86|P|T|q|5|stone
+Coal Bomb|#25252b|P|T|c|6|coal
+Ash Bomb|#8d8d93|P|F|c|7|ash
+Clay Bomb|#c97b5a|P|T|c|6|clay
+Dirt Bomb|#7a5230|P|T|c|7|dirt
+Moon Rock Bomb|#b9b4c9|P|T|c|6|moon
+Rubber Bomb|#ff5a7a|P|T|c|6|rubber
+Mercury Bomb|#b9bdd0|P|T|c|6|mercury
+Acid Bomb|#7dff3a|P|T|c|6|acid
+Laser Bomb|#ff3d3d|P|I|h|1|fire|60
+Pillar Bomb|#ff7a3d|P|I|v|1|fire|60
+Cross Bomb|#e04a2a|P|F|p|12|fire
+X Bomb|#c03a2a|P|F|x|12|fire
+Ring Bomb|#ff9a3c|P|F|o|10|fire
+Diamond Bomb|#6fd0ff|P|F|d|9|fire
+Square Bomb|#d0a030|P|F|q|6|fire
+Star Burst Bomb|#ffd34e|P|F|t|12|fire
+Scatter Bomb|#d05a2a|P|F|s|10|fire
+Cluster Bomb|#a04a2a|P|T|s|8|fire
+Drill Bomb|#8a8a9a|P|T|D|40|clr
+Tunnel Bomb|#6a6a7a|P|I|D|30|clr|50
+Rocket Bomb|#e8e8f0|P|F|U|30|clr
+Geyser Bomb|#5fb0ff|P|T|U|24|water
+Black Hole Bomb|#101018|P|T|c|10|clr
+Vacuum Bomb|#303040|S|A|c|12|clr
+Eraser Bomb|#ffd0e0|P|T|q|8|clr
+Wet Bomb|#4aa0e0|P|W|c|6|fire
+Sour Bomb|#b6e03a|P|X|c|6|fire
+Garden Bomb|#4fbf6a|P|P|c|7|fire
+Sand Trap Bomb|#d8b46a|P|S|c|7|fire
+Oil Slick Bomb|#4a3a2a|P|O|c|9|fire
+Magnet Bomb|#8a8aa0|P|M|c|6|fire
+Mega Blast|#ff2a2a|P|T|c|20|fire
+Giga Boom|#ff0a0a|P|I|c|26|fire|200`;
+  const BOMBS = [];
+  BOMB_ROWS.trim().split("\n").forEach(r => { const f = r.split("|"); BOMBS.push(def(f[0], f[1], f[2], 5, { bomb: { t: f[3], sh: f[4], r: +f[5], fill: f[6], f: +(f[7] || 0) } })); });
+  const FILLS = { glass: "Glass", water: "Water", lava: "Lava", ice: "Ice", snow: "Snow", plant: "Plant", slime: "Slime", sand: "Sand", rain: "Rainbow Fluid", acid: "Acid", oil: "Oil", honey: "Honey", mud: "Mud", stone: "Stone", gold: "Gold", bub: "Bubbles", steam: "Steam", star: "Star Dust", glit: "Glitter", ash: "Ash", smoke: "Smoke", dirt: "Dirt", metal: "Metal", coal: "Coal", milk: "Milk", ink: "Ink", salt: "Salt", clay: "Clay", moss: "Moss", flower: "Flower", seed: "Seed", brick: "Brick", rubber: "Rubber Balls", mercury: "Mercury", gas: "Swamp Gas", moon: "Moon Rock" };
+  const TRIG = { F: "fire", T: "landing", W: "water", I: "timer", A: "touch", C: "cold", P: "plants", S: "sand", O: "oil", X: "acid", M: "metal" };   // you begin with the first 9 core materials unlocked
   const ID = n => BY[n];
   const KIND_NAME = { P: "Powders", L: "Liquids", G: "Gases", S: "Solids", F: "Fire", V: "Living" };
 
   B.add({
     id: "s9-sand", name: "Sand Box", ages: [5, 20], cat: "Creative", color: "#e6c47a", icon: "S",
-    desc: TOTAL + " materials to unlock, with fire, ice, acid, explosions and growing plants.", controls: "Paint with the mouse or finger. Fill the star bar to unlock new materials. Finish when you are done.",
+    desc: TOTAL + " materials to unlock plus 100 bombs, with fire, ice, acid, explosions and growing plants.", controls: "Paint with the mouse or finger. Fill the star bar to unlock new materials. Finish when you are done.",
     start(g) {
       const CS = g.by(5, 4, 4), W = Math.floor(640 / CS), H = Math.floor(400 / CS);
-      const cells = new Uint16Array(W * H), aux = new Uint8Array(W * H), stamp = new Uint8Array(W * H);
+      const cells = new Uint16Array(W * H), aux = new Uint8Array(W * H), stamp = new Uint8Array(W * H), fuse = new Uint16Array(W * H);
       const { c, x, pos } = g.canvas(W * CS, H * CS), small = document.createElement("canvas"); small.width = W; small.height = H;
       const sx = small.getContext("2d"), img = sx.createImageData(W, H), px = img.data;
       const NEED0 = g.by(220, 320, 480), need = () => NEED0 * Math.min(1, .25 + unlocked / 250);   // paint this much to unlock the next material
       let unlocked = START, xp = 0, placed = 0, sel = ID("Sand"), size = g.by(4, 3, 2), shape = "round", tool = "paint", paused = false, rain = false, wind = 0, gy = 1, frame = 0, down = false, mp = { x: 0, y: 0 }, cat = "All", page = 0, query = "";
-      const used = new Set(), quests = [["steam", "Make steam"], ["grow", "Grow a plant"], ["ice", "Freeze water"], ["boom", "Make an explosion"], ["glass", "Melt sand into glass"], ["rain", "Make it rain"], ["paint", "Paint 2000 pieces"], ["mix", "Use 8 different materials"]], done = {};
+      const used = new Set(), quests = [["steam", "Make steam"], ["grow", "Grow a plant"], ["ice", "Freeze water"], ["boom", "Make an explosion"], ["glass", "Melt sand into glass"], ["rain", "Make it rain"], ["paint", "Paint 2000 pieces"], ["mix", "Use 8 different materials"], ["bombs", "Set off 10 different bombs"]], done = {};
       const saved = g.load(); if (saved) { unlocked = Math.max(START, Math.min(TOTAL, saved.u || START)); xp = saved.xp || 0; placed = saved.p || 0; Object.assign(done, saved.q || {}); if (saved.s && saved.s <= unlocked) sel = saved.s; }
       const R = n => Math.floor(Math.random() * n), inb = (a, b) => a >= 0 && b >= 0 && a < W && b < H;
-      const setc = (i, id) => { cells[i] = id; aux[i] = id && M[id].kind === "F" ? 20 + R(30) : R(256); };
+      const setc = (i, id) => { cells[i] = id; aux[i] = id && M[id].kind === "F" ? 20 + R(30) : R(256); fuse[i] = id && M[id].bomb ? M[id].bomb.f : 0; };
       const quest = k => { if (done[k]) return; done[k] = 1; unlock(3); g.sfx("cheer"); g.pop("Quest done! +3 new materials", 320, 40, "#6be28f"); drawQuests(); };
       function unlock(n) { const before = unlocked; unlocked = Math.min(TOTAL, unlocked + n); if (unlocked > before) { g.sfx("star"); g.pop("New: " + M[unlocked].name + (n > 1 ? " and more!" : "!"), 320, 70, "#ffd34e"); drawPal(); } }
       const earn = n => { xp += n; while (xp >= need() && unlocked < TOTAL) { xp -= need(); unlock(1); } if (unlocked >= TOTAL) xp = 0; bar(); };
@@ -73,15 +180,16 @@
       const xpwrap = g.html('<div class="sb-xp"><div class="sb-xpbar"><i></i></div><span></span></div>', "sb-wrap"), xpi = xpwrap.querySelector("i"), xpt = xpwrap.querySelector("span");
       function bar() { xpi.style.width = Math.min(100, xp / need() * 100) + "%"; xpt.textContent = unlocked + " / " + TOTAL + " materials unlocked" + (unlocked < TOTAL ? " · next: ???" : " · you have them all!"); g.score(unlocked); }
       function mode() { bErase.classList.toggle("sb-on", tool === "erase"); bBolt.classList.toggle("sb-on", tool === "bolt"); showSel(); }
-      function showSel() { const m = M[sel]; sel0.innerHTML = '<span class="sb-sw" style="background:' + m.col + '"></span> ' + (tool === "erase" ? "Eraser" : tool === "bolt" ? "Lightning: tap the sky!" : m.name) + (tool === "paint" ? ' <em>' + (KIND_NAME[m.kind] || "") + (m.fx ? " · " + m.fx : "") + "</em>" : ""); g.status(tool === "paint" ? m.name : tool); }
+      function showSel() { const m = M[sel]; sel0.innerHTML = '<span class="sb-sw" style="background:' + m.col + '"></span> ' + (tool === "erase" ? "Eraser" : tool === "bolt" ? "Lightning: tap the sky!" : m.name) + (tool === "paint" ? ' <em>' + (m.bomb ? "Bomb · goes off by " + (TRIG[m.bomb.t] || "fire") + (m.bomb.t === "I" ? " (timer)" : "") : (KIND_NAME[m.kind] || "") + (m.fx ? " · " + m.fx : "")) + "</em>" : ""); g.status(tool === "paint" ? m.name : tool); }
       const palwrap = g.html('<div class="sb-pal"><div class="sb-tabs"></div><input class="sb-search" type="search" placeholder="Search your materials" autocomplete="off"><div class="sb-grid"></div><div class="sb-pg"></div></div>', "sb-wrap"), tabs = palwrap.querySelector(".sb-tabs"), grid = palwrap.querySelector(".sb-grid"), pg = palwrap.querySelector(".sb-pg");
       palwrap.querySelector(".sb-search").oninput = e => { query = e.target.value.trim().toLowerCase(); page = 0; drawPal(); };
-      const CATS = ["All", "New", "Powders", "Liquids", "Gases", "Solids", "Fire", "Living", "Special"];
+      const CATS = ["All", "Bombs", "New", "Powders", "Liquids", "Gases", "Solids", "Fire", "Living", "Special"];
       CATS.forEach(n => { const b = document.createElement("button"); b.type = "button"; b.className = "sb-tab"; b.textContent = n; b.onclick = () => { cat = n; page = 0; drawPal(); }; tabs.appendChild(b); });
       function drawPal() {
         let list = []; for (let i = 1; i <= unlocked; i++) list.push(i);
-        if (cat === "New") list = list.slice(-24).reverse(); else if (cat === "Special") list = list.filter(i => M[i].fx); else if (cat !== "All") list = list.filter(i => KIND_NAME[M[i].kind] === cat);
-        if (query) list = list.filter(i => M[i].name.toLowerCase().includes(query));
+        if (cat === "Bombs") list = BOMBS.slice();
+        if (cat === "Bombs") { } else if (cat === "New") list = list.slice(-24).reverse(); else if (cat === "Special") list = list.filter(i => M[i].fx); else if (cat !== "All") list = list.filter(i => KIND_NAME[M[i].kind] === cat);
+        if (query) list = (query && cat === "All" ? list.concat(BOMBS) : list).filter(i => M[i].name.toLowerCase().includes(query));
         const per = 40, pages = Math.max(1, Math.ceil(list.length / per)); page = Math.min(page, pages - 1);
         tabs.childNodes.forEach(b => b.classList.toggle("sb-on", b.textContent === cat));
         grid.innerHTML = ""; list.slice(page * per, page * per + per).forEach(i => { const b = document.createElement("button"); b.type = "button"; b.className = "sb-m" + (i === sel && tool === "paint" ? " sb-on" : ""); b.title = M[i].name; b.innerHTML = '<span style="background:' + M[i].col + '"></span><b>' + M[i].name + "</b>"; b.onclick = () => { sel = i; tool = "paint"; mode(); drawPal(); g.sfx("pick"); }; grid.appendChild(b); });
@@ -118,13 +226,54 @@
       function persist() { g.save({ u: unlocked, xp, p: placed, q: done, s: sel }); }
 
       // ---------- the world ----------
+      // ---------- bombs ----------
+      let shake = 0; const blasted = new Set();
+      function fillCell(i, fill) {
+        if (fill === "clr") { cells[i] = 0; return; }
+        if (fill === "fire") { const q = Math.random(); if (q < .55) { setc(i, ID("Fire")); } else if (q < .8) setc(i, ID("Smoke")); else cells[i] = 0; return; }
+        if (fill === "conf") { setc(i, ID(["Rainbow Fluid", "Glitter", "Star Dust", "Gold"][R(4)])); return; }
+        if (Math.random() < .88) setc(i, ID(FILLS[fill] || "Smoke")); else cells[i] = 0;
+      }
+      function detonate(a, b, sp, name) {
+        const r = sp.r; if (name && !blasted.has(name)) { blasted.add(name); if (blasted.size >= 10) quest("bombs"); }
+        quest("boom"); shake = Math.min(12, 2 + r * .5);
+        const hit = (X, Y) => {
+          if (!inb(X, Y)) return; const i = X + Y * W, k = cells[i]; if (k && M[k].wall) return;
+          if (k && M[k].bomb) { const sp2 = M[k].bomb, nm = M[k].name; cells[i] = 0; g.timeout(() => detonate(X, Y, sp2, nm), 50 + R(120)); return; }
+          fillCell(i, sp.fill);
+        };
+        const sh = sp.sh;
+        if (sh === "c") { for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (dx * dx + dy * dy <= r * r) hit(a + dx, b + dy); }
+        else if (sh === "d") { for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (Math.abs(dx) + Math.abs(dy) <= r) hit(a + dx, b + dy); }
+        else if (sh === "q") { for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) hit(a + dx, b + dy); }
+        else if (sh === "p") { for (let k = -r * 2; k <= r * 2; k++) for (let w = -1; w <= 1; w++) { hit(a + k, b + w); hit(a + w, b + k); } }
+        else if (sh === "x") { for (let k = -r * 2; k <= r * 2; k++) for (let w = 0; w <= 1; w++) { hit(a + k + w, b + k); hit(a + k + w, b - k); } }
+        else if (sh === "h") { for (let X = 0; X < W; X++) for (let w = -1; w <= 1; w++) hit(X, b + w); }
+        else if (sh === "v") { for (let Y = 0; Y < H; Y++) for (let w = -1; w <= 1; w++) hit(a + w, Y); }
+        else if (sh === "o") { for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const d2 = dx * dx + dy * dy; if (d2 <= r * r && d2 >= (r - 2) * (r - 2)) hit(a + dx, b + dy); } }
+        else if (sh === "D") { for (let k = 0; k <= r; k++) for (let w = -1; w <= 1; w++) hit(a + w, b + k * gy); }
+        else if (sh === "U") { for (let k = 0; k <= r; k++) for (let w = -1; w <= 1; w++) hit(a + w, b - k * gy); }
+        else if (sh === "s") { for (let k = 0; k < r * r * 2; k++) { const an = Math.random() * 6.283, d = Math.random() * r; hit(a + Math.round(Math.cos(an) * d), b + Math.round(Math.sin(an) * d)); } }
+        else if (sh === "t") { for (let q = 0; q < 8; q++) { const an = q * .7854; for (let k = 0; k <= r * 1.6; k++) hit(a + Math.round(Math.cos(an) * k), b + Math.round(Math.sin(an) * k)); } hit(a, b); }
+        g.sfx(r < 5 ? "pop" : "boom");
+      }
+      // does this bomb go off this frame? (true = it exploded)
+      function bombCheck(a, y, i, m) {
+        const sp = m.bomb, t = sp.t;
+        if (t === "I") { if (fuse[i] > 0) fuse[i]--; if (fuse[i] === 0 && (aux[i] & 1 || true)) { cells[i] = 0; detonate(a, y, sp, m.name); return true; } return false; }
+        if (t === "T") { fuse[i] = Math.min(60000, fuse[i] + 1); const below = inb(a, y + gy) ? cells[a + (y + gy) * W] : 1; if (fuse[i] > 25 && below && below !== cells[i]) { cells[i] = 0; detonate(a, y, sp, m.name); return true; } return false; }
+        const d = [[1, 0], [-1, 0], [0, 1], [0, -1]][R(4)], X = a + d[0], Y = y + d[1]; if (!inb(X, Y)) return false; const k = cells[X + Y * W]; if (!k || k === cells[i]) return false; const T = M[k]; let go = false;
+        if (t === "F") go = T.heat || T.kind === "F"; else if (t === "W") go = T.name === "Water"; else if (t === "A") go = fuse[i] < 1 && !T.wall; else if (t === "C") go = T.cold || T.name === "Snow" || T.name === "Ice";
+        else if (t === "P") go = T.kind === "V"; else if (t === "S") go = T.name === "Sand"; else if (t === "O") go = T.name === "Oil"; else if (t === "X") go = T.acid; else if (t === "M") go = T.name === "Metal" || T.name === "Stone";
+        if (go) { cells[i] = 0; detonate(a, y, sp, m.name); return true; } return false;
+      }
       function boom(a, b, r) {
         quest("boom");
-        for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const X = a + dx, Y = b + dy; if (!inb(X, Y) || dx * dx + dy * dy > r * r) continue; const i = X + Y * W, k = cells[i]; if (k && M[k].wall) continue; if (k && M[k].boom && !(dx === 0 && dy === 0)) { cells[i] = 0; g.timeout(() => boom(X, Y, 3), 60); continue; } if (Math.random() < .55) setc(i, ID("Fire")); else if (Math.random() < .5) setc(i, ID("Smoke")); else cells[i] = 0; }
+        for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const X = a + dx, Y = b + dy; if (!inb(X, Y) || dx * dx + dy * dy > r * r) continue; const i = X + Y * W, k = cells[i]; if (k && M[k].wall) continue; if (k && M[k].bomb && !(dx === 0 && dy === 0)) { const sp2 = M[k].bomb, nm = M[k].name; cells[i] = 0; g.timeout(() => detonate(X, Y, sp2, nm), 60); continue; } if (k && M[k].boom && !(dx === 0 && dy === 0)) { cells[i] = 0; g.timeout(() => boom(X, Y, 3), 60); continue; } if (Math.random() < .55) setc(i, ID("Fire")); else if (Math.random() < .5) setc(i, ID("Smoke")); else cells[i] = 0; }
         g.sfx("boom");
       }
       const canGo = (a, b) => { const k = cells[b]; if (!k) return true; const A = M[a], T = M[k]; return (T.kind === "L" || T.kind === "G") && A.d > T.d && A.kind !== "G"; };
-      function swap(i, j) { const t = cells[j], ta = aux[j]; cells[j] = cells[i]; aux[j] = aux[i]; cells[i] = t; aux[i] = ta; stamp[j] = stamp[i] = frame & 1 ? 1 : 2; }
+      function swap(i, j) { const t = cells[j], ta = aux[j], tf = fuse[j]; cells[j] = cells[i]; aux[j] = aux[i]; fuse[j] = fuse[i]; cells[i] = t; aux[i] = ta; fuse[i] = tf; stamp[j] = stamp[i] = frame & 1 ? 1 : 2; }
       function react(a, b, i, m) {
         const dir = [[1, 0], [-1, 0], [0, 1], [0, -1]][R(4)], X = a + dir[0], Y = b + dir[1]; if (!inb(X, Y)) return; const j = X + Y * W, k = cells[j], T = k ? M[k] : null;
         if (m.heat || m.fx === "heat") {
@@ -152,6 +301,7 @@
         for (let y = y0; y !== y1; y += ys) for (let xi = 0; xi < W; xi++) {
           const a = lr ? xi : W - 1 - xi, i = a + y * W, k = cells[i]; if (!k || stamp[i] === par) continue; const m = M[k];
           if (m.wall) continue;
+          if (m.bomb && bombCheck(a, y, i, m)) continue;
           const dn = y + gy, up = y - gy, kind = m.kind;
           if (kind === "P") {
             if (m.sticky && Math.random() < .7) { } else if (inb(a, dn) && canGo(k, a + dn * W)) swap(i, a + dn * W);
@@ -185,12 +335,13 @@
           if (m.kind === "F") { const f = aux[i] / 50; r = 255; gg = 90 + 150 * f; b = 20 + 40 * f; }
           else if (m.fx === "rainbow" || m.name === "Rainbow Fluid") { const c2 = hsl(t * 90 + (i % W) * 5 + aux[i], .9, .6); r = c2[0]; gg = c2[1]; b = c2[2]; }
           else if (m.fx === "confetti") { const c2 = hsl(aux[i] * 1.4, .9, .6); r = c2[0]; gg = c2[1]; b = c2[2]; }
+          else if (m.bomb) { if (((t * 3 + aux[i] / 40) | 0) % 2 === 0) { r = Math.min(255, r + 70); gg = Math.min(255, gg + 70); b = Math.min(255, b + 70); } }
           else if (m.glow) { const p = .85 + .3 * Math.sin(t * 4 + aux[i] * .1); r = Math.min(255, r * p + 30); gg = Math.min(255, gg * p + 30); b = Math.min(255, b * p + 30); }
           else if (m.fx === "sparkle" && Math.random() < .05) { r = gg = b = 255; }
           else if (m.fx === "zap" && Math.random() < .03) { r = 200; gg = 230; b = 255; }
           px[o] = r > 255 ? 255 : r; px[o + 1] = gg > 255 ? 255 : gg; px[o + 2] = b > 255 ? 255 : b; px[o + 3] = 255;
         }
-        sx.putImageData(img, 0, 0); x.imageSmoothingEnabled = false; x.drawImage(small, 0, 0, W * CS, H * CS);
+        sx.putImageData(img, 0, 0); x.imageSmoothingEnabled = false; x.save(); if (shake > .4) { x.translate((Math.random() - .5) * shake, (Math.random() - .5) * shake); shake *= .9; } else shake = 0; x.fillStyle = "#0e1336"; x.fillRect(-20, -20, W * CS + 40, H * CS + 40); x.drawImage(small, 0, 0, W * CS, H * CS); x.restore();
       });
     }
   });
