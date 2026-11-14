@@ -12,6 +12,11 @@
 
   // ---------------- the parts ----------------
   const ENGINES = {
+    hornet: { name: "Hornet", thr: 600, isp: 295, mass: 3, cost: 340000, rel: .955, res: "hornet", tip: "A strong mid-size engine." },
+    silk: { name: "Silk (big space engine)", thr: 500, isp: 362, mass: 3.2, cost: 1100000, rel: .96, vac: 1, res: "silk", tip: "A big, very efficient engine for upper stages." },
+    colossus: { name: "Colossus", thr: 10000, isp: 318, mass: 45, cost: 5000000, rel: .96, res: "colossus", tip: "An enormous engine for super heavy rockets." },
+    mammoth: { name: "Mammoth", thr: 22000, isp: 322, mass: 95, cost: 10000000, rel: .955, res: "mammoth", tip: "The biggest engine of all." },
+    bigsrb: { name: "Big Solid Booster", thr: 4200, isp: 252, mass: 7, cost: 800000, rel: .94, solid: 70, res: "bigsrb", tip: "A giant solid booster with 70 tonnes of fuel." },
     wasp: { name: "Wasp", thr: 25, isp: 275, mass: .2, cost: 30000, rel: .92, tip: "A tiny engine for tiny rockets." },
     spark: { name: "Spark", thr: 90, isp: 265, mass: .45, cost: 60000, rel: .93, tip: "A small starter engine." },
     pulse: { name: "Pulse", thr: 280, isp: 285, mass: 1.4, cost: 150000, rel: .95, tip: "A medium engine for a first stage." },
@@ -23,9 +28,10 @@
     whisper: { name: "Whisper (space engine)", thr: 70, isp: 345, mass: .6, cost: 220000, rel: .96, vac: 1, res: "whisper", tip: "Very efficient in space, but weak at the ground (only 35% thrust)." },
     srb: { name: "Solid Booster", thr: 1100, isp: 242, mass: 1.6, cost: 140000, rel: .94, solid: 14, res: "srb", tip: "Carries its own 14 tonnes of solid fuel. Cheap and strong, but a lower Isp." }
   };
-  const TANKS = { T: { name: "Tiny", fuel: 1, dry: .15, cost: 8000 }, S: { name: "Small", fuel: 3, dry: .35, cost: 15000 }, M: { name: "Medium", fuel: 12, dry: 1.1, cost: 45000 }, L: { name: "Large", fuel: 45, dry: 3.6, cost: 130000 }, XL: { name: "Huge", fuel: 150, dry: 11, cost: 380000, res: "xl" }, G: { name: "Giant", fuel: 400, dry: 28, cost: 1000000, res: "giant" } };
+  const TANKS = { T: { name: "Tiny", fuel: 1, dry: .15, cost: 8000 }, S: { name: "Small", fuel: 3, dry: .35, cost: 15000 }, M: { name: "Medium", fuel: 12, dry: 1.1, cost: 45000 }, L: { name: "Large", fuel: 45, dry: 3.6, cost: 130000 }, XL: { name: "Huge", fuel: 150, dry: 11, cost: 380000, res: "xl" }, G: { name: "Giant", fuel: 400, dry: 28, cost: 1000000, res: "giant" }, MG: { name: "Mega", fuel: 1000, dry: 70, cost: 2500000, res: "mega" }, TT: { name: "Titanic", fuel: 3000, dry: 200, cost: 7000000, res: "tt" } };
+  const TORD = ["T", "S", "M", "L", "XL", "G", "MG", "TT"], BOOSTS = ["srb", "bigsrb"];
   const FUELS = { kero: { name: "Kerosene + oxygen", isp: 1, dry: 1, cost: 1 }, meth: { name: "Methane + oxygen", isp: 1.04, dry: 1.05, cost: 1.2, res: "meth" }, hydro: { name: "Hydrogen + oxygen", isp: 1.25, dry: 2.2, cost: 1.7, res: "hydro" } };
-  const TOPS = { fairing: { name: "Basic fairing", mass: .5, cost: 40000 }, light: { name: "Light fairing", mass: .25, cost: 140000, res: "light" }, capsule: { name: "Crew capsule", mass: 4, cost: 300000, crew: 1 } };
+  const TOPS = { fairing: { name: "Basic fairing (up to 5,000 kg)", mass: .5, cost: 40000, cap: 5000 }, light: { name: "Light fairing (up to 3,000 kg)", mass: .25, cost: 140000, res: "light", cap: 3000 }, wide: { name: "Wide fairing (up to 25,000 kg)", mass: 2.2, cost: 260000, res: "wide", cap: 25000 }, megaf: { name: "Mega fairing (up to 150,000 kg)", mass: 9, cost: 900000, res: "megaf", cap: 150000 }, capsule: { name: "Crew capsule (up to 12,000 kg)", mass: 4, cost: 300000, crew: 1, cap: 12000 } };
   // 100 real places to go. Row: id | name | delta-v needed (m/s) | distance from Earth (km) | kind (S hop, E Earth orbit, F flyby, O orbit, L landing, P special point)
   const PLACES = `sub|Suborbital hop (100 km)|2500|105|S
 leo|Low Earth orbit|9400|400|E
@@ -132,6 +138,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
   if (DLIST.length !== 100) console.warn("places:", DLIST.length);
   const RESEARCH = {
     comet: ["Comet engine", 120000, "A mid-size engine."], gale: ["Gale space engine", 350000, "Very efficient upper-stage engine."], nuke: ["Nuclear thermal engine", 2500000, "Isp 850! For the far planets."], giant: ["Giant fuel tank", 700000, "400 tonnes of fuel in one tank."],
+    hornet: ["Hornet engine", 150000, "A strong mid-size engine."], silk: ["Silk big space engine", 900000, "Very efficient and strong, for upper stages."], colossus: ["Colossus engine", 3000000, "10,000 kN of push!"], mammoth: ["Mammoth engine", 8000000, "22,000 kN of push. The biggest."], bigsrb: ["Big Solid Booster", 600000, "A giant strap-on booster."], mega: ["Mega fuel tank", 2000000, "1,000 tonnes of fuel in one tank."], tt: ["Titanic fuel tank", 6000000, "3,000 tonnes of fuel in one tank."], stage4: ["Fourth stage", 800000, "Build rockets with 4 stages."], stage5: ["Fifth stage", 2000000, "Build rockets with 5 stages."], wide: ["Wide fairing", 200000, "Carries satellites up to 25,000 kg."], megaf: ["Mega fairing", 900000, "Carries satellites up to 150,000 kg."],
     thunder: ["Thunder engine", 200000, "A big engine. You will need it for orbit."], titan: ["Titan engine", 900000, "The biggest engine."], whisper: ["Whisper space engine", 250000, "Great for upper stages."], srb: ["Solid Booster", 120000, "Cheap, powerful fuel-filled booster."],
     xl: ["Huge fuel tank", 300000, "150 tonnes of fuel in one tank."], meth: ["Methane fuel", 200000, "Slightly better than kerosene."], hydro: ["Hydrogen fuel", 500000, "Best Isp, but the tanks are big and heavy."],
     stage3: ["Third stage", 250000, "Build rockets with 3 stages."], light: ["Light fairing", 150000, "Saves 250 kg."], reuse: ["Landing legs", 600000, "Your first stage can land, and you get 60% of its price back (75% of the time)."],
@@ -149,7 +156,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
 
   let S = null, app = null, tab = "contracts", sel = null, lessonOpen = 0;
   function fresh() {
-    return { cash: 1000000, ok: 0, tries: 0, earned: 0, res: {}, contracts: [], log: [], designs: [], design: { stages: [{ eng: "spark", count: 1, tank: "S", tanks: 1, fuel: "kero" }], top: "fairing", look: { ...LOOK0 } }, cid: 1, best: 0, debt: 0, company: "My Rocket Co", visited: {}, sat: { name: "Starling", pieces: {}, insure: false } };
+    return { cash: 1000000, ok: 0, tries: 0, earned: 0, res: {}, contracts: [], log: [], designs: [], design: { stages: [{ eng: "spark", count: 1, tank: "S", tanks: 1, fuel: "kero" }], top: "fairing", boost: { eng: "srb", count: 0 }, extras: {}, look: { ...LOOK0 } }, cid: 1, best: 0, debt: 0, company: "My Rocket Co", visited: {}, sat: { name: "Starling", pieces: {}, insure: false } };
   }
   const has = k => !k || S.res[k];
   const tier = () => { let t = 0; TIERS.forEach((n, i) => { if (S.ok >= n) t = i; }); return t; };
@@ -170,34 +177,39 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
 
   // ---------------- the maths of rockets ----------------
   function analyze(des, c) {
-    const kg = c ? c.kg : 200, top = TOPS[des.top] || TOPS.fairing, dest = c ? DESTS[c.dest] : DESTS.sub;
-    let above = kg / 1000 + top.mass, cost = top.cost, dvTot = 0, rel = 1, notes = [];
-    const st = [];
+    const kg = c ? c.kg : 200, top = TOPS[des.top] || TOPS.fairing, dest = c ? DESTS[c.dest] : DESTS.sub, ex = des.extras || {}, bo = des.boost && des.boost.count > 0 && ENGINES[des.boost.eng] ? des.boost : null;
+    let above = kg / 1000 + top.mass + (ex.avionics ? .2 : 0) + (ex.fins ? .3 : 0), cost = top.cost + (ex.avionics ? 120000 : 0) + (ex.fins ? 60000 : 0), dvTot = 0, rel = 1;
+    const bonus = (S.res.test1 ? .015 : 0) + (S.res.test2 ? .015 : 0) + (S.res.test3 ? .015 : 0) + (ex.avionics ? .025 : 0), st = [];
     for (let i = des.stages.length - 1; i >= 0; i--) {
       const s = des.stages[i], e = ENGINES[s.eng], f = FUELS[s.fuel] || FUELS.kero, t = TANKS[s.tank] || TANKS.S, n = s.count;
       const tanks = e.solid ? 0 : s.tanks;
       const dry = e.mass * n + tanks * t.dry * f.dry, fuel = e.solid ? e.solid * n : tanks * t.fuel, wet = dry + fuel;
-      const ve = e.isp * (e.solid ? 1 : f.isp) * G0, dv = fuel > 0 ? ve * Math.log((above + wet) / (above + dry)) : 0;
-      const thrust = e.thr * n * (e.vac && i === 0 ? .35 : 1), twr = thrust / (G0 * (above + wet)) ;
-      const c1 = e.cost * n + tanks * t.cost * f.cost;
-      cost += c1; rel *= Math.pow(e.rel + (S.res.test1 ? .015 : 0) + (S.res.test2 ? .015 : 0) + (S.res.test3 ? .015 : 0), 1 + .15 * (n - 1));
-      st[i] = { dv, twr, wet, dry, fuel, cost: c1, thrust, ve, above }; dvTot += dv; above += wet;
+      const ve = e.isp * (e.solid ? 1 : f.isp) * G0;
+      let dv = fuel > 0 ? ve * Math.log((above + wet) / (above + dry)) : 0, thrust = e.thr * n * (e.vac && i === 0 ? .35 : 1), wetT = wet, c1 = e.cost * n + tanks * t.cost * f.cost;
+      if (i === 0 && bo) {   // strap-on boosters burn together with the first stage, then fall away
+        const be = ENGINES[bo.eng], nb = bo.count, Fb = be.thr * nb * 1, fuelB = be.solid * nb, dryB = be.mass * nb, veB = be.isp * G0, mdB = Fb / veB, tb = fuelB / mdB, md1 = thrust / ve, m1 = Math.min(fuel, md1 * tb);
+        const m0 = above + wet + fuelB + dryB, veEff = (Fb + thrust) / (mdB + md1), dvA = veEff * Math.log(m0 / (m0 - fuelB - m1)), mA = m0 - fuelB - m1 - dryB, rest = fuel - m1;
+        dv = dvA + (rest > 0 ? ve * Math.log(mA / (mA - rest)) : 0); thrust += Fb; wetT = wet + fuelB + dryB; c1 += be.cost * nb; rel *= Math.pow(be.rel + bonus, 1 + .15 * (nb - 1));
+      }
+      const twr = thrust / (G0 * (above + wetT));
+      cost += c1; rel *= Math.pow(e.rel + bonus, 1 + .15 * (n - 1));
+      st[i] = { dv, twr, wet: wetT, dry, fuel, cost: c1, thrust, ve, above }; dvTot += dv; above += wetT;
     }
     const total = above, twr0 = st[0] ? st[0].twr : 0; cost += 15000 + 500 * total;
     let need = dest.dv, low = 0;
     st.forEach((s, i) => { if (i > 0 && s.twr < .25) { need += 400; low++; } });
     if (twr0 < 1.15 && twr0 >= 1) need *= 1 + (1.15 - twr0) * .8;
-    const crewOk = !c || !c.crew || top.crew;
-    return { st, dv: dvTot, need, twr0, cost, total, rel: Math.min(.995, rel), crewOk, low, lift: twr0 >= 1, enough: dvTot >= need };
+    const crewOk = !c || !c.crew || top.crew, fairOk = kg <= top.cap;
+    return { st, dv: dvTot, need, twr0, cost, total, rel: Math.min(.995, rel), crewOk, fairOk, cap: top.cap, low, lift: twr0 >= 1, enough: dvTot >= need };
   }
 
   // ---------------- drawing a rocket (also used by the launch) ----------------
   function drawRocket(x, des, cx, base, sc, o) {
     o = o || {}; const L = des.look || LOOK0, stages = o.only ? des.stages.slice(0, o.only) : des.stages; let y = base;
-    const wOf = s => { const e = ENGINES[s.eng]; return (e.solid ? 16 : 14) * Math.min(1.4, .7 + (TANKS[s.tank] ? ["T", "S", "M", "L", "XL", "G"].indexOf(s.tank) * .2 : .3) + (s.count > 1 ? .12 * Math.min(4, s.count) : 0)) * sc; };
+    const wOf = s => { const e = ENGINES[s.eng]; return (e.solid ? 16 : 14) * Math.min(1.4, .7 + (TANKS[s.tank] ? TORD.indexOf(s.tank) * .2 : .3) + (s.count > 1 ? .12 * Math.min(4, s.count) : 0)) * sc; };
     const flameCol = L.flame; let topW = 20 * sc;
     stages.forEach((s, i) => {
-      const e = ENGINES[s.eng], w = wOf(s) * (i === 0 ? 1.15 : 1) * Math.pow(.88, i), tanks = e.solid ? 1 : Math.max(1, s.tanks), th = e.solid ? 46 * sc : (["T", "S", "M", "L", "XL", "G"].indexOf(s.tank) * 9 + 14) * sc;
+      const e = ENGINES[s.eng], w = wOf(s) * (i === 0 ? 1.15 : 1) * Math.pow(.88, i), tanks = e.solid ? 1 : Math.max(1, s.tanks), th = e.solid ? 46 * sc : (TORD.indexOf(s.tank) * 9 + 14) * sc;
       const nz = Math.min(5, s.count);
       // flame + nozzles
       if (o.flame && i === (o.flameStage || 0)) { for (let k = 0; k < nz; k++) { const fx = cx - w / 2 + (k + .5) * w / nz, fl = (22 + Math.random() * 16) * sc * (o.flame || 1); const g = x.createLinearGradient(fx, y, fx, y + fl); g.addColorStop(0, "#fff"); g.addColorStop(.3, flameCol); g.addColorStop(1, "rgba(255,80,0,0)"); x.fillStyle = g; x.beginPath(); x.moveTo(fx - 4 * sc, y); x.lineTo(fx, y + fl); x.lineTo(fx + 4 * sc, y); x.fill(); } }
@@ -210,6 +222,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
       if (L.stripes) { x.fillStyle = L.stripe; x.fillRect(cx - w / 2, y + h * .12, w, Math.max(2, h * .1)); if (L.stripes > 1) x.fillRect(cx - w / 2, y + h * .78, w, Math.max(2, h * .1)); }
       if (i === stages.length - 1 && L.windows && !o.noWin) { for (let k = 0; k < Math.min(3, L.windows); k++) { x.fillStyle = "#9fe3ff"; x.beginPath(); x.arc(cx, y + h * .35 + k * 12 * sc, 3.4 * sc, 0, 7); x.fill(); x.strokeStyle = "#1a1240"; x.stroke(); } }
       if (i === 0 && L.logo) { x.fillStyle = "#1a1240"; x.font = "bold " + Math.round(11 * sc) + "px system-ui, sans-serif"; x.textAlign = "center"; x.fillText(String(L.logo).slice(0, 2), cx, y + h * .6); }
+      if (i === 0 && des.boost && des.boost.count > 0 && ENGINES[des.boost.eng]) { const nb = Math.min(4, des.boost.count), bw = w * .3, bh = h * .85; [-1, 1].forEach((d, k) => { for (let q = 0; q < Math.ceil(nb / 2) && q < 2; q++) { const bx = cx + d * (w / 2 + bw / 2 + q * bw * .95); x.fillStyle = "#e8e8ee"; x.fillRect(bx - bw / 2, y + h - bh, bw, bh); x.fillStyle = L.nose; x.beginPath(); x.moveTo(bx - bw / 2, y + h - bh); x.lineTo(bx, y + h - bh - bw * 1.1); x.lineTo(bx + bw / 2, y + h - bh); x.fill(); x.strokeStyle = "#1a1240"; x.strokeRect(bx - bw / 2, y + h - bh, bw, bh); } }); }
       // fins on the first stage
       if (i === 0 && L.finShape !== "none") { const fh = (L.finShape === "big" ? 22 : L.finShape === "swept" ? 26 : 13) * sc, fw = (L.finShape === "big" ? 13 : 9) * sc; x.fillStyle = L.fins; [[-1], [1]].forEach(([d]) => { x.beginPath(); x.moveTo(cx + d * w / 2, y + h - fh * (L.finShape === "swept" ? 1.1 : 1)); x.lineTo(cx + d * (w / 2 + fw), y + h + 2 * sc); x.lineTo(cx + d * w / 2, y + h); x.closePath(); x.fill(); x.stroke(); }); }
       y -= 3 * sc; x.fillStyle = "#3a3f55"; x.fillRect(cx - w * .42, y, w * .84, 3 * sc); topW = w;
@@ -302,17 +315,17 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
 
   // ---------------- UI ----------------
   function open() {
-    S = load() || fresh(); if (!S.design) S.design = fresh().design; const f0 = fresh(); ["company", "visited", "sat", "debt"].forEach(k => { if (!S[k]) S[k] = f0[k]; }); S.contracts = (S.contracts || []).filter(c => DESTS[c.dest]); refill(); save();
+    S = load() || fresh(); if (!S.design) S.design = fresh().design; const f0 = fresh(); ["company", "visited", "sat", "debt"].forEach(k => { if (!S[k]) S[k] = f0[k]; }); S.contracts = (S.contracts || []).filter(c => DESTS[c.dest]); S.design.boost = S.design.boost || { eng: "srb", count: 0 }; S.design.extras = S.design.extras || {}; (S.designs || []).forEach(d => { d.boost = d.boost || { eng: "srb", count: 0 }; d.extras = d.extras || {}; }); refill(); save();
     app = document.getElementById("app"); tab = "contracts"; sel = null; render();
   }
   function head() {
     const t = tier();
     return `<button class="back" id="rcHome">← All subjects</button><div class="rc-head"><h1>${esc(S.company)}</h1><div class="rc-stats"><span>Cash <b>${money(S.cash)}</b></span>${S.debt > 0 ? `<span>Debt <b class="badc">${money(S.debt)}</b></span>` : ""}<span>${esc(TIERNAMES[t])}</span><span>Launches <b>${S.ok}</b> good / ${S.tries}</span></div></div>
       <p class="sub">You run a launch company: customers order a ride into space for their satellites. Play money only! Build rockets, take orders, and launch heavier and heavier satellites. <label class="rc-co">Company name <input id="rcCo" maxlength="20" value="${esc(S.company)}"></label></p>
-      <div class="rc-tabs">${[["contracts", "Orders"], ["build", "Build"], ["places", "100 Places"], ["research", "Shop & research"], ["bank", "Loans"], ["learn", "Rocket science"], ["log", "Records"]].map(a => `<button type="button" class="rc-tab ${tab === a[0] ? "on" : ""}" data-t="${a[0]}">${a[1]}</button>`).join("")}</div>`;
+      <div class="rc-tabs">${[["contracts", "Orders"], ["build", "Build"], ["places", "100 Places"], ["research", "Shop & research"], ["bank", "Loans"], ["stocks", "Stocks"], ["learn", "Rocket science"], ["log", "Records"]].map(a => `<button type="button" class="rc-tab ${tab === a[0] ? "on" : ""}" data-t="${a[0]}">${a[1]}</button>`).join("")}</div>`;
   }
   function render() {
-    if (!app) return; const t = { contracts, build, places, research, bank, learn, log }[tab] || contracts;
+    if (!app) return; const t = { contracts, build, places, research, bank, stocks, learn, log }[tab] || contracts;
     app.innerHTML = head() + '<div class="rc-body" id="rcBody"></div>';
     document.getElementById("rcCo").onchange = e => { S.company = e.target.value.replace(/[^\p{L}\p{N} _&'-]/gu, "").trim().slice(0, 20) || "My Rocket Co"; save(); render(); };
     document.getElementById("rcHome").onclick = () => { if (typeof home === "function") home(); };
@@ -337,20 +350,27 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
     const c = c0 ? { ...c0, kg: c0.kg + pk } : null, a = analyze(des, c);
     const liab = c0 ? Math.round(c0.pay * (1 + pb / 100) * .6 / 1000) * 1000 : 0, prem = sat.insure ? Math.round(liab * .12 / 100) * 100 : 0, total = a.cost + pc + prem;
     const opt = (map, curv, only) => Object.keys(map).map(k => { const m = map[k], locked = m.res && !has(m.res); return `<option value="${k}" ${k === curv ? "selected" : ""} ${locked ? "disabled" : ""}>${esc(m.name)}${locked ? " (research it)" : ""}</option>`; }).join("");
-    const maxStages = has("stage3") ? 3 : 2;
+    const maxStages = has("stage5") ? 5 : has("stage4") ? 4 : has("stage3") ? 3 : 2;
     const bar = (lab, v, mx, cls) => `<div class="rc-bar"><span>${lab}</span><div><i class="${cls}" style="width:${Math.min(100, v / mx * 100)}%"></i></div><b>${Math.round(v).toLocaleString()}</b></div>`;
     el.innerHTML = `<div class="rc-build"><div class="rc-prev"><canvas id="rcPrev" width="300" height="430"></canvas><div class="rc-name"></div></div>
       <div class="rc-ed">
         ${c ? `<div class="rc-job"><b>Order:</b> ${c0.kg.toLocaleString()} kg ${esc(c.thing)} to ${esc(DESTS[c.dest].name)}, pays <b>${money(c.pay)}</b> <button class="hintbtn" id="rcJobs" type="button">Change order</button></div>` : '<div class="rc-job">Take an order first on the <b>Orders</b> tab. Until then this just tests a 200 kg satellite.</div>'}
         ${des.stages.map((s, i) => `<div class="rc-stage"><h3>Stage ${i + 1}${i === 0 ? " (bottom, lights first)" : ""}</h3>
           <label>Engine <select data-i="${i}" data-k="eng">${opt(ENGINES, s.eng)}</select></label>
-          <label>How many <input type="number" min="1" max="9" value="${s.count}" data-i="${i}" data-k="count"></label>
+          <label>How many <input type="number" min="1" max="30" value="${s.count}" data-i="${i}" data-k="count"></label>
           ${ENGINES[s.eng].solid ? '<p class="note">This booster carries its own fuel.</p>' : `<label>Fuel tank <select data-i="${i}" data-k="tank">${opt(TANKS, s.tank)}</select></label>
-          <label>Tanks <input type="number" min="1" max="8" value="${s.tanks}" data-i="${i}" data-k="tanks"></label>
+          <label>Tanks <input type="number" min="1" max="20" value="${s.tanks}" data-i="${i}" data-k="tanks"></label>
           <label>Fuel <select data-i="${i}" data-k="fuel">${opt(FUELS, s.fuel)}</select></label>`}
           <div class="rc-sm">Δv ${Math.round(a.st[i].dv).toLocaleString()} m/s · push ${Math.round(a.st[i].thrust).toLocaleString()} kN · weight ${a.st[i].wet.toFixed(1)} t${des.stages.length > 1 ? ` <button class="hintbtn rc-x" data-del="${i}" type="button">Remove stage</button>` : ""}</div></div>`).join("")}
         ${des.stages.length < maxStages ? '<button class="hintbtn" id="rcAddStage" type="button">Add a stage on top</button>' : ""}
         <label>Top part <select id="rcTop">${opt(TOPS, des.top)}</select></label>
+        <div class="rc-stage"><h3>Strap-on boosters (they fire with stage 1)</h3>
+          <label>Type <select id="boType"><option value="srb" ${des.boost.eng === "srb" ? "selected" : ""} ${has("srb") ? "" : "disabled"}>Solid Booster${has("srb") ? "" : " (research it)"}</option><option value="bigsrb" ${des.boost.eng === "bigsrb" ? "selected" : ""} ${has("bigsrb") ? "" : "disabled"}>Big Solid Booster${has("bigsrb") ? "" : " (research it)"}</option></select></label>
+          <label>How many <input type="number" min="0" max="12" id="boCount" value="${des.boost.count}"></label>
+          <p class="rc-sm">Boosters add lots of push for liftoff and fall away when empty.</p></div>
+        <div class="rc-stage"><h3>Extras</h3>
+          <label class="rc-ins"><input type="checkbox" id="exAv" ${des.extras.avionics ? "checked" : ""}> Redundant computers ($120,000): engines are 2.5% more reliable</label>
+          <label class="rc-ins"><input type="checkbox" id="exFin" ${des.extras.fins ? "checked" : ""}> Grid fins and parachutes ($60,000): your first stage can come back and save you money</label></div>
         <div class="rc-sat"><h3>Your satellite</h3>
           <label>Name it <input id="satName" maxlength="14" value="${esc(sat.name)}"></label>
           <div class="rc-pieces">${Object.keys(SATP).map(k => `<label>${esc(SATP[k][0])} <small>${SATP[k][1]} kg · ${money(SATP[k][2])} · +${SATP[k][3]}% pay</small> <input type="number" min="0" max="3" value="${sat.pieces[k] || 0}" data-sp="${k}"></label>`).join("")}</div>
@@ -360,8 +380,8 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
           ${bar("Δv you have", a.dv, Math.max(a.need, a.dv, 1), a.enough ? "ok" : "bad")}${bar("Δv needed (m/s)", a.need, Math.max(a.need, a.dv, 1), "need")}
           <p class="rc-sm">Push at liftoff compared with weight (TWR): <b class="${a.twr0 >= 1.15 ? "okc" : a.lift ? "warn" : "badc"}">${a.twr0.toFixed(2)}</b> ${a.twr0 >= 1.15 ? "(good)" : a.lift ? "(slow, wastes fuel)" : "(too heavy to lift!)"}</p>
           <p class="rc-sm">Rocket weight ${a.total.toFixed(1)} tonnes · Rocket price <b>${money(a.cost)}</b> (+ satellite pieces ${money(pc)}) · Engines work ${Math.round(a.rel * 100)}% of the time${a.low ? " · weak upper stage: extra Δv needed" : ""}</p>
-          ${c && !a.crewOk ? '<p class="rc-sm badc">This order needs the Crew capsule as the top part.</p>' : ""}</div>
-        <button class="close rc-go" id="rcGo" type="button" ${c && a.lift && a.crewOk && S.cash >= total ? "" : "disabled"}>${!c ? "Take an order first" : S.cash < total ? "Not enough cash" : !a.lift ? "Too heavy to lift" : !a.crewOk ? "Needs a crew capsule" : "LAUNCH! (" + money(total) + ")"}</button>
+          ${c && !a.crewOk ? '<p class="rc-sm badc">This order needs the Crew capsule as the top part.</p>' : ""}${c && !a.fairOk ? `<p class="rc-sm badc">This satellite (${c.kg.toLocaleString()} kg) is too big for this top part. It can carry up to ${a.cap.toLocaleString()} kg. Pick a wider fairing (research it in the shop).</p>` : ""}</div>
+        <button class="close rc-go" id="rcGo" type="button" ${c && a.lift && a.crewOk && a.fairOk && S.cash >= total ? "" : "disabled"}>${!c ? "Take an order first" : S.cash < total ? "Not enough cash" : !a.lift ? "Too heavy to lift" : !a.crewOk ? "Needs a crew capsule" : !a.fairOk ? "Needs a wider fairing" : "LAUNCH! (" + money(total) + ")"}</button>
       </div>
       <div class="rc-look"><h3>Look</h3>
         <label>Name <input id="lkName" maxlength="14" value="${esc(L.name)}"></label>
@@ -377,12 +397,16 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
       </div></div>`;
     const cv = el.querySelector("#rcPrev"), x = cv.getContext("2d");
     const g = x.createLinearGradient(0, 0, 0, 430); g.addColorStop(0, "#1c2a7a"); g.addColorStop(1, "#4cc3ff"); x.fillStyle = g; x.fillRect(0, 0, 300, 430); x.fillStyle = "#3a8a4a"; x.fillRect(0, 400, 300, 30);
-    const sc = des.stages.length >= 3 ? 1.15 : 1.5; drawRocket(x, des, 150, 392, sc, { flame: 0 });
+    const mc = document.createElement("canvas").getContext("2d"); mc.canvas.width = 300; mc.canvas.height = 6000; const hh = 5900 - drawRocket(mc, des, 150, 5900, 1, { flame: 0 }), sc = Math.max(.12, Math.min(1.5, 330 / hh)); drawRocket(x, des, 150, 392, sc, { flame: 0 });
     x.fillStyle = "rgba(255,255,255,.9)"; x.font = "bold 14px system-ui"; x.textAlign = "center"; x.fillText(L.name, 150, 420);
     const redo = () => { save(); const y = window.scrollY; render(); window.scrollTo(0, y); };
-    el.querySelectorAll("[data-i]").forEach(inp => inp.onchange = () => { const s = des.stages[+inp.dataset.i], k = inp.dataset.k; s[k] = (k === "count" || k === "tanks") ? Math.max(1, Math.min(k === "count" ? 9 : 8, +inp.value || 1)) : inp.value; snd("pick"); redo(); });
+    el.querySelectorAll("[data-i]").forEach(inp => inp.onchange = () => { const s = des.stages[+inp.dataset.i], k = inp.dataset.k; s[k] = (k === "count" || k === "tanks") ? Math.max(1, Math.min(k === "count" ? 30 : 20, +inp.value || 1)) : inp.value; snd("pick"); redo(); });
     el.querySelectorAll("[data-del]").forEach(b => b.onclick = () => { des.stages.splice(+b.dataset.del, 1); redo(); });
     const add = el.querySelector("#rcAddStage"); if (add) add.onclick = () => { des.stages.push({ eng: has("whisper") ? "whisper" : "spark", count: 1, tank: "S", tanks: 1, fuel: "kero" }); snd("pick"); redo(); };
+    const bt = el.querySelector("#boType"); if (bt) bt.onchange = () => { des.boost.eng = bt.value; redo(); };
+    const bc = el.querySelector("#boCount"); if (bc) bc.onchange = () => { des.boost.count = Math.max(0, Math.min(12, +bc.value || 0)); snd("pick"); redo(); };
+    const ea = el.querySelector("#exAv"); if (ea) ea.onchange = () => { des.extras.avionics = ea.checked; redo(); };
+    const ef = el.querySelector("#exFin"); if (ef) ef.onchange = () => { des.extras.fins = ef.checked; redo(); };
     el.querySelector("#rcTop").onchange = e => { des.top = e.target.value; redo(); };
     const jb = el.querySelector("#rcJobs"); if (jb) jb.onclick = () => { tab = "contracts"; render(); };
     el.querySelector("#lkName").oninput = e => { const v = e.target.value.replace(/[^\p{L}\p{N} _-]/gu, "").slice(0, 14); L.name = v || "Rocket"; save(); };
@@ -403,6 +427,32 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
     el.innerHTML = `<p class="note">100 real places to go! You have visited <b>${seen} / 100</b>. Orders for a place appear when you reach the right level, and the first trip there pays a bonus.</p><div class="rc-places">${DLIST.map(d => { const v = S.visited[d.id]; return `<div class="rc-place ${v ? "seen" : d.tier > t ? "locked" : ""}"><canvas class="rc-pic" width="200" height="100" data-pid="${d.id}"></canvas><b>${esc(d.name)}</b><small>Needs ${d.dv.toLocaleString()} m/s · ${d.alt >= 1e9 ? (d.alt / 1e9).toFixed(1) + " billion km" : d.alt >= 1e6 ? Math.round(d.alt / 1e6) + " million km" : d.alt.toLocaleString() + " km"} away</small><em>${v ? "Visited " + v + "x" : d.tier > t ? "Level " + (d.tier + 1) + " needed" : "Open"}</em></div>`; }).join("")}</div>`; pics(el);
   }
   function pics(el) { el.querySelectorAll("canvas[data-pid]").forEach(cv => { try { drawPlace(cv.getContext("2d"), cv.dataset.pid, cv.width, cv.height, "orb"); } catch (e) {} }); }
+  // ---------------- stock market (pretend companies, pretend money) ----------------
+  const STOCKS = [["ROKT", "Skyward Rockets", 42, .035], ["FUEL", "Cryo Fuel Co", 18, .03], ["SATS", "Orbit Satellites", 65, .04], ["TOUR", "Moon Tours Ltd", 12, .07], ["MINE", "Asteroid Mining Inc", 8, .09], ["COMM", "Nova Telecom", 55, .025], ["FOOD", "Space Snacks", 6, .05], ["ROBO", "Rover Robotics", 30, .045], ["SOLR", "Sun Energy", 22, .04], ["MARS", "Mars Colony Corp", 5, .12]];
+  const NEWS = [["ROKT", "Skyward Rockets wins a big launch deal", .06], ["ROKT", "Skyward Rockets has a rocket failure", -.07], ["FUEL", "Cryo Fuel Co finds a cheaper fuel recipe", .06], ["FUEL", "A fuel factory has a fire", -.06], ["SATS", "Orbit Satellites launches 100 new satellites", .06], ["SATS", "Orbit Satellites loses a satellite", -.06], ["TOUR", "Moon Tours sells out its first trip", .1], ["TOUR", "Moon Tours has a safety scare", -.1], ["MINE", "Asteroid Mining finds gold in a rock", .15], ["MINE", "Asteroid Mining's probe breaks", -.12], ["COMM", "Nova Telecom signs a giant phone deal", .05], ["FOOD", "Space Snacks adds a new flavour", .04], ["ROBO", "Rover Robotics wins a Mars order", .08], ["SOLR", "Sun Energy builds a bigger solar farm", .05], ["MARS", "Mars Colony Corp plans a new base", .18], ["MARS", "Mars Colony Corp runs out of money", -.2], ["*", "The whole space industry is booming!", .03], ["*", "Worried news makes everyone sell", -.03]];
+  const gauss = () => { let u = 0; while (!u) u = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(6.283 * Math.random()); };
+  function mktStep(launchOk, quiet) {
+    const m = S.mkt; m.day++; const ev = Math.random() < (quiet ? .06 : .35) ? pick(NEWS) : null;
+    STOCKS.forEach(st => { const h = m.hist[st[0]], p = h[h.length - 1]; let r = Math.log(st[2] / p) * .004 + st[3] * gauss();
+      if (ev && (ev[0] === st[0] || ev[0] === "*")) r += ev[2]; if (launchOk === true || launchOk === false) { if (st[0] === "ROKT" || st[0] === "SATS") r += launchOk ? .012 : -.012; }
+      h.push(Math.max(1, Math.round(p * Math.exp(r) * 100) / 100)); if (h.length > 120) h.shift(); });
+    if (ev && !quiet) { m.news.unshift("Day " + m.day + ": " + ev[1]); m.news = m.news.slice(0, 8); }
+  }
+  function mktInit() { const m = { day: 0, hist: {}, hold: {}, news: [] }; STOCKS.forEach(st => { m.hist[st[0]] = [st[2]]; }); S.mkt = m; for (let i = 0; i < 60; i++) mktStep(null, true); m.day = 0; }
+  const px = sym => { const h = S.mkt.hist[sym]; return h[h.length - 1]; };
+  function stocks(el) {
+    if (!S.mkt) { mktInit(); save(); } const m = S.mkt; let val = 0, cost = 0; STOCKS.forEach(st => { const h = m.hold[st[0]]; if (h) { val += h.n * px(st[0]); cost += h.cost; } });
+    el.innerHTML = `<p class="note">The Space Stock Market! These are <b>pretend companies</b> and <b>pretend money</b>. Prices change every time you launch, or when you press "Wait a day". Real stocks can go down as well as up, and real investing is a job for grown-ups.</p>
+      <div class="rc-bankbox"><div>Cash <b>${money(S.cash)}</b></div><div>Market day <b>${m.day}</b></div><div>Shares you own are worth <b>${money(val)}</b> (you paid ${money(cost)}) · profit <b class="${val - cost >= 0 ? "okc" : "badc"}">${money(val - cost)}</b></div><div class="rc-sm">Every trade costs a 0.5% fee. Spreading your money over several companies is safer than putting it all in one.</div></div>
+      <button class="close" id="mkWait" type="button">Wait a day</button>
+      ${m.news.length ? `<h3>News</h3><div class="rc-news">${m.news.map(n => `<div>${esc(n)}</div>`).join("")}</div>` : ""}
+      <div class="rc-stks">${STOCKS.map(st => { const sym = st[0], h = m.hist[sym], p = h[h.length - 1], prev = h[h.length - 2] || p, chg = (p / prev - 1) * 100, own = m.hold[sym] ? m.hold[sym].n : 0;
+        return `<div class="rc-stk"><div class="rc-stkh"><b>${sym}</b> ${esc(st[1])}</div><canvas data-sp="${sym}" width="200" height="50"></canvas><div class="rc-stkp"><b>$${p.toFixed(2)}</b> <span class="${chg >= 0 ? "okc" : "badc"}">${chg >= 0 ? "+" : ""}${chg.toFixed(1)}%</span></div><div class="rc-sm">You own <b>${own.toLocaleString()}</b> (${money(own * p)})</div><div class="rc-stkb">${[1, 10, 100].map(n => `<button class="close" data-buy="${sym}:${n}" ${S.cash < n * p * 1.005 ? "disabled" : ""}>Buy ${n}</button>`).join("")}${[1, 10].map(n => `<button class="hintbtn" data-sell="${sym}:${n}" ${own < n ? "disabled" : ""}>Sell ${n}</button>`).join("")}<button class="hintbtn" data-sell="${sym}:all" ${own < 1 ? "disabled" : ""}>Sell all</button></div></div>`; }).join("")}</div>`;
+    STOCKS.forEach(st => { const cv = el.querySelector(`canvas[data-sp="${st[0]}"]`), x = cv.getContext("2d"), h = m.hist[st[0]], mn = Math.min(...h), mx = Math.max(...h); x.strokeStyle = h[h.length - 1] >= h[0] ? "#6be28f" : "#ff8a8a"; x.lineWidth = 2; x.beginPath(); h.forEach((v, i) => { const X = i / (h.length - 1) * 196 + 2, Y = 46 - (v - mn) / Math.max(.01, mx - mn) * 42; i ? x.lineTo(X, Y) : x.moveTo(X, Y); }); x.stroke(); });
+    el.querySelector("#mkWait").onclick = () => { mktStep(null, false); save(); snd("tick"); render(); };
+    el.querySelectorAll("[data-buy]").forEach(b => b.onclick = () => { const [sym, n] = b.dataset.buy.split(":"), q = +n, c = q * px(sym) * 1.005; if (S.cash < c) return; S.cash -= c; const h = m.hold[sym] || (m.hold[sym] = { n: 0, cost: 0 }); h.n += q; h.cost += c; save(); snd("clink"); const y = window.scrollY; render(); window.scrollTo(0, y); });
+    el.querySelectorAll("[data-sell]").forEach(b => b.onclick = () => { const [sym, n] = b.dataset.sell.split(":"), h = m.hold[sym]; if (!h) return; const q = n === "all" ? h.n : +n; if (q > h.n || q < 1) return; const get = q * px(sym) * .995; S.cash += get; h.cost *= (h.n - q) / h.n; h.n -= q; if (!h.n) delete m.hold[sym]; save(); snd("pop"); const y = window.scrollY; render(); window.scrollTo(0, y); });
+  }
   // ---------------- loans ----------------
   const LIMITS = [300000, 600000, 1200000, 2500000, 5000000, 10000000, 25000000], RATE = .04;
   function bank(el) {
@@ -441,7 +491,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
     let outcome = "ok", failAt = 1, why = "";
     if (!a.enough) { outcome = "short"; failAt = .92; }
     else if (Math.random() > a.rel) { outcome = "boom"; failAt = rr(.12, .85); why = "An engine failed."; }
-    const L = des.stages.length;
+    const L = des.stages.length, mc = document.createElement("canvas").getContext("2d"); mc.canvas.width = 300; mc.canvas.height = 6000; const rScale = Math.max(.12, Math.min(1, 230 / (5900 - drawRocket(mc, des, 150, 5900, 1.2, { flame: 0 }))));
     app.innerHTML = `<div class="rc-launch"><canvas id="rcL" width="640" height="420"></canvas><div class="rc-tele" id="rcT"></div><div class="rc-deploy" id="rcD" hidden><p>Your rocket is at <b>${esc(D.name)}</b>! Press <b>Deploy</b> when the marker is in the <b class="okc">green zone</b>.</p><div class="rc-dbar"><i class="zone" id="rcZ"></i><i class="mk" id="rcM"></i></div><button class="close" id="rcDep" type="button">Deploy ${esc(sname)}!</button></div></div>`;
     const cv = document.getElementById("rcL"), x = cv.getContext("2d"), tele = document.getElementById("rcT"), dep = document.getElementById("rcD"), zone = document.getElementById("rcZ"), mk = document.getElementById("rcM");
     let t0 = 0, raf = 0, done = false, parts = [], boomed = false, phase = "climb", tOrbit = 0, tDep = 0, deployOK = false, z0 = .2 + Math.random() * .4, marker = 0;
@@ -451,7 +501,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
     const finish = res => {
       if (done) return; done = true; cancelAnimationFrame(raf);
       let pay = 0, first = 0, text = "", okk = res === "ok", refund = 0, owed = 0, paidBy = 0;
-      if (S.res.reuse && a.st[0] && res !== "boom" && Math.random() < .75) { refund = Math.round(a.st[0].cost * .6); S.cash += refund; }
+      if ((S.res.reuse || (des.extras && des.extras.fins)) && a.st[0] && res !== "boom" && Math.random() < .72) { refund = Math.round(a.st[0].cost * .6); S.cash += refund; }
       S.contracts = S.contracts.filter(k => k.id !== c.id); sel = null;
       if (okk) {
         pay = Math.round(c.pay * (1 + o.bonus)); if (!S.visited[c.dest]) first = 50000 * (D.tier + 1); S.visited[c.dest] = (S.visited[c.dest] || 0) + 1;
@@ -461,6 +511,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
         if (S.sat.insure) paidBy = o.liab; else { owed = o.liab; S.cash -= owed; }
         text = res === "short" ? "ran out of speed before reaching " + D.name + "." : res === "boom" ? why : res === "forgot" ? "never let go of the satellite \"" + sname + "\"." : "dropped the satellite \"" + sname + "\" when deploying.";
       }
+      if (!S.mkt) mktInit(); mktStep(okk);
       let interest = 0; if (S.debt > 0) { interest = Math.round(S.debt * RATE); S.debt += interest; }
       refill(); S.sat.name = pick(SATNAMES) + " " + (1 + R(99)); S.sat.pieces = {};
       S.log.push({ name: des.look.name, ok: okk, text }); S.log = S.log.slice(-40); save(); snd(okk ? "finish" : "sad");
@@ -487,7 +538,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
       if (phase !== "climb") { // in orbit: the rocket coasts above the Earth
         drawPlace(x, c.dest, 640, 420, "orb", ts / 1000);
         const rx = 320 + Math.sin(ts / 2500) * 10, ry = 62;
-        x.save(); x.translate(rx, ry); x.rotate(Math.PI / 2); drawRocket(x, { ...des, top: des.top }, 0, 26, .55, { flame: 0 }); x.restore();
+        x.save(); x.translate(rx, ry); x.rotate(Math.PI / 2); drawRocket(x, { ...des, top: des.top }, 0, 26, Math.min(.55, .45 * rScale * 1.2 + .05), { flame: 0 }); x.restore();
         if (phase === "orbit") { marker = 1 - Math.abs(((ts - tOrbit) / 1000 * .6) % 2 - 1); mk.style.left = marker * 100 + "%"; drawSat(rx + 48, ry, 0, .7, true); label("Ready to deploy " + sname, 26); if (ts - tOrbit > 15000) { phase = "deploying"; deployOK = false; tDep = performance.now(); dep.hidden = true; finishLater("forgot", ts); } }
         else if (phase === "deploying") { const q = Math.min(1, (performance.now() - tDep) / 2200); if (deployOK) { drawSat(rx + 48 + q * 150, ry + q * 70, q * .6, .7 + q * .3, true); label(sname + " deployed!", 26); for (let i = 0; i < 2; i++) parts.push({ x: rx + 48 + q * 150, y: ry + q * 70, vx: (Math.random() - .5) * 20, vy: (Math.random() - .5) * 20, l: .8, c: "#ffd34e" }); } else { drawSat(rx + 48 + q * 100, ry + q * 140, q * 8, .7, false); if (q > .7 && !boomed) { boomed = true; snd("boom"); for (let i = 0; i < 40; i++) parts.push({ x: rx + 150, y: ry + 100, vx: (Math.random() - .5) * 200, vy: (Math.random() - .5) * 200, l: 1.2, c: ["#ff6a2a", "#ffd34e", "#fff"][R(3)] }); } label(q > .7 ? "The satellite is lost!" : "Oh no...", 26); } if (q >= 1 && !fin) finishLater(deployOK ? "ok" : "misdeploy", ts); }
         parts = parts.filter(q => (q.l -= .016) > 0); parts.forEach(q => { q.x += q.vx * .016; q.y += q.vy * .016; x.globalAlpha = Math.max(0, q.l); x.fillStyle = q.c; x.fillRect(q.x, q.y, 4, 4); }); x.globalAlpha = 1;
@@ -500,14 +551,14 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
       const sepAt = L > 1 ? [.36, .66] : []; let stage = 0; sepAt.forEach((s2, i) => { if (p > s2 && i < L - 1) stage = i + 1; });
       const failP = outcome === "ok" ? 2 : failAt; const rx = 320, ry = Math.max(120, 330 - alt * 260), sc = 1.0 - Math.min(.45, alt * .5);
       if (p < failP || outcome === "ok") {
-        if (stage > 0 && p - sepAt[stage - 1] < .06) { const sp = (p - sepAt[stage - 1]) / .06; x.save(); x.globalAlpha = 1 - sp; drawRocket(x, { ...des, top: "none", stages: [des.stages[stage - 1]] }, rx - 40 * sp, ry + 90 + sp * 180, sc * .9, { noTop: true, noWin: true }); x.restore(); }
+        if (stage > 0 && p - sepAt[stage - 1] < .06) { const sp = (p - sepAt[stage - 1]) / .06; x.save(); x.globalAlpha = 1 - sp; drawRocket(x, { ...des, top: "none", stages: [des.stages[stage - 1]] }, rx - 40 * sp, ry + 90 + sp * 180, sc * .9 * rScale, { noTop: true, noWin: true }); x.restore(); }
         const cut = des.stages.slice(stage), vis = { ...des, stages: cut.length ? cut : des.stages }, shake = p < .12 ? (Math.random() - .5) * 3 : 0;
         let tilt = 0; if (outcome === "ok" && p > .88) tilt = (p - .88) / .12 * 1.3;
-        x.save(); x.translate(rx + shake, ry + 60); x.rotate(tilt); x.translate(-rx, -(ry + 60)); drawRocket(x, vis, rx, ry + 60, sc * 1.2, { flame: 1 }); x.restore();
+        x.save(); x.translate(rx + shake, ry + 60); x.rotate(tilt); x.translate(-rx, -(ry + 60)); drawRocket(x, vis, rx, ry + 60, sc * 1.2 * rScale, { flame: 1 }); x.restore();
         if (Math.random() < .8) parts.push({ x: rx + (Math.random() - .5) * 12, y: ry + 62, vx: (Math.random() - .5) * 20, vy: 40 + Math.random() * 40, l: 1, c: Math.random() < .5 ? "#fff" : "#ffc060" });
       } else if (outcome === "boom") {
         if (!boomed) { boomed = true; snd("boom"); for (let i = 0; i < 60; i++) parts.push({ x: rx, y: ry + 20, vx: (Math.random() - .5) * 260, vy: (Math.random() - .5) * 260, l: 1.4, c: ["#ff6a2a", "#ffd34e", "#fff", "#b02a0a"][R(4)] }); }
-      } else { const fp = (p - failP) / (1 - failP); x.save(); x.translate(rx + fp * 90, ry + fp * fp * 330); x.rotate(fp * 3); drawRocket(x, { ...des, stages: des.stages.slice(0, 1) }, 0, 0, sc, { flame: 0 }); x.restore(); }
+      } else { const fp = (p - failP) / (1 - failP); x.save(); x.translate(rx + fp * 90, ry + fp * fp * 330); x.rotate(fp * 3); drawRocket(x, { ...des, stages: des.stages.slice(0, 1) }, 0, 0, sc * rScale, { flame: 0 }); x.restore(); }
       parts = parts.filter(q => (q.l -= .016) > 0); parts.forEach(q => { q.x += q.vx * .016; q.y += q.vy * .016; x.globalAlpha = Math.max(0, q.l); x.fillStyle = q.c; x.fillRect(q.x, q.y, 4, 4); }); x.globalAlpha = 1;
       const fr = outcome === "ok" ? p : Math.min(p, failP), k = outcome === "ok" ? 1 : Math.min(1, a.dv / a.need), v = Math.pow(fr, .8) * D.spd * 1000 * k, ak = Math.pow(fr, 1.7) * D.alt * k;
       tele.innerHTML = `<span>Stage <b>${Math.min(L, stage + 1)}</b></span><span>Height <b>${Math.round(ak).toLocaleString()} km</b></span><span>Speed <b>${(v / 1000).toFixed(1)} km/s</b></span><span>${p < .08 ? "Liftoff!" : outcome === "boom" && p >= failP ? "FAILURE" : outcome === "short" && p >= failP ? "Out of speed" : stage > 0 && p < .7 ? "Stage separation!" : "Climbing"}</span>`;
