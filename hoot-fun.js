@@ -24,6 +24,11 @@
     if (L_UNSAFE.test(q)) return "I can't chat about that. Let's keep break time fun! How about a joke or a would-you-rather?";
     if (L_SCHOOL.test(q)) return "It's break time, so no school stuff right now! Ask me again when your break is over. For now: joke, riddle, fun fact or story?";
     if (lastRiddle && /\b(answer|give up|i give up|tell me|what is it|idk|dunno)\b/.test(t)) { const a = lastRiddle[1]; lastRiddle = null; return "The answer is: " + a + " Want another riddle?"; }
+    if (lastRiddle && !/\b(joke|riddle|fact|story|would you rather|game)\b/.test(t)) {   // checking a riddle answer
+      const key = lastRiddle[1].replace(/[!.,']/g, " ").replace(/^\s*(a|an|the|your)\s+/i, "").trim().split(/\s+/)[0].toLowerCase();
+      if (key && new RegExp("\\b" + key.replace(/[^a-z]/g, "") + "s?\\b").test(t)) { const a = lastRiddle[1]; lastRiddle = null; return pick(["Yes! ", "You got it! ", "Hoo hoo, correct! ", "Brilliant! "]) + a + " Want another riddle?"; }
+      if (t.split(/\s+/).length <= 4) return pick(["Not quite! Try again, or say 'answer' if you give up.", "Ooh, close! Have another guess, or say 'answer'.", "Hmm, not that one! Guess again, or say 'answer'."]);
+    }
     if (/\b(joke|funny|laugh|make me laugh)\b/.test(t)) return pick(JOKES);
     if (/\b(riddle|puzzle me|brain ?teaser)\b/.test(t)) { lastRiddle = pick(RIDDLES); return lastRiddle[0] + " (Say 'answer' when you give up!)"; }
     if (/\b(fact|facts|something cool|something interesting|did you know)\b/.test(t)) return pick(FACTS);
