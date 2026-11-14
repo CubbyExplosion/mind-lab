@@ -458,27 +458,50 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
   // ---------------- engineer job ----------------
   let engQ = null, engMsg = "";
   const engPay = () => 10000 + 1000 * tier();
+  const ENGQ = [
+    ["What does a rocket need to get off the ground?", "Lots of push from its engines", ["A big wing", "A long runway", "A parachute"], "Engines push the rocket up, harder than gravity pulls it down."],
+    ["What do rockets burn to make their push?", "Fuel", ["Water only", "Sand", "Cheese"], "Fuel burns and shoots out the back, pushing the rocket up."],
+    ["Which one is a rocket part?", "Engine", ["Bicycle", "Sofa", "Umbrella"], "Engines make the push that lifts a rocket."],
+    ["Where do we put a satellite on a rocket?", "In the nose, on top", ["Under the engine", "Outside on the fins", "In the fuel tank"], "The satellite rides at the top, inside the nose cone."],
+    ["What is a satellite?", "Something that goes around a planet in space", ["A kind of fish", "A car", "A cloud"], "Satellites circle the Earth and send us pictures, TV and maps."],
+    ["What does an empty fuel tank do to a rocket?", "It is just extra weight", ["It makes the rocket faster", "It makes more fuel", "Nothing at all"], "That is why rockets drop empty parts. It's called staging!"],
+    ["Why do rockets drop their empty parts?", "To get lighter", ["To get heavier", "To look cool", "To make noise"], "A lighter rocket speeds up more easily."],
+    ["Which is heavier, a full fuel tank or an empty one?", "The full one", ["The empty one", "They always weigh the same", "Neither"], "Fuel has weight!"],
+    ["Is it easier to push a light rocket or a heavy rocket?", "A light rocket", ["A heavy rocket", "They are the same", "Neither"], "Less weight needs less push."],
+    ["What is the planet we live on called?", "Earth", ["Mars", "The Moon", "The Sun"], "Our rockets start on Earth."],
+    ["Which place is closest to Earth?", "The Moon", ["Mars", "Jupiter", "Neptune"], "The Moon is about 384,000 km away, much closer than any planet."],
+    ["Which planet is called the Red Planet?", "Mars", ["Earth", "Venus", "Neptune"], "Mars looks red because of rusty dust."],
+    ["Which is farther away, the Moon or Mars?", "Mars", ["The Moon", "They are the same", "Neither"], "Mars is much, much farther than the Moon."],
+    ["Will a far trip need more fuel or less fuel?", "More fuel", ["Less fuel", "No fuel", "Only water"], "Going farther needs more push, so more fuel."],
+    ["Why do some rockets have fins?", "To help them fly straight", ["To hold snacks", "To be heavier", "To make coffee"], "Fins keep a rocket pointing the right way."],
+    ["What shape is the top of a rocket?", "Pointy, like a cone", ["Flat like a table", "Like a square box", "Like a ball"], "A pointy nose cuts through the air."],
+    ["What happens if a rocket is heavier than its push?", "It cannot lift off", ["It flies super fast", "It goes sideways", "It turns blue"], "The push has to be bigger than the weight."],
+    ["How many engines make a stronger push, 1 or 5?", "5 engines", ["1 engine", "They are the same", "0 engines"], "More engines means more push, but also more weight."],
+    ["What do we call a rocket's parts that fall off when empty?", "Stages", ["Hats", "Wheels", "Doors"], "A rocket with 2 stages drops the first stage first."],
+    ["Which one can fly to space?", "A rocket", ["A bicycle", "A boat", "A bus"], "Only rockets are fast enough to reach space."],
+    ["What is orbit?", "Going around a planet again and again", ["Going straight forever", "Standing still", "Going underground"], "In orbit you are falling around the Earth but moving sideways so fast you never land."],
+    ["Do you need to tell the satellite to open at the right time?", "Yes, deploy it at the right time", ["No, never", "Only when you sleep", "Only on Mondays"], "In the game, press Deploy when the marker is in the green zone."],
+    ["If you borrow money from the bank, what must you do later?", "Pay it back, plus a little extra", ["Keep it forever", "Nothing", "Give it to a friend"], "Extra money you pay is called interest."],
+    ["What is a company that makes rockets trying to do?", "Help customers and earn money", ["Break things", "Hide from people", "Run away"], "You give a service and customers pay you."],
+    ["Which is the biggest, the Sun or the Earth?", "The Sun", ["The Earth", "The Moon", "A rocket"], "You could fit about a million Earths inside the Sun!"],
+    ["Which is hotter, the Sun or the Moon?", "The Sun", ["The Moon", "They are the same", "Neither"], "The Sun is a giant ball of hot gas."],
+    ["Is space full of air like on Earth?", "No, space is almost empty", ["Yes, lots of air", "It is full of water", "It is full of snow"], "That is why astronauts need space suits."],
+    ["Why do astronauts wear space suits?", "There is no air in space", ["For fashion", "To be warm in bed", "To swim"], "The suit gives them air and keeps them safe."],
+    ["What shape is the Earth?", "Round, like a ball", ["Flat like a plate", "Like a cube", "Like a banana"], "Earth is a big ball floating in space."]
+  ];
   function engMake() {
-    const R = (a, b) => Math.round(rr(a, b)), shuf = a => a.sort(() => Math.random() - .5);
-    const opts = (right, spread, fmt) => { const set = [right]; let g = 0; while (set.length < 4 && g++ < 60) { const v = Math.round(right * (1 + (Math.random() < .5 ? -1 : 1) * rr(.15, .6) * (1 + g / 30))); if (v > 0 && !set.some(x => Math.abs(x - v) < right * .08)) set.push(v); } return shuf(set).map(v => ({ t: fmt(v), ok: v === right })); };
-    const kind = Math.floor(Math.random() * 6);
-    if (kind === 0) { const isp = pick([280, 300, 320, 350, 380, 420]), r = pick([2, 3, 4, 5, 6, 8]), m0 = R(60, 400) * 10, dv = Math.round(isp * 9.81 * Math.log(r) / 10) * 10;
-      return { q: `A rocket stage has Isp ${isp} s. Full it weighs ${m0} kg and empty it weighs ${Math.round(m0 / r)} kg (a ratio of ${r}). Using Δv = Isp × 9.81 × ln(full ÷ empty), what is its Δv?`, a: opts(dv, 0, v => v.toLocaleString() + " m/s"), why: `ln(${r}) = ${Math.log(r).toFixed(2)}, and ${isp} × 9.81 × ${Math.log(r).toFixed(2)} ≈ ${dv.toLocaleString()} m/s.` }; }
-    if (kind === 1) { const w = R(40, 400), tw = pick([1.1, 1.3, 1.5, 1.8, 2]), th = Math.round(w * 9.81 * tw);
-      return { q: `A rocket weighs ${w} tonnes at liftoff and its engines make ${th.toLocaleString()} kN of thrust. Its weight is about ${w} × 9.81 kN. What is its TWR (thrust ÷ weight)?`, a: shuf([tw, +(tw / 2).toFixed(2), +(tw * 1.7).toFixed(1), +(tw * .7).toFixed(2)]).map(v => ({ t: v.toFixed(2).replace(/0$/, ""), ok: v === tw })), why: `${th.toLocaleString()} ÷ (${w} × 9.81) ≈ ${tw}.` }; }
-    if (kind === 2) { const lift = Math.random() < .5, w = R(50, 300), th = Math.round(w * 9.81 * (lift ? rr(1.2, 1.7) : rr(.5, .9)));
-      return { q: `A ${w} tonne rocket has engines with ${th.toLocaleString()} kN of thrust. Will it leave the launch pad?`, a: shuf([{ t: "Yes, TWR is above 1", ok: lift }, { t: "No, TWR is below 1", ok: !lift }]), why: `Weight is about ${Math.round(w * 9.81).toLocaleString()} kN. Thrust ${lift ? "is bigger" : "is smaller"}, so TWR ${lift ? "> 1" : "< 1"}.` }; }
-    if (kind === 3) { const q = [["Which fuel gives the best efficiency (Isp) for an upper stage?", "Hydrogen + oxygen", ["Kerosene + oxygen", "Gunpowder", "Water"], "Hydrogen gives about 380 s of Isp, but needs big, heavy tanks, so it is best high up."], ["Why do rockets drop empty stages?", "Empty tanks are dead weight, so dropping them makes the rest lighter", ["To make noise", "To save the fuel", "The engines get cold"], "Less weight to speed up means more Δv for the same fuel."], ["About how much Δv do you need to reach low Earth orbit?", "About 9,400 m/s", ["About 100 m/s", "About 940 m/s", "About 94,000 m/s"], "Orbit speed is 7,800 m/s, plus what gravity and air take away."], ["What does a higher Isp mean?", "The engine uses fuel more efficiently", ["The rocket is heavier", "The rocket is cheaper", "The engine is louder"], "You get more speed from each kilogram of fuel."], ["When is a rocket's TWR good for liftoff?", "Around 1.2 to 1.5", ["Exactly 0", "Below 1", "Always 100"], "Under 1.0 it can't leave the ground, and much more just wastes weight."], ["Why can a reusable first stage save money?", "Engines and tanks are the expensive parts, so landing them lets you fly them again", ["It makes the rocket faster", "It needs no fuel", "Customers pay double"], "You only pay to refuel and check it."]][Math.floor(Math.random() * 6)];
-      return { q: q[0], a: shuf([{ t: q[1], ok: true }, ...q[2].map(t => ({ t, ok: false }))]), why: q[3] }; }
-    if (kind === 4) { const a = pick([[300, "kerosene"], [380, "hydrogen"], [240, "a solid booster"], [330, "methane"]]), b = pick([[300, "kerosene"], [380, "hydrogen"], [240, "a solid booster"], [330, "methane"]]); if (a[0] === b[0]) return engMake();
-      return { q: `Engine A uses ${a[1]} (Isp ${a[0]} s). Engine B uses ${b[1]} (Isp ${b[0]} s). Which is more fuel-efficient?`, a: shuf([{ t: "Engine A", ok: a[0] > b[0] }, { t: "Engine B", ok: b[0] > a[0] }]), why: `A higher Isp means more speed from each kg of fuel. ${Math.max(a[0], b[0])} beats ${Math.min(a[0], b[0])}.` }; }
-    const m = R(20, 90) * 10, f = R(2, 9) * m, tot = m + f, r = +(tot / m).toFixed(2);
-    return { q: `A stage has ${m} kg of empty rocket and ${f.toLocaleString()} kg of fuel. What is its mass ratio (full weight ÷ empty weight)?`, a: opts(Math.round(r * 100), 0, v => (v / 100).toFixed(2)), why: `Full = ${m} + ${f.toLocaleString()} = ${tot.toLocaleString()} kg, and ${tot.toLocaleString()} ÷ ${m} = ${r}.` };
+    const shuf = a => a.sort(() => Math.random() - .5);
+    if (Math.random() < .25) { const w = pick([10, 20, 50, 100]), lift = Math.random() < .5, th = lift ? w * pick([2, 3]) : Math.round(w / 2);
+      return { q: `A rocket weighs ${w}. Its engines push with a strength of ${th}. Can it lift off? (It must push harder than its weight.)`, a: shuf([{ t: "Yes, it lifts off", ok: lift }, { t: "No, it stays on the ground", ok: !lift }]), why: `${th} ${lift ? "is bigger than" : "is smaller than"} ${w}, so it ${lift ? "lifts off" : "stays down"}.` }; }
+    if (Math.random() < .2) { const a = R2(2, 9), b = R2(2, 9); const r = a + b;
+      return { q: `You have ${a} fuel tanks and buy ${b} more. How many do you have?`, a: shuf([r, r + 1, r - 1, r + 2].map(v => ({ t: String(v), ok: v === r }))), why: `${a} + ${b} = ${r}.` }; }
+    const q = pick(ENGQ); return { q: q[0], a: shuf([{ t: q[1], ok: true }, ...q[2].map(t => ({ t, ok: false }))]), why: q[3] };
   }
+  const R2 = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
   function eng(el) {
     if (S.shifts == null) S.shifts = 5; const left = S.shifts, pay = engPay();
     if (!engQ && left > 0) engQ = engMake();
-    el.innerHTML = `<p class="note">Short of money? Work as a <b>rocket engineer</b> for other companies! Solve a rocket-science task and earn <b>${money(pay)}</b> each (more as your company grows). You can do <b>${left}</b> more tasks. Your shift is refilled after your next launch, or when you press <b>Wait a day</b> in Stocks.</p>
+    el.innerHTML = `<p class="note">Short of money? Work as a <b>rocket engineer</b> for other companies! Answer an easy space question and earn <b>${money(pay)}</b> each (more as your company grows). You can do <b>${left}</b> more tasks. Your shift is refilled after your next launch, or when you press <b>Wait a day</b> in Stocks.</p>
       ${engMsg ? `<div class="rc-job">${engMsg}</div>` : ""}
       ${left > 0 && engQ ? `<div class="rc-bankbox"><b>Task: ${esc(engQ.q)}</b>${engQ.a.map((o, i) => `<button class="close" type="button" data-a="${i}">${esc(o.t)}</button>`).join("")}</div>` : `<div class="rc-bankbox">You are all done for this shift. Go launch a rocket, or press Wait a day in the Stocks tab, then come back!</div>`}`;
     el.querySelectorAll("[data-a]").forEach(b => b.onclick = () => {
