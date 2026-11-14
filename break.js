@@ -17,16 +17,36 @@
     if (t.next && now < t.next) return { s: "wait", ms: t.next - now };
     return { s: "ready", ms: 0 };
   }
-  function start() {
-    if (status().s !== "ready") return false;
+  function start(force) {
+    if (!force && status().s !== "ready") return false;
     if (inQuiz()) return false;
     const now = Date.now(); put({ end: now + BREAK_MS, next: now + BREAK_MS + WAIT_MS }); render(); pill(); setTimeout(() => { if (!document.querySelector(".bg-stage, .bg-grid, .bg-gate")) { try { breakHome(); } catch (e) {} } }, 0); return true;
   }
-  // ending early still means a full hour's wait, counted from now
+  // Ending a break early: no code needed, but the 1 hour wait starts right away.
   function endNow(msg) {
     const now = Date.now(); put({ end: 0, next: now + WAIT_MS });
     try { if (window.BreakGames) window.BreakGames.leave(); } catch (e) {}
     pill(); render(); backHome(); hootSay(msg || "Break over! Back to learning. 🦉 Your next break is in 1 hour.", true);
+  }
+  // The SECRET CODE gets you out of school time: it starts a break right now, even while you are waiting for the next one.
+  // (It only changes this Mind Lab break timer. It cannot change the homework time or the bedtime that your parents set.)
+  // The code is stored only as a hash.
+  const CODE_HASH = "b80ca43d4ea7731517b6b1c5cf0b7f9a21376e4d937ba1be7ac6adf63ede785e";
+  async function sha(t) { try { const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t + "|mindlab-break")); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join(""); } catch (e) { return ""; } }
+  function askCode() {
+    if (document.getElementById("brkCode")) return;
+    const m = document.createElement("div"); m.id = "brkCode"; m.className = "prof-modal";
+    m.innerHTML = `<div class="pm-card"><button class="pm-x" type="button" aria-label="Close">x</button><h2>Secret code</h2><p>Type the secret code to leave school time and start a break right now.</p>
+      <input id="brkIn" type="password" inputmode="numeric" autocomplete="off" maxlength="20" placeholder="Secret code" style="font-size:20px;padding:10px;border-radius:12px;border:3px solid #1a1240;width:90%">
+      <div class="pm-err" id="brkErr"></div><div class="pm-btns"><button class="close" id="brkGo" type="button">Start my break</button></div></div>`;
+    document.body.appendChild(m); const inp = m.querySelector("#brkIn"), err = m.querySelector("#brkErr"); inp.focus();
+    const close = () => m.remove(); m.querySelector(".pm-x").onclick = close; m.onclick = e => { if (e.target === m) close(); };
+    const go = async () => {
+      const h = await sha(inp.value.trim());
+      if (h && h === CODE_HASH) { if (inQuiz()) { err.textContent = "Finish your quiz first."; return; } close(); start(true); openGames(); hootSay("Secret code accepted! Here is your 30 minute break. 🦉", false); }
+      else { err.textContent = "That is not the code."; inp.value = ""; inp.focus(); }
+    };
+    m.querySelector("#brkGo").onclick = go; inp.onkeydown = e => { if (e.key === "Enter") go(); };
   }
   function backHome() { try { if (document.querySelector(".bg-stage, .bg-grid, .bg-gate") && typeof home === "function") home(); } catch (e) {} }
 
@@ -44,11 +64,12 @@
   function render() {
     if (!bar) return; const st = status();
     if (st.s === "ready") bar.innerHTML = `<span><b>Break mode</b>: take a 30 minute break and play Break Time Games.</span><button type="button" class="hb-go" id="hbStart">Start my break</button>`;
-    else if (st.s === "on") bar.innerHTML = `<span><b>Break time!</b> <i id="hbLeft">${fmt(st.ms)}</i> left</span><button type="button" class="hb-go" id="hbGames">Games</button><button type="button" class="hb-end" id="hbEnd">End break</button>`;
-    else bar.innerHTML = `<span><b>Break mode</b>: your next break is in <i id="hbLeft">${fmt(st.ms)}</i></span>`;
+    else if (st.s === "on") bar.innerHTML = `<span><b>Break time!</b> <i id="hbLeft">${fmt(st.ms)}</i> left</span><button type="button" class="hb-go" id="hbGames">Games</button><button type="button" class="hb-end" id="hbEnd">End my break</button>`;
+    else bar.innerHTML = `<span><b>Break mode</b>: your next break is in <i id="hbLeft">${fmt(st.ms)}</i></span><button type="button" class="hb-code" id="hbCode">Secret code</button>`;
     const b1 = document.getElementById("hbStart"); if (b1) b1.onclick = () => { if (start()) { hootSay("Enjoy your 30 minute break! 🦉 I'll tell you when it's over.", false); openGames(); } else hootSay(inQuiz() ? "Finish your quiz first, then ask me for a break. 🦉" : "Not yet. 🦉", false); };
+    const b4 = document.getElementById("hbCode"); if (b4) b4.onclick = askCode;
     const b2 = document.getElementById("hbGames"); if (b2) b2.onclick = openGames;
-    const b3 = document.getElementById("hbEnd"); if (b3) b3.onclick = () => { if (confirm("End your break now? You will have to wait 1 hour for the next one.")) endNow("Break over! Back to learning. 🦉 Your next break is in 1 hour."); };
+    const b3 = document.getElementById("hbEnd"); if (b3) b3.onclick = () => endNow();
   }
   function openGames() { if (panel) panel.classList.remove("open"); try { window.BreakGames && window.BreakGames.open(); } catch (e) {} }
 
@@ -108,8 +129,9 @@
     a.innerHTML = `<button class="back" id="bgGateBack">← All subjects</button>
       <div class="bg-gate">${hoot}<h1>Break Time Games</h1>
         ${st.s === "ready" ? `<p>Hoot gives you a <b>30 minute break</b> to play. When the 30 minutes are up the games close, and you wait <b>1 hour</b> before the next break.</p><button class="close" id="bgGateGo">Start my 30 minute break</button><div class="pm-err" id="bgGateMsg"></div>`
-          : `<p>Hoot says: no break yet! 🦉 You can have your next break in <b id="bgGateLeft">${fmt(st.ms)}</b>. Let's learn something until then.</p>`}</div>`;
+          : `<p>Hoot says: no break yet! 🦉 You can have your next break in <b id="bgGateLeft">${fmt(st.ms)}</b>. Let's learn something until then.</p><button class="hintbtn" id="bgGateCode" type="button">I have a secret code</button>`}</div>`;
     document.getElementById("bgGateBack").onclick = () => home();
+    const gc = document.getElementById("bgGateCode"); if (gc) gc.onclick = askCode;
     const go = document.getElementById("bgGateGo");
     if (go) go.onclick = () => { if (start()) window.BreakGames.open(); else document.getElementById("bgGateMsg").textContent = inQuiz() ? "Finish your quiz first." : "Not yet."; };
   }
@@ -129,9 +151,9 @@
     const a = document.getElementById("app"); if (!a) return; const st = status();
     const hoot = (typeof HOOT_SRC !== "undefined") ? `<img src="${HOOT_SRC}" alt="" width="70" height="77">` : "";
     a.innerHTML = `<div class="bg-gate">${hoot}<h1>Break time!</h1><p>No school right now. Your break has <b id="bgGateLeft">${fmt(st.ms)}</b> left. Lessons open again when it's over.</p>
-      <button class="close" id="bhGames">Play Break Time Games</button> <button class="hintbtn" id="bhEnd" type="button">End my break</button></div>`;
+      <button class="close" id="bhGames">Play Break Time Games</button> <button class="hintbtn" id="bhEnd" type="button">Leave break mode</button></div>`;
     document.getElementById("bhGames").onclick = () => window.BreakGames.open();
-    document.getElementById("bhEnd").onclick = () => { if (confirm("End your break now? You will have to wait 1 hour for the next one.")) endNow(); };
+    document.getElementById("bhEnd").onclick = () => endNow();
     window.scrollTo(0, 0);
   }
   ["course", "levelPage", "startLesson", "startExam", "bookstore", "requestModal", "home", "cardsPage", "scrollPage"].forEach(n => {
@@ -155,5 +177,5 @@
     if (b.textContent !== t) b.textContent = t; b.classList.toggle("bg-locked", st.s !== "on");
   }
   render(); pill(); chatLabels();
-  window.MindBreak = { status, start, endNow, BREAK_MS, WAIT_MS };
+  window.MindBreak = { status, start, endNow, askCode, BREAK_MS, WAIT_MS };
 })();

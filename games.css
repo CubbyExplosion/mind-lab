@@ -81,3 +81,4 @@
 .sb-none { grid-column: 1 / -1; text-align: center; opacity: .8; }
 .sb-pg { text-align: center; font-size: 12px; margin-top: 4px; }
 .sb-q { font-size: 12px; display: flex; flex-wrap: wrap; gap: 4px 10px; justify-content: center; } .sb-q span { opacity: .8; } .sb-qd { color: #6be28f; opacity: 1 !important; font-weight: 800; }
+.hb-code { background: #ffd34e; color: #3a2a00; }
