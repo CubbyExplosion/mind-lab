@@ -610,7 +610,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
       if (S.dealPaid[D.id]) return `<div class="rc-bankbox"><b>${D.name}: DONE!</b><div>You played ${D.name} 100 times and got your ${money(D.pay)}. This deal is once per account.</div></div>`;
       const n = d ? Math.min(100, d.count || 0) : 0, on = !!(d && d.on);
       return `<div class="rc-bankbox"><b>${D.name}: play 100 times, get ${money(D.pay)}!</b>
-        <div class="rc-dealbar"><i style="width:${n}%"></i></div><div><b>${n}/100</b> plays (each play counts after 1 minute in the game)</div>
+        <div class="rc-dealbar"><i style="width:${n}%"></i></div><div><b>${n}/100</b> plays (each play must be at least 30 minutes in the game)</div>
         ${me ? "" : "<div>Sign in first (press <b>Sign in</b> at the top).</div>"}
         ${me && !on ? `<button class="close" type="button" data-start="${D.id}">Start this deal</button>` : ""}
         <a class="close" href="${D.url}" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">Play ${D.name}</a>
