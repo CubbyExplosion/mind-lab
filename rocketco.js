@@ -393,11 +393,11 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
       st[i] = { dv, twr, wet: wetT, dry, fuel, cost: c1, thrust, ve, above }; dvTot += dv; above += wetT;
     }
     const total = above, twr0 = st[0] ? st[0].twr : 0; cost += 15000 + 500 * total;
-    let need = dest.dv, low = 0;
+    const bfx = baseFx(); let need = Math.max(400, dest.dv - bfx.dv), low = 0;
     st.forEach((s, i) => { if (i > 0 && s.twr < .25) { need += 400; low++; } });
     if (twr0 < 1.15 && twr0 >= 1) need *= 1 + (1.15 - twr0) * .8;
     const crewOk = !c || !c.crew || top.crew, fairOk = kg <= top.cap;
-    return { st, dv: dvTot, need, twr0, cost, total, rel: Math.min(.995, rel), crewOk, fairOk, cap: top.cap, low, lift: twr0 >= 1, enough: dvTot >= need };
+    return { st, dv: dvTot, need, twr0, cost: cost * (1 - bfx.disc), total, rel: Math.min(.995, rel + bfx.rel), crewOk, fairOk, cap: top.cap, low, lift: twr0 >= 1, enough: dvTot >= need };
   }
 
   const BODYSHAPES = { classic: t => 1, tapered: t => .72 + .28 * t, flared: t => .9 + .3 * t, barrel: t => 1 + .2 * Math.sin(Math.PI * t), hourglass: t => 1 - .2 * Math.sin(Math.PI * t), diamond: t => .7 + .5 * Math.sin(Math.PI * t), stepped: t => t < .5 ? .8 : 1.08, wavy: t => 1 + .1 * Math.sin(t * Math.PI * 6), slim: t => .78, chunky: t => 1.22 };
@@ -558,17 +558,17 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
 
   // ---------------- UI ----------------
   function open() {
-    S = load() || fresh(); if (!S.design) S.design = fresh().design; const f0 = fresh(); ["company", "visited", "sat", "debt", "fj"].forEach(k => { if (!S[k]) S[k] = f0[k]; }); S.contracts = (S.contracts || []).filter(c => DESTS[c.dest]); S.design.boost = S.design.boost || { eng: "srb", count: 0 }; S.design.extras = S.design.extras || {}; (S.designs || []).forEach(d => { d.boost = d.boost || { eng: "srb", count: 0 }; d.extras = d.extras || {}; }); refill(); save();
+    S = load() || fresh(); if (!S.design) S.design = fresh().design; const f0 = fresh(); ["company", "visited", "sat", "debt", "fj"].forEach(k => { if (!S[k]) S[k] = f0[k]; }); if (!S.base || !S.base.items) S.base = { site: "texas", items: [{ t: "pad", x: .5, y: .72 }, { t: "tower", x: .62, y: .62 }] }; S.contracts = (S.contracts || []).filter(c => DESTS[c.dest]); S.design.boost = S.design.boost || { eng: "srb", count: 0 }; S.design.extras = S.design.extras || {}; (S.designs || []).forEach(d => { d.boost = d.boost || { eng: "srb", count: 0 }; d.extras = d.extras || {}; }); refill(); save();
     app = document.getElementById("app"); tab = "contracts"; sel = null; render();
   }
   function head() {
     const t = tier();
     return `<button class="back" id="rcHome">← All subjects</button><div class="rc-head"><h1>${esc(S.company)}</h1><div class="rc-stats"><span>Cash <b>${money(S.cash)}</b></span>${S.debt > 0 ? `<span>Debt <b class="badc">${money(S.debt)}</b></span>` : ""}<span>${esc(TIERNAMES[t])}</span><span>Launches <b>${S.ok}</b> good / ${S.tries}</span></div></div>
       <p class="sub">You run a launch company: customers order a ride into space for their satellites. Play money only! Build rockets, take orders, and launch heavier and heavier satellites. <label class="rc-co">Company name <input id="rcCo" maxlength="20" value="${esc(S.company)}"></label></p>
-      <div class="rc-tabs">${[["contracts", "Orders"], ["build", "Build"], ["places", "296 Places"], ["research", "Shop & research"], ["eng", "Engineer job"], ["fun", "Fun jobs"], ["deal", "Special deals"], ["bank", "Loans"], ["stocks", "Stocks"], ["learn", "Rocket science"], ["log", "Records"]].map(a => `<button type="button" class="rc-tab ${tab === a[0] ? "on" : ""}" data-t="${a[0]}">${a[1]}</button>`).join("")}</div>`;
+      <div class="rc-tabs">${[["contracts", "Orders"], ["build", "Build"], ["places", "296 Places"], ["research", "Shop & research"], ["eng", "Engineer job"], ["fun", "Fun jobs"], ["base", "My Base"], ["deal", "Special deals"], ["bank", "Loans"], ["stocks", "Stocks"], ["learn", "Rocket science"], ["log", "Records"]].map(a => `<button type="button" class="rc-tab ${tab === a[0] ? "on" : ""}" data-t="${a[0]}">${a[1]}</button>`).join("")}</div>`;
   }
   function render() {
-    if (!app) return; const t = { contracts, build, places, research, eng, fun, deal, bank, stocks, learn, log }[tab] || contracts;
+    if (!app) return; const t = { contracts, build, places, research, eng, fun, base: baseTab, deal, bank, stocks, learn, log }[tab] || contracts;
     app.innerHTML = head() + '<div class="rc-body" id="rcBody"></div>';
     document.getElementById("rcCo").onchange = e => { S.company = e.target.value.replace(/[^\p{L}\p{N} _&'-]/gu, "").trim().slice(0, 20) || "My Rocket Co"; save(); render(); };
     document.getElementById("rcHome").onclick = () => { if (typeof home === "function") home(); };
@@ -925,6 +925,107 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
   }
 
   // ---------------- launch ----------------
+  // ---------------- your launch base (like Starbase): design it and move it ----------------
+  const BSITES = [
+    { id: "texas", name: "Starbase, Texas (beach)", dv: 0, cost: 0, sky: ["#4aa0e8", "#bfe6ff"], ground: "#d8c48a", kind: "sea", note: "Where you start. Sand, sun and the sea." },
+    { id: "desert", name: "Desert base", dv: 40, cost: 500000, sky: ["#e89a4a", "#ffe0a8"], ground: "#d9a66a", kind: "desert", note: "Hot, flat and empty. Lots of room to build." },
+    { id: "cali", name: "Vandenberg, California", dv: 60, cost: 750000, sky: ["#5aa8e0", "#d8efff"], ground: "#8aa060", kind: "hills", note: "Green hills by the ocean. Great for polar orbits." },
+    { id: "flor", name: "Cape Canaveral, Florida", dv: 100, cost: 900000, sky: ["#3a98e8", "#c8ecff"], ground: "#6aa860", kind: "sea", note: "The famous spaceport with palm trees." },
+    { id: "mount", name: "High mountain base", dv: 150, cost: 2000000, sky: ["#2a6ad0", "#a8d0ff"], ground: "#a8b0a8", kind: "mount", note: "Thin air up high means less to push through." },
+    { id: "kourou", name: "Kourou, French Guiana", dv: 250, cost: 3000000, sky: ["#2a9ad8", "#c0f0e0"], ground: "#3f9a4a", kind: "jungle", note: "Right near the equator: the spinning Earth gives you a big free push!" },
+    { id: "kwaj", name: "Kwajalein island (Pacific)", dv: 300, cost: 4000000, sky: ["#28a8e8", "#c8fff0"], ground: "#f0e0a0", kind: "sea", note: "A tiny tropical island near the equator." },
+    { id: "ship", name: "Ocean platform (floating base!)", dv: 350, cost: 6000000, sky: ["#2a78d8", "#b8e0ff"], ground: "#6a7488", kind: "ocean", note: "A giant floating launch platform right on the equator. The best push!" }
+  ];
+  const BITEMS = {
+    pad: { name: "Launch pad", cost: 150000 }, tower: { name: "Launch tower", cost: 400000, fx: ["rel", .012, 4], tx: "+1.2% safer engines (up to 4)" },
+    control: { name: "Control room", cost: 300000, fx: ["rel", .01, 3], tx: "+1% safer engines (up to 3)" }, dish: { name: "Radar dish", cost: 150000, fx: ["rel", .005, 4], tx: "+0.5% safer (up to 4)" },
+    lightning: { name: "Lightning rod", cost: 80000, fx: ["rel", .004, 4], tx: "+0.4% safer (up to 4)" }, tank: { name: "Fuel tank farm", cost: 250000, fx: ["disc", .02, 5], tx: "rockets cost 2% less (up to 5)" },
+    hangar: { name: "Rocket hangar", cost: 600000, fx: ["disc", .03, 4], tx: "rockets cost 3% less (up to 4)" }, factory: { name: "Rocket factory", cost: 1000000, fx: ["disc", .04, 3], tx: "rockets cost 4% less (up to 3)" },
+    crane: { name: "Big crane", cost: 200000, fx: ["disc", .015, 4], tx: "rockets cost 1.5% less (up to 4)" }, solar: { name: "Solar panels", cost: 100000, fx: ["disc", .005, 6], tx: "rockets cost 0.5% less (up to 6)" },
+    visitor: { name: "Visitor center", cost: 300000, fx: ["pay", .02, 5], tx: "orders pay 2% more (up to 5)" }, shop: { name: "Gift shop", cost: 120000, fx: ["pay", .01, 5], tx: "orders pay 1% more (up to 5)" },
+    hotel: { name: "Fan hotel", cost: 800000, fx: ["pay", .03, 3], tx: "orders pay 3% more (up to 3)" },
+    statue: { name: "Rocket statue", cost: 50000 }, tree: { name: "Tree", cost: 5000 }, palm: { name: "Palm tree", cost: 5000 }, flag: { name: "Flag", cost: 10000 }, tent: { name: "Party tent", cost: 20000 }, truck: { name: "Truck", cost: 30000 }
+  };
+  const BMAX = 80;
+  function baseFx() {
+    const b = S.base || {}, cnt = {}; (b.items || []).forEach(i => { cnt[i.t] = (cnt[i.t] || 0) + 1; });
+    const f = { rel: 0, disc: 0, pay: 0, dv: (BSITES.find(s => s.id === b.site) || BSITES[0]).dv };
+    Object.keys(cnt).forEach(t => { const it = BITEMS[t]; if (it && it.fx) f[it.fx[0]] += it.fx[1] * Math.min(cnt[t], it.fx[2]); });
+    f.disc = Math.min(.35, f.disc); return f;
+  }
+  function bDraw(x, t, cx, by, s) {
+    const rc = (ox, oy, w, h, c) => { x.fillStyle = c; x.fillRect(cx + ox * s, by - (oy + h) * s, w * s, h * s); };
+    const ln = (a, b, c, d, col, w) => { x.strokeStyle = col; x.lineWidth = Math.max(1, (w || 1.5) * s); x.beginPath(); x.moveTo(cx + a * s, by - b * s); x.lineTo(cx + c * s, by - d * s); x.stroke(); };
+    const tri = (a, b, c, d, e, f, col) => { x.fillStyle = col; x.beginPath(); x.moveTo(cx + a * s, by - b * s); x.lineTo(cx + c * s, by - d * s); x.lineTo(cx + e * s, by - f * s); x.closePath(); x.fill(); };
+    const ci = (a, b, r, col) => { x.fillStyle = col; x.beginPath(); x.arc(cx + a * s, by - b * s, r * s, 0, 7); x.fill(); };
+    x.fillStyle = "rgba(0,0,0,.18)"; x.beginPath(); x.ellipse(cx, by, 30 * s, 5 * s, 0, 0, 7); x.fill();
+    if (t === "pad") { rc(-50, 0, 100, 6, "#8d8d98"); rc(-40, 6, 80, 3, "#6c6c78"); rc(-12, 0, 24, 6, "#2a2a34"); }
+    else if (t === "tower") { rc(-7, 0, 14, 110, "#b8bcc8"); for (let k = 0; k < 11; k++) ln(-7, k * 10, 7, k * 10 + 10, "#6a6e7c", 1.2); rc(7, 88, 30, 5, "#e0453a"); rc(-9, 108, 18, 4, "#888"); }
+    else if (t === "control") { rc(-30, 0, 60, 26, "#d4d8e4"); rc(-24, 11, 48, 8, "#4aa8ff"); rc(-34, 26, 68, 4, "#556"); }
+    else if (t === "dish") { rc(-2, 0, 4, 18, "#888"); x.fillStyle = "#e8e8f0"; x.beginPath(); x.ellipse(cx, by - 22 * s, 16 * s, 8 * s, -.5, 0, 7); x.fill(); ci(4, 26, 2, "#e0453a"); }
+    else if (t === "lightning") { rc(-1.5, 0, 3, 42, "#999"); tri(-4, 42, 4, 42, 0, 54, "#ffd34e"); }
+    else if (t === "tank") { [-26, 12].forEach(o => { rc(o, 0, 28, 34, "#eaeaf2"); x.fillStyle = "#cfd2e0"; x.beginPath(); x.ellipse(cx + (o + 14) * s, by - 34 * s, 14 * s, 4 * s, 0, 0, 7); x.fill(); rc(o, 14, 28, 3, "#4a78d8"); }); }
+    else if (t === "hangar") { rc(-50, 0, 100, 40, "#7a86a8"); x.fillStyle = "#6a76a0"; x.beginPath(); x.ellipse(cx, by - 40 * s, 50 * s, 12 * s, 0, Math.PI, 0); x.fill(); rc(-20, 0, 40, 34, "#2a3050"); ln(0, 0, 0, 34, "#556", 1); }
+    else if (t === "factory") { rc(-55, 0, 110, 38, "#aeaeba"); for (let k = 0; k < 4; k++) tri(-55 + k * 28, 38, -55 + k * 28, 52, -27 + k * 28, 38, "#8a8a98"); rc(-40, 38, 10, 22, "#777"); rc(-8, 38, 10, 28, "#777"); for (let k = 0; k < 5; k++) rc(-48 + k * 20, 12, 12, 10, "#ffd34e"); }
+    else if (t === "crane") { rc(-3, 0, 6, 92, "#f0b020"); rc(-12, 88, 70, 5, "#f0b020"); ln(48, 88, 48, 58, "#444", 1); rc(42, 54, 12, 5, "#555"); rc(-12, 93, 10, 8, "#888"); }
+    else if (t === "visitor") { rc(-35, 0, 70, 26, "#fff2dc"); tri(-40, 26, 40, 26, 0, 44, "#d84a3a"); rc(-8, 0, 16, 16, "#6a4a2a"); rc(-28, 8, 14, 10, "#6ab8ff"); rc(14, 8, 14, 10, "#6ab8ff"); }
+    else if (t === "shop") { rc(-22, 0, 44, 20, "#ffd0e0"); rc(-26, 20, 52, 5, "#e0316f"); rc(-16, 5, 14, 10, "#fff"); ci(14, 10, 4, "#ffd34e"); }
+    else if (t === "hotel") { rc(-30, 0, 60, 72, "#e4ecff"); for (let r = 0; r < 5; r++) for (let c = 0; c < 4; c++) rc(-24 + c * 13, 8 + r * 12, 8, 7, (r + c) % 3 ? "#ffd34e" : "#4a78d8"); rc(-34, 72, 68, 4, "#556"); ln(0, 76, 0, 92, "#888", 1.5); ci(0, 94, 4, "#ffd34e"); }
+    else if (t === "solar") { for (let k = 0; k < 3; k++) { x.fillStyle = "#2a4a9a"; x.beginPath(); x.moveTo(cx + (-34 + k * 24) * s, by - 6 * s); x.lineTo(cx + (-14 + k * 24) * s, by - 6 * s); x.lineTo(cx + (-8 + k * 24) * s, by - 20 * s); x.lineTo(cx + (-28 + k * 24) * s, by - 20 * s); x.closePath(); x.fill(); ln(-24 + k * 24, 0, -24 + k * 24, 7, "#666", 1); } }
+    else if (t === "tree") { rc(-2, 0, 4, 14, "#6a4a2a"); ci(0, 22, 11, "#2f9a4a"); ci(-6, 17, 7, "#3aae54"); }
+    else if (t === "palm") { rc(-1.5, 0, 3, 34, "#8a6a3a"); for (let k = -2; k <= 2; k++) ln(0, 34, k * 11, 28 - Math.abs(k) * 3, "#2f9a4a", 3); }
+    else if (t === "flag") { rc(-1, 0, 2, 42, "#ddd"); rc(1, 30, 20, 12, "#e0453a"); rc(1, 34, 20, 4, "#fff"); }
+    else if (t === "statue") { rc(-9, 0, 18, 6, "#999"); rc(-5, 6, 10, 34, "#f4f4f8"); tri(-5, 40, 5, 40, 0, 54, "#e0453a"); tri(-5, 6, -12, 6, -5, 18, "#e0453a"); tri(5, 6, 12, 6, 5, 18, "#e0453a"); ci(0, 28, 2.5, "#4aa8ff"); }
+    else if (t === "tent") { tri(-26, 0, 26, 0, 0, 30, "#ff5a8a"); tri(-26, 0, -8, 0, -17, 14, "#e03a6a"); rc(-1, 0, 2, 34, "#777"); }
+    else if (t === "truck") { rc(-18, 4, 26, 14, "#e8e8ee"); rc(8, 4, 12, 10, "#e0453a"); rc(11, 9, 6, 4, "#8ad0ff"); ci(-9, 4, 4.5, "#222"); ci(13, 4, 4.5, "#222"); }
+  }
+  let baseCache = { key: "", hh: 0 }, bsel = "tower", btool = "place", bdrag = -1;
+  function baseRocketH() {
+    const key = JSON.stringify(S.design); if (baseCache.key === key) return baseCache.hh;
+    try { const mc = document.createElement("canvas").getContext("2d"); mc.canvas.width = 300; mc.canvas.height = 6000; baseCache = { key, hh: 5900 - drawRocket(mc, S.design, 150, 5900, 1, { flame: 0 }) }; } catch (e) { baseCache = { key, hh: 200 }; }
+    return baseCache.hh;
+  }
+  function basePaint(cv) {
+    const x = cv.getContext("2d"), W = cv.width, H = cv.height, hy = H * .5, site = BSITES.find(s => s.id === S.base.site) || BSITES[0];
+    const g = x.createLinearGradient(0, 0, 0, hy); g.addColorStop(0, site.sky[0]); g.addColorStop(1, site.sky[1]); x.fillStyle = g; x.fillRect(0, 0, W, hy);
+    x.fillStyle = "rgba(255,255,255,.8)"; [[.12, .14], [.4, .1], [.72, .18]].forEach(c => { x.beginPath(); x.ellipse(W * c[0], H * c[1], 46, 14, 0, 0, 7); x.ellipse(W * c[0] + 26, H * c[1] + 5, 34, 11, 0, 0, 7); x.fill(); });
+    x.fillStyle = "#ffe98a"; x.beginPath(); x.arc(W * .88, H * .16, 22, 0, 7); x.fill();
+    if (site.kind === "mount" || site.kind === "hills") { x.fillStyle = site.kind === "mount" ? "#8a94a8" : "#7f9a68"; x.beginPath(); x.moveTo(0, hy); for (let k = 0; k <= 8; k++) x.lineTo(W * k / 8, hy - (site.kind === "mount" ? 70 : 30) * (.5 + .5 * Math.sin(k * 1.9 + 1))); x.lineTo(W, hy); x.fill(); if (site.kind === "mount") { x.fillStyle = "#fff"; x.beginPath(); x.moveTo(W * .5, hy - 72); x.lineTo(W * .45, hy - 44); x.lineTo(W * .55, hy - 44); x.fill(); } }
+    if (site.kind === "sea" || site.kind === "ocean") { x.fillStyle = "#2a78d8"; x.fillRect(0, hy - 12, W, 22); x.fillStyle = "rgba(255,255,255,.5)"; for (let k = 0; k < 16; k++) x.fillRect((k * 53) % W, hy - 8 + (k % 3) * 6, 18, 2); }
+    if (site.kind === "jungle") { x.fillStyle = "#1f7a38"; for (let k = 0; k < 14; k++) { x.beginPath(); x.arc(k * W / 13, hy - 2, 20 + (k % 3) * 6, Math.PI, 0); x.fill(); } }
+    if (site.kind === "ocean") { x.fillStyle = "#2a78d8"; x.fillRect(0, hy, W, H - hy); x.fillStyle = "rgba(255,255,255,.18)"; for (let k = 0; k < 40; k++) x.fillRect((k * 97) % W, hy + 10 + (k * 31) % (H - hy - 14), 30, 2); x.fillStyle = site.ground; x.fillRect(W * .08, hy + 14, W * .84, H - hy - 30); x.fillStyle = "#4e586c"; x.fillRect(W * .08, hy + 14, W * .84, 5); }
+    else { x.fillStyle = site.ground; x.fillRect(0, hy, W, H - hy); x.fillStyle = "rgba(0,0,0,.07)"; for (let k = 0; k < 30; k++) x.fillRect((k * 83) % W, hy + 6 + (k * 47) % (H - hy - 10), 26, 3); }
+    const items = S.base.items.map((it, i) => ({ it, i })).sort((a, b) => a.it.y - b.it.y); let rockOn = false;
+    items.forEach(o => { const it = o.it, px = it.x * W, py = hy + 24 + it.y * (H - hy - 34), sc = .55 + .7 * it.y; bDraw(x, it.t, px, py, sc * (it.t === "pad" || it.t === "tower" ? 1.15 : 1));
+      if (it.t === "pad" && !rockOn) { rockOn = true; const hh = baseRocketH(), sc2 = Math.min(1, 125 * sc / hh); try { drawRocket(x, S.design, px, py - 8 * sc, sc2, { flame: 0 }); } catch (e) {} } });
+    x.fillStyle = "rgba(0,0,0,.45)"; x.fillRect(6, 6, 250, 24); x.fillStyle = "#fff"; x.font = "bold 13px system-ui"; x.fillText(site.name, 12, 23);
+  }
+  function baseTab(el) {
+    S.base = S.base || { site: "texas", items: [] }; const b = S.base;
+    el.innerHTML = `<p class="note">This is YOUR launch base, like Starbase! Build towers, hangars and factories and put them anywhere. You can also <b>move your whole base</b> to a new place. Buildings make rockets safer, cheaper, and customers pay more.</p>
+      <canvas id="bsCv" class="rc-bscv" width="760" height="340"></canvas>
+      <div class="rc-bstools"><button type="button" class="hintbtn ${btool === "place" ? "rc-on" : ""}" data-bt="place">Build</button><button type="button" class="hintbtn ${btool === "move" ? "rc-on" : ""}" data-bt="move">Move buildings (drag)</button><button type="button" class="hintbtn ${btool === "erase" ? "rc-on" : ""}" data-bt="erase">Remove (get half back)</button><span id="bsN" class="rc-sm"></span></div>
+      <div class="rc-bsfx" id="bsFx"></div>
+      <h3>Buildings</h3><div class="rc-bspal">${Object.keys(BITEMS).map(k => { const it = BITEMS[k]; return `<button type="button" class="rc-bsb ${bsel === k && btool === "place" ? "on" : ""}" data-bi="${k}"><canvas width="64" height="64" data-bp="${k}"></canvas><b>${it.name}</b><span>${money(it.cost)}</span><small>${it.tx || (it.cost <= 30000 ? "just for looks" : "looks cool")}</small></button>`; }).join("")}</div>
+      <h3>Move your base</h3><p class="rc-sm">Your buildings come with you. Moving costs money. Close to the equator the spinning Earth gives your rockets a free push (extra speed).</p>
+      <div class="rc-bssites">${BSITES.map(s => `<div class="rc-bsite ${s.id === b.site ? "here" : ""}"><b>${s.name}</b><div>Free push: <b>+${s.dv} m/s</b></div><div class="rc-sm">${s.note}</div>${s.id === b.site ? "<em>Your base is here!</em>" : `<button type="button" class="close" data-mv="${s.id}" ${S.cash < s.cost ? "disabled" : ""}>Move here (${money(s.cost)})</button>`}</div>`).join("")}</div>`;
+    const cv = el.querySelector("#bsCv"), upd = () => {
+      basePaint(cv); const hd = document.querySelector(".rc-stats b"); if (hd) hd.textContent = money(S.cash); el.querySelector("#bsN").textContent = b.items.length + "/" + BMAX + " buildings";
+      const f = baseFx(); el.querySelector("#bsFx").innerHTML = `<b>Your base gives:</b> engines <b class="okc">+${(f.rel * 100).toFixed(1)}%</b> safer · rockets <b class="okc">${Math.round(f.disc * 100)}%</b> cheaper · orders pay <b class="okc">+${Math.round(f.pay * 100)}%</b> more · free push <b class="okc">+${f.dv} m/s</b>`; };
+    el.querySelectorAll("canvas[data-bp]").forEach(c => { const q = c.getContext("2d"); bDraw(q, c.dataset.bp, 32, 60, .5); });
+    el.querySelectorAll("[data-bt]").forEach(bn => bn.onclick = () => { btool = bn.dataset.bt; const y = window.scrollY; baseTab(el); window.scrollTo(0, y); });
+    el.querySelectorAll("[data-bi]").forEach(bn => bn.onclick = () => { bsel = bn.dataset.bi; btool = "place"; snd("tick"); const y = window.scrollY; baseTab(el); window.scrollTo(0, y); });
+    el.querySelectorAll("[data-mv]").forEach(bn => bn.onclick = () => { const s = BSITES.find(q => q.id === bn.dataset.mv); if (!s || S.cash < s.cost) return; S.cash -= s.cost; b.site = s.id; save(); snd("star"); const y = window.scrollY; render(); window.scrollTo(0, y); });
+    const pos = e => { const r = cv.getBoundingClientRect(), W = cv.width, H = cv.height, px = (e.clientX - r.left) * W / r.width, py = (e.clientY - r.top) * H / r.height; return { px, py, x: Math.max(.03, Math.min(.97, px / W)), y: Math.max(0, Math.min(1, (py - H * .5 - 24) / (H * .5 - 34))) }; };
+    const near = p => { let bi = -1, bd = 1e9; b.items.forEach((it, i) => { const ix = it.x * cv.width, iy = cv.height * .5 + 24 + it.y * (cv.height * .5 - 34) - 20, d = (ix - p.px) ** 2 + (iy - p.py) ** 2; if (d < bd) { bd = d; bi = i; } }); return bd < 55 * 55 ? bi : -1; };
+    cv.style.touchAction = "none"; cv.onpointerdown = e => { const p = pos(e); if (btool === "place") { if (p.py < cv.height * .5 || b.items.length >= BMAX) return; const it = BITEMS[bsel]; if (S.cash < it.cost) { el.querySelector("#bsN").textContent = "Not enough cash!"; return; } S.cash -= it.cost; b.items.push({ t: bsel, x: +p.x.toFixed(3), y: +p.y.toFixed(3) }); save(); snd("clink"); upd(); }
+      else if (btool === "erase") { const i = near(p); if (i >= 0) { S.cash += Math.round(BITEMS[b.items[i].t].cost / 2); b.items.splice(i, 1); save(); snd("tick"); upd(); } }
+      else { bdrag = near(p); if (bdrag >= 0) { try { cv.setPointerCapture(e.pointerId); } catch (er) {} } } };
+    cv.onpointermove = e => { if (btool !== "move" || bdrag < 0) return; const p = pos(e), it = b.items[bdrag]; if (!it) return; it.x = +p.x.toFixed(3); it.y = +p.y.toFixed(3); basePaint(cv); };
+    cv.onpointerup = () => { if (bdrag >= 0) { bdrag = -1; save(); upd(); } };
+    upd();
+  }
+
   function launch(c, a, o) {
     const des = JSON.parse(JSON.stringify(S.design)), D = DESTS[c.dest], sname = o.name;
     S.cash -= a.cost + o.pieceCost + o.prem; S.tries++; save();
@@ -944,7 +1045,7 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
       if ((S.res.reuse || (des.extras && des.extras.fins)) && a.st[0] && res !== "boom" && Math.random() < .72) { refund = Math.round(a.st[0].cost * .6); S.cash += refund; }
       S.contracts = S.contracts.filter(k => k.id !== c.id); sel = null;
       if (okk) {
-        pay = Math.round(c.pay * (1 + o.bonus)); if (!S.visited[c.dest]) first = 50000 * (D.tier + 1); S.visited[c.dest] = (S.visited[c.dest] || 0) + 1;
+        pay = Math.round(c.pay * (1 + o.bonus + baseFx().pay)); if (!S.visited[c.dest]) first = 50000 * (D.tier + 1); S.visited[c.dest] = (S.visited[c.dest] || 0) + 1;
         S.cash += pay + first; S.ok++; S.earned += pay + first; S.best = Math.max(S.best, c.kg);
         text = "delivered the satellite \"" + sname + "\" (" + (c.kg + o.pieceKg).toLocaleString() + " kg) to " + D.name + " and earned " + money(pay) + (first ? " plus a first-visit bonus of " + money(first) : "") + "!";
       } else {
