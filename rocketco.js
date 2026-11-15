@@ -946,7 +946,7 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
     hotel: { name: "Fan hotel", cost: 800000, fx: ["pay", .03, 3], tx: "orders pay 3% more (up to 3)" },
     statue: { name: "Rocket statue", cost: 50000 }, tree: { name: "Tree", cost: 5000 }, palm: { name: "Palm tree", cost: 5000 }, flag: { name: "Flag", cost: 10000 }, tent: { name: "Party tent", cost: 20000 }, truck: { name: "Truck", cost: 30000 }
   };
-  const BMAX = 80;
+  const BMAX = 100;
   function baseFx() {
     const b = S.base || {}, cnt = {}; (b.items || []).forEach(i => { cnt[i.t] = (cnt[i.t] || 0) + 1; });
     const f = { rel: 0, disc: 0, pay: 0, dv: (BSITES.find(s => s.id === b.site) || BSITES[0]).dv };
