@@ -265,7 +265,7 @@ halebland|Comet Hale-Bopp landing|15000|3000000000|L`;
   // ---------------- contracts ----------------
   function makeContract() {
     const t = tier(), cap = [400, 800, 2500, 6000, 15000, 40000, 100000][t];
-    const open = DLIST.filter(d => d.tier <= t), near = open.filter(d => d.tier >= t - 1), pool = Math.random() < .55 && near.length ? near : open, d = pick(pool);
+    const open = DLIST, near = open.filter(d => Math.abs(d.tier - t) <= 1), pool = Math.random() < .4 && near.length ? near : open, d = pick(pool);
     const maxKg = d.id === "sub" ? 800 : d.dv <= 9400 ? 100000 : 100000 * Math.exp(-(d.dv - 9400) / 1900), hi = Math.max(60, Math.min(cap, maxKg)), lo = Math.max(30, hi * .08);
     let kg = Math.round(rr(lo, hi) / 10) * 10; const heavy = Math.random() < .12 + t * .02; if (heavy) kg = Math.round(kg * 1.5 / 10) * 10;
     const base = kg <= 300 ? 15000 : kg <= 3000 ? 6000 : 3000;
@@ -596,7 +596,7 @@ halebland|Comet Hale-Bopp landing|15000|3000000000|L`;
 
   function places(el) {
     const t = tier(), seen = Object.keys(S.visited).length;
-    el.innerHTML = `<p class="note">200 real places to go! You have visited <b>${seen} / 200</b>. Orders for a place appear when you reach the right level, and the first trip there pays a bonus.</p><div class="rc-places">${DLIST.map(d => { const v = S.visited[d.id]; return `<div class="rc-place ${v ? "seen" : d.tier > t ? "locked" : ""}"><canvas class="rc-pic" width="200" height="100" data-pid="${d.id}"></canvas><b>${esc(d.name)}</b><small>Needs ${d.dv.toLocaleString()} m/s · ${d.alt >= 1e9 ? (d.alt / 1e9).toFixed(1) + " billion km" : d.alt >= 1e6 ? Math.round(d.alt / 1e6) + " million km" : d.alt.toLocaleString() + " km"} away</small><em>${v ? "Visited " + v + "x" : d.tier > t ? "Level " + (d.tier + 1) + " needed" : "Open"}</em></div>`; }).join("")}</div>`; pics(el);
+    el.innerHTML = `<p class="note">200 real places to go! You have visited <b>${seen} / 200</b>. Every place is open for orders from the start. Build a rocket with enough speed (delta-v) and the first trip there pays a bonus.</p><div class="rc-places">${DLIST.map(d => { const v = S.visited[d.id]; return `<div class="rc-place ${v ? "seen" : ""}"><canvas class="rc-pic" width="200" height="100" data-pid="${d.id}"></canvas><b>${esc(d.name)}</b><small>Needs ${d.dv.toLocaleString()} m/s · ${d.alt >= 1e9 ? (d.alt / 1e9).toFixed(1) + " billion km" : d.alt >= 1e6 ? Math.round(d.alt / 1e6) + " million km" : d.alt.toLocaleString() + " km"} away</small><em>${v ? "Visited " + v + "x" : "Open"}</em></div>`; }).join("")}</div>`; pics(el);
   }
   function pics(el) { el.querySelectorAll("canvas[data-pid]").forEach(cv => { try { drawPlace(cv.getContext("2d"), cv.dataset.pid, cv.width, cv.height, "orb"); } catch (e) {} }); }
   // ---------------- stock market (pretend companies, pretend money) ----------------
