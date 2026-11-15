@@ -600,8 +600,8 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
   }
 
   // ---------------- special deals: play a game 100 times, subscribe ----------------
-  const DEALS = [{ id: "explox", name: "Explox", url: "https://cubbyexplosion.github.io/explox-the-best/play/", pay: 5000000, key: "sip-explox-deal:" }, { id: "citylife", name: "City Life", url: "https://cubbyexplosion.github.io/city-life-game/play/", pay: 5000000, key: "sip-citylife-deal:" }];
-  const SUB_URL = "https://www.youtube.com/channel/UCIdFOg3xN0mP2RxihrIumMQ", SUB_PAY = 10000000;
+  const DEALS = [{ id: "explox", name: "Explox", url: "https://cubbyexplosion.github.io/explox-the-best/play/", pay: 25000000, key: "sip-explox-deal:" }, { id: "citylife", name: "City Life", url: "https://cubbyexplosion.github.io/city-life-game/play/", pay: 25000000, key: "sip-citylife-deal:" }];
+  const SUB_URL = "https://www.youtube.com/channel/UCIdFOg3xN0mP2RxihrIumMQ", SUB_PAY = 50000000;
   const dealMe = () => { try { return localStorage.getItem("mindlab-profile") || ""; } catch (e) { return ""; } };
   function deal(el) {
     const me = dealMe(); S.dealPaid = S.dealPaid || {}; if (S.exPaid) { S.dealPaid.explox = 1; delete S.exPaid; save(); }
