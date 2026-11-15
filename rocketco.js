@@ -233,10 +233,106 @@ plumount|Pluto: ice mountains|17450|5900000000|L
 erisorb|Eris orbit|17600|10000000000|O
 cometland2|Comet Halley landing|14500|2000000000|L
 hyakland|Comet Hyakutake landing|14000|1000000000|L
-halebland|Comet Hale-Bopp landing|15000|3000000000|L`;
+halebland|Comet Hale-Bopp landing|15000|3000000000|L
+cargoshipdocko|Cargo ship dock orbit|9500|500|E
+spacehotelorbi|Space hotel orbit|9507|500|E
+studentsatelli|Student satellite orbit|9514|500|E
+spacefactoryor|Space factory orbit|9521|500|E
+rocketfueldepo|Rocket fuel depot orbit|9528|500|E
+spacejunkclean|Space junk cleaner orbit|9535|500|E
+spacelaborbit|Space lab orbit|9542|500|E
+radiotelescope|Radio telescope relay orbit|9549|500|E
+cloudtophop100|Cloud-top hop (100 km)|2600|110|S
+spacepostcardh|Space postcard hop (105 km)|2607|110|S
+schoolrocketho|School rocket hop (95 km)|2614|110|S
+moonmarecrisiu|Moon: Mare Crisium|13300|384400|L
+moonrimahyginu|Moon: Rima Hyginus|13307|384400|L
+moonschrodinge|Moon: Schrodinger Basin|13314|384400|L
+moonmonshadley|Moon: Mons Hadley|13321|384400|L
+moonoceanuspro|Moon: Oceanus Procellarum|13328|384400|L
+moontsiolkovsk|Moon: Tsiolkovskiy Crater|13335|384400|L
+moonplatocrate|Moon: Plato Crater|13342|384400|L
+moonmonsrumker|Moon: Mons Rumker|13349|384400|L
+moonmessiercra|Moon: Messier Craters|13356|384400|L
+moonsurveyor3s|Moon: Surveyor 3 site|13363|384400|L
+moonfrozenorbi|Moon: frozen orbit|12500|384400|O
+moonhaloorbit|Moon: halo orbit|12507|384400|O
+marsutopiaplan|Mars: Utopia Planitia|14400|140000000|L
+marsarsiamons|Mars: Arsia Mons|14407|140000000|L
+marsmeridianip|Mars: Meridiani Planum|14414|140000000|L
+marsnoctislaby|Mars: Noctis Labyrinthus|14421|140000000|L
+marsargyrebasi|Mars: Argyre Basin|14428|140000000|L
+marstharsisbul|Mars: Tharsis Bulge|14435|140000000|L
+marsmawrthvall|Mars: Mawrth Vallis|14442|140000000|L
+marscerberusfo|Mars: Cerberus Fossae|14449|140000000|L
+marsloworbit|Mars: low orbit|13550|140000000|O
+marsrelayorbit|Mars: relay orbit|13557|140000000|O
+venusishtarter|Venus: Ishtar Terra|14100|41000000|L
+venusaphrodite|Venus: Aphrodite Terra|14107|41000000|L
+venusbetaregio|Venus: Beta Regio|14114|41000000|L
+mercuryrachman|Mercury: Rachmaninoff Basin|17000|77000000|L
+mercuryhollows|Mercury: Hollows|17007|77000000|L
+mercurytolstoj|Mercury: Tolstoj Basin|17014|77000000|L
+ceresahunamons|Ceres: Ahuna Mons|15250|413000000|L
+cereskerwancra|Ceres: Kerwan Crater|15257|413000000|L
+vestaveneneiab|Vesta: Veneneia Basin|14850|250000000|L
+vestamarciacra|Vesta: Marcia Crater|14857|250000000|L
+jupiterequator|Jupiter: equator orbit|15600|630000000|O
+jupiterhighorb|Jupiter: high orbit|15607|630000000|O
+iopillanpatera|Io: Pillan Patera|16150|630000000|L
+iotvashtarvolc|Io: Tvashtar Volcano|16157|630000000|L
+ioprometheuspl|Io: Prometheus plume|16164|630000000|L
+europapwyllcra|Europa: Pwyll Crater|16250|630000000|L
+europatheramac|Europa: Thera Macula|16257|630000000|L
+europatyreimpa|Europa: Tyre Impact|16264|630000000|L
+ganymedetroscr|Ganymede: Tros Crater|16050|630000000|L
+ganymedenichol|Ganymede: Nicholson Regio|16057|630000000|L
+callistoasgard|Callisto: Asgard Basin|16050|630000000|L
+callistobrancr|Callisto: Bran Crater|16057|630000000|L
+saturnpolarorb|Saturn: polar orbit|16100|1200000000|O
+saturnringskim|Saturn: ring skimmer orbit|16107|1200000000|O
+titanligeiasea|Titan: Ligeia Sea|16550|1200000000|L
+titanxanadu|Titan: Xanadu|16557|1200000000|L
+titanselkcrate|Titan: Selk Crater|16564|1200000000|L
+enceladusbaghd|Enceladus: Baghdad Sulcus|16650|1200000000|L
+enceladusdamas|Enceladus: Damascus Sulcus|16657|1200000000|L
+rheatirawabasi|Rhea: Tirawa Basin|16650|1200000000|L
+iapetuscassini|Iapetus: Cassini Regio|16750|1200000000|L
+iapetusequator|Iapetus: Equatorial Ridge|16757|1200000000|L
+mimasherschelc|Mimas: Herschel Crater|16550|1200000000|L
+uranuspolarorb|Uranus: polar orbit|16600|2700000000|O
+uranushighorbi|Uranus: high orbit|16607|2700000000|O
+neptunepolaror|Neptune: polar orbit|16900|4300000000|O
+neptuneringorb|Neptune: ring orbit|16907|4300000000|O
+tritoncantalou|Triton: Cantaloupe Terrain|17150|4300000000|L
+tritonmazomba|Triton: Mazomba|17157|4300000000|L
+plutosputnikpl|Pluto: Sputnik Planitia|17450|5900000000|L
+plutowrightmon|Pluto: Wright Mons|17457|5900000000|L
+plutocthulhuma|Pluto: Cthulhu Macula|17464|5900000000|L
+charonmordorma|Charon: Mordor Macula|17400|5900000000|L
+charonvulcanpl|Charon: Vulcan Planum|17407|5900000000|L
+erospsychecrat|Eros: Psyche Crater|13200|250000000|L
+bennunightinga|Bennu: Nightingale site|12600|150000000|L
+ryuguorbit|Ryugu orbit|12800|300000000|O
+itokawaorbit|Itokawa orbit|12500|300000000|O
+apophisorbit|Apophis orbit|12400|150000000|O
+idadactylmoonl|Ida: Dactyl moon landing|13500|300000000|L
+lutetiaorbit|Lutetia orbit|13800|400000000|O
+kleopatraorbit|Kleopatra orbit|14100|300000000|O
+arrokothlandin|Arrokoth landing|16800|6500000000|L
+makemakeorbit|Makemake orbit|17000|7000000000|O
+haumeaorbit|Haumea orbit|17000|7500000000|O
+sednaorbit|Sedna orbit|17400|14000000000|O
+halleyorbit|Halley orbit|14200|2000000000|O
+sunsecondclose|Sun: second close pass|14600|150000000|P
+sunsolarwindca|Sun: solar wind catcher|14607|150000000|P
+sunmercurydist|Sun: Mercury-distance orbit|14614|150000000|P
+sunearthl4poin|Sun-Earth L4 point|10600|1500000|P
+sunearthl5poin|Sun-Earth L5 point|10607|1500000|P
+moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
   const DESTS = {}, DLIST = [];
   PLACES.split("\n").forEach(r => { const f = r.split("|"), dv = +f[2], tier = dv <= 2500 ? 0 : dv <= 9800 ? 1 : dv <= 11500 ? 2 : dv <= 12800 ? 3 : dv <= 13700 ? 4 : dv <= 15000 ? 5 : 6; const d = { id: f[0], name: f[1], dv, alt: +f[3], kind: f[4], tier, spd: Math.min(14, dv / 1000 * .8), mult: f[0] === "sub" ? .17 : Math.max(.5, Math.pow(dv / 9400, 3)) }; DESTS[d.id] = d; DLIST.push(d); });
-  if (DLIST.length !== 200) console.warn("places:", DLIST.length);
+  if (DLIST.length !== 296) console.warn("places:", DLIST.length);
   const RESEARCH = {
     comet: ["Comet engine", 120000, "A mid-size engine."], gale: ["Gale space engine", 350000, "Very efficient upper-stage engine."], nuke: ["Nuclear thermal engine", 2500000, "Isp 850! For the far planets."], giant: ["Giant fuel tank", 700000, "400 tonnes of fuel in one tank."],
     hornet: ["Hornet engine", 150000, "A strong mid-size engine."], silk: ["Silk big space engine", 900000, "Very efficient and strong, for upper stages."], colossus: ["Colossus engine", 3000000, "10,000 kN of push!"], mammoth: ["Mammoth engine", 8000000, "22,000 kN of push. The biggest."], sipu: ["SIPU engine", 5000000, "500,000 push, just 10 tonnes, and it makes its own fuel!"], bigsrb: ["Big Solid Booster", 600000, "A giant strap-on booster."], mega: ["Mega fuel tank", 2000000, "1,000 tonnes of fuel in one tank."], tt: ["Titanic fuel tank", 6000000, "3,000 tonnes of fuel in one tank."], stage4: ["Fourth stage", 800000, "Build rockets with 4 stages."], stage5: ["Fifth stage", 2000000, "Build rockets with 5 stages."], wide: ["Wide fairing", 200000, "Carries satellites up to 25,000 kg."], megaf: ["Mega fairing", 900000, "Carries satellites up to 150,000 kg."],
@@ -388,6 +484,7 @@ halebland|Comet Hale-Bopp landing|15000|3000000000|L`;
   const PB = { earth: "sub leo cube iss polar sso gps molniya heo geo grave", moon: "moonfly moonorb moonland tranq tycho farside shack gateway", mercury: "merfly merorb", venus: "venfly venorb venland", mars: "marsfly marsorb marsland jezero olympus valles", phobos: "phoborb phobland", deimos: "deimland", ceres: "cerfly cerorb cerland", vesta: "vesfly vesorb vesland", jupiter: "jupfly juporb", io: "ioorb ioland", europa: "euorb euland", ganymede: "ganorb ganland", callisto: "calorb calland", saturn: "satfly satorb", titan: "titorb titland", enceladus: "encorb encland", rhea: "rhland", iapetus: "iapland", mimas: "mimland", uranus: "uranfly uranorb", neptune: "nepfly neporb", triton: "tritland", pluto: "plufly pluorb pluland", charon: "charland", eros: "eros", bennu: "bennu", ryugu: "ryugu", itokawa: "itokawa", psyche: "psyche", apophis: "apophis", halley: "halley", churyumov: "churyumov", halebopp: "halebopp", hyaku: "hyaku", l1: "l1", l2: "l2", sunpass: "sunpass", arrokoth: "arrokoth", eris: "eris", helio: "helio", inter: "inter", dione: "dione", tethys: "tethys", hyperion: "hyperion", phoebe: "phoebe", miranda: "miranda", titania: "titania", oberon: "oberon", ariel: "ariel", amalthea: "amalthea", himalia: "himalia", makemake: "makemake", haumea: "haumea", sedna: "sedna", ida: "ida", lutetia: "lutetia", kleopatra: "kleopatra" };
   { const NEWB = {leo2: "earth", hubble: "earth", tiangong: "earth", equator: "earth", starlink: "earth", tdrs: "earth", apollo17: "moon", copernicus: "moon", imbrium: "moon", aristarch: "moon", moonpole: "moon", lavatube: "moon", gale: "mars", hellas: "mars", elysium: "mars", marsice: "mars", gusev: "mars", marshigh: "mars", maxwell: "venus", venhigh: "venus", caloris: "mercury", occator: "ceres", rheasil: "vesta", redspot: "jupiter", juppolar: "jupiter", loki: "io", conamara: "europa", galileoreg: "ganymede", valhalla: "callisto", satring: "saturn", satinner: "saturn", kraken: "titan", dunes: "titan", tiger: "enceladus", uranring: "uranus", darkspot: "neptune", geyser: "triton", tombaugh: "pluto", pluhigh: "pluto", erosorb: "eros", bennuorb: "bennu", itofly: "itokawa", psyorb: "psyche", churorb: "churyumov", halleyclose: "halley", stickney: "phobos", deimorb: "deimos", hypland: "hyperion", pholand: "phoebe", dioneorb: "dione"}; Object.keys(NEWB).forEach(id => { PB[NEWB[id]] = (PB[NEWB[id]] || "") + " " + id; }); }
   { const NEWB2 = {leo3: "earth", nano: "earth", weather: "earth", spy: "earth", navi: "earth", geo2: "earth", sub3: "earth", moonnorth: "moon", moonmare: "moon", moonrim: "moon", moonlow: "moon", moonrock: "moon", moonbase: "moon", marsnorth: "mars", marsdunes: "mars", marscave: "mars", marsmoon: "mars", marsfly2: "mars", venpole: "venus", venlava: "venus", merpole: "mercury", merlow: "mercury", cerice: "ceres", cerhigh: "ceres", vesmount: "vesta", jupstorm: "jupiter", iovolc: "io", euice: "europa", euocean: "europa", gancrat: "ganymede", calice: "callisto", satstorm: "saturn", satgap: "saturn", titlake: "titan", titmount: "titan", encplume: "enceladus", rhorb: "rhea", iaporb: "iapetus", miranorb: "miranda", titanorb: "titania", oberorb: "oberon", arielorb: "ariel", tritorb: "triton", nepstorm: "neptune", charorb: "charon", plumount: "pluto", erisorb: "eris", cometland2: "halley", hyakland: "hyaku", halebland: "halebopp"}; Object.keys(NEWB2).forEach(id => { PB[NEWB2[id]] = (PB[NEWB2[id]] || "") + " " + id; }); }
+  { const NEWB3 = {cargoshipdocko: "earth", spacehotelorbi: "earth", studentsatelli: "earth", spacefactoryor: "earth", rocketfueldepo: "earth", spacejunkclean: "earth", spacelaborbit: "earth", radiotelescope: "earth", cloudtophop100: "earth", spacepostcardh: "earth", schoolrocketho: "earth", moonmarecrisiu: "moon", moonrimahyginu: "moon", moonschrodinge: "moon", moonmonshadley: "moon", moonoceanuspro: "moon", moontsiolkovsk: "moon", moonplatocrate: "moon", moonmonsrumker: "moon", moonmessiercra: "moon", moonsurveyor3s: "moon", moonfrozenorbi: "moon", moonhaloorbit: "moon", marsutopiaplan: "mars", marsarsiamons: "mars", marsmeridianip: "mars", marsnoctislaby: "mars", marsargyrebasi: "mars", marstharsisbul: "mars", marsmawrthvall: "mars", marscerberusfo: "mars", marsloworbit: "mars", marsrelayorbit: "mars", venusishtarter: "venus", venusaphrodite: "venus", venusbetaregio: "venus", mercuryrachman: "mercury", mercuryhollows: "mercury", mercurytolstoj: "mercury", ceresahunamons: "ceres", cereskerwancra: "ceres", vestaveneneiab: "vesta", vestamarciacra: "vesta", jupiterequator: "jupiter", jupiterhighorb: "jupiter", iopillanpatera: "io", iotvashtarvolc: "io", ioprometheuspl: "io", europapwyllcra: "europa", europatheramac: "europa", europatyreimpa: "europa", ganymedetroscr: "ganymede", ganymedenichol: "ganymede", callistoasgard: "callisto", callistobrancr: "callisto", saturnpolarorb: "saturn", saturnringskim: "saturn", titanligeiasea: "titan", titanxanadu: "titan", titanselkcrate: "titan", enceladusbaghd: "enceladus", enceladusdamas: "enceladus", rheatirawabasi: "rhea", iapetuscassini: "iapetus", iapetusequator: "iapetus", mimasherschelc: "mimas", uranuspolarorb: "uranus", uranushighorbi: "uranus", neptunepolaror: "neptune", neptuneringorb: "neptune", tritoncantalou: "triton", tritonmazomba: "triton", plutosputnikpl: "pluto", plutowrightmon: "pluto", plutocthulhuma: "pluto", charonmordorma: "charon", charonvulcanpl: "charon", erospsychecrat: "eros", bennunightinga: "bennu", ryuguorbit: "ryugu", itokawaorbit: "itokawa", apophisorbit: "apophis", idadactylmoonl: "ida", lutetiaorbit: "lutetia", kleopatraorbit: "kleopatra", arrokothlandin: "arrokoth", makemakeorbit: "makemake", haumeaorbit: "haumea", sednaorbit: "sedna", halleyorbit: "halley", sunsecondclose: "sunpass", sunsolarwindca: "sunpass", sunmercurydist: "sunpass", sunearthl4poin: "l1", sunearthl5poin: "l1", moonl2halofars: "gateway"}; Object.keys(NEWB3).forEach(id => { PB[NEWB3[id]] = (PB[NEWB3[id]] || "") + " " + id; }); }
   const PBODY = {}; Object.keys(PB).forEach(k => PB[k].split(" ").forEach(id => { PBODY[id] = k; }));
   const ROCK = { moon: ["#b0aeb8", "#4c4c58", "#eceaf2", 90], mercury: ["#a39a8e", "#403b36", "#ddd4c6", 110], ceres: ["#8c8982", "#3a3834", "#cac6be", 60], ganymede: ["#8c8272", "#3c352c", "#cabda8", 50], callisto: ["#4e463a", "#1a1612", "#8c8070", 140], rhea: ["#b8b8bc", "#505058", "#f0f0f4", 70], iapetus: ["#c8c8cc", "#46464c", "#f4f4f8", 50], mimas: ["#aaaab0", "#484850", "#e4e4ea", 60], dione: ["#bcbcc2", "#505058", "#f0f0f6", 60], tethys: ["#c4c4ca", "#54545c", "#f4f4fa", 50], miranda: ["#a8a8b0", "#484850", "#e0e0e8", 50], titania: ["#a0a0a8", "#44444c", "#dcdce4", 60], oberon: ["#8c8890", "#3c3a40", "#c8c4cc", 70], ariel: ["#b4b4bc", "#4c4c54", "#e8e8f0", 50], charon: ["#a8a4a8", "#444044", "#e0dce0", 50], eris: ["#e8e8f0", "#7a7a8a", "#ffffff", 20], makemake: ["#b46a46", "#58301c", "#e8a47c", 30], sedna: ["#b0402a", "#4a1a10", "#e87a5a", 10] };
   const HAZE = { venus: ["#ecca7a", "#8a6a30", "#fff2c4"], titan: ["#dc9c3c", "#6c4412", "#ffd890"], uranus: ["#8fe3e6", "#3a8a98", "#d4ffff"], neptune: ["#2f5fd8", "#14307a", "#7aa0ff"] };
@@ -468,7 +565,7 @@ halebland|Comet Hale-Bopp landing|15000|3000000000|L`;
     const t = tier();
     return `<button class="back" id="rcHome">← All subjects</button><div class="rc-head"><h1>${esc(S.company)}</h1><div class="rc-stats"><span>Cash <b>${money(S.cash)}</b></span>${S.debt > 0 ? `<span>Debt <b class="badc">${money(S.debt)}</b></span>` : ""}<span>${esc(TIERNAMES[t])}</span><span>Launches <b>${S.ok}</b> good / ${S.tries}</span></div></div>
       <p class="sub">You run a launch company: customers order a ride into space for their satellites. Play money only! Build rockets, take orders, and launch heavier and heavier satellites. <label class="rc-co">Company name <input id="rcCo" maxlength="20" value="${esc(S.company)}"></label></p>
-      <div class="rc-tabs">${[["contracts", "Orders"], ["build", "Build"], ["places", "200 Places"], ["research", "Shop & research"], ["eng", "Engineer job"], ["fun", "Fun jobs"], ["deal", "Special deals"], ["bank", "Loans"], ["stocks", "Stocks"], ["learn", "Rocket science"], ["log", "Records"]].map(a => `<button type="button" class="rc-tab ${tab === a[0] ? "on" : ""}" data-t="${a[0]}">${a[1]}</button>`).join("")}</div>`;
+      <div class="rc-tabs">${[["contracts", "Orders"], ["build", "Build"], ["places", "296 Places"], ["research", "Shop & research"], ["eng", "Engineer job"], ["fun", "Fun jobs"], ["deal", "Special deals"], ["bank", "Loans"], ["stocks", "Stocks"], ["learn", "Rocket science"], ["log", "Records"]].map(a => `<button type="button" class="rc-tab ${tab === a[0] ? "on" : ""}" data-t="${a[0]}">${a[1]}</button>`).join("")}</div>`;
   }
   function render() {
     if (!app) return; const t = { contracts, build, places, research, eng, fun, deal, bank, stocks, learn, log }[tab] || contracts;
@@ -596,7 +693,7 @@ halebland|Comet Hale-Bopp landing|15000|3000000000|L`;
 
   function places(el) {
     const t = tier(), seen = Object.keys(S.visited).length;
-    el.innerHTML = `<p class="note">200 real places to go! You have visited <b>${seen} / 200</b>. Every place is open for orders from the start. Build a rocket with enough speed (delta-v) and the first trip there pays a bonus.</p><div class="rc-places">${DLIST.map(d => { const v = S.visited[d.id]; return `<div class="rc-place ${v ? "seen" : ""}"><canvas class="rc-pic" width="200" height="100" data-pid="${d.id}"></canvas><b>${esc(d.name)}</b><small>Needs ${d.dv.toLocaleString()} m/s · ${d.alt >= 1e9 ? (d.alt / 1e9).toFixed(1) + " billion km" : d.alt >= 1e6 ? Math.round(d.alt / 1e6) + " million km" : d.alt.toLocaleString() + " km"} away</small><em>${v ? "Visited " + v + "x" : "Open"}</em></div>`; }).join("")}</div>`; pics(el);
+    el.innerHTML = `<p class="note">296 real places to go! You have visited <b>${seen} / 296</b>. Every place is open for orders from the start. Build a rocket with enough speed (delta-v) and the first trip there pays a bonus.</p><div class="rc-places">${DLIST.map(d => { const v = S.visited[d.id]; return `<div class="rc-place ${v ? "seen" : ""}"><canvas class="rc-pic" width="200" height="100" data-pid="${d.id}"></canvas><b>${esc(d.name)}</b><small>Needs ${d.dv.toLocaleString()} m/s · ${d.alt >= 1e9 ? (d.alt / 1e9).toFixed(1) + " billion km" : d.alt >= 1e6 ? Math.round(d.alt / 1e6) + " million km" : d.alt.toLocaleString() + " km"} away</small><em>${v ? "Visited " + v + "x" : "Open"}</em></div>`; }).join("")}</div>`; pics(el);
   }
   function pics(el) { el.querySelectorAll("canvas[data-pid]").forEach(cv => { try { drawPlace(cv.getContext("2d"), cv.dataset.pid, cv.width, cv.height, "orb"); } catch (e) {} }); }
   // ---------------- stock market (pretend companies, pretend money) ----------------
