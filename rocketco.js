@@ -12,20 +12,20 @@
 
   // ---------------- the parts ----------------
   const ENGINES = {
-    hornet: { name: "Hornet", thr: 600, isp: 295, mass: 3, cost: 340000, rel: .955, res: "hornet", tip: "A strong mid-size engine." },
-    silk: { name: "Silk (big space engine)", thr: 500, isp: 362, mass: 3.2, cost: 1100000, rel: .96, vac: 1, res: "silk", tip: "A big, very efficient engine for upper stages." },
-    colossus: { name: "Colossus", thr: 10000, isp: 318, mass: 45, cost: 5000000, rel: .96, res: "colossus", tip: "An enormous engine for super heavy rockets." },
-    mammoth: { name: "Mammoth", thr: 22000, isp: 322, mass: 95, cost: 10000000, rel: .955, res: "mammoth", tip: "The biggest engine of all." },
+    hornet: { name: "Hornet", thr: 3000, isp: 295, mass: 3, cost: 340000, rel: .955, res: "hornet", tip: "A strong mid-size engine." },
+    silk: { name: "Silk (big space engine)", thr: 2500, isp: 362, mass: 3.2, cost: 1100000, rel: .96, vac: 1, res: "silk", tip: "A big, very efficient engine for upper stages." },
+    colossus: { name: "Colossus", thr: 50000, isp: 318, mass: 45, cost: 5000000, rel: .96, res: "colossus", tip: "An enormous engine for super heavy rockets." },
+    mammoth: { name: "Mammoth", thr: 110000, isp: 322, mass: 95, cost: 10000000, rel: .955, res: "mammoth", tip: "The biggest engine of all." },
     bigsrb: { name: "Big Solid Booster", thr: 21000, isp: 252, mass: 7, cost: 800000, rel: .94, solid: 70, res: "bigsrb", tip: "A giant solid booster with 70 tonnes of fuel and 5x the push!" },
-    wasp: { name: "Wasp", thr: 25, isp: 275, mass: .2, cost: 30000, rel: .92, tip: "A tiny engine for tiny rockets." },
-    spark: { name: "Spark", thr: 90, isp: 265, mass: .45, cost: 60000, rel: .93, tip: "A small starter engine." },
-    pulse: { name: "Pulse", thr: 280, isp: 285, mass: 1.4, cost: 150000, rel: .95, tip: "A medium engine for a first stage." },
-    thunder: { name: "Thunder", thr: 900, isp: 300, mass: 4.2, cost: 420000, rel: .96, res: "thunder", tip: "A big, strong engine." },
-    titan: { name: "Titan", thr: 3000, isp: 312, mass: 14, cost: 1400000, rel: .97, res: "titan", tip: "A giant engine for heavy lifting." },
-    comet: { name: "Comet", thr: 450, isp: 292, mass: 2.4, cost: 260000, rel: .955, res: "comet", tip: "Between Pulse and Thunder." },
-    gale: { name: "Gale (space engine)", thr: 200, isp: 355, mass: 1.1, cost: 480000, rel: .96, vac: 1, res: "gale", tip: "A strong, efficient engine for space." },
-    nuke: { name: "Nuclear thermal (space)", thr: 250, isp: 850, mass: 8, cost: 3000000, rel: .9, vac: 1, res: "nuke", tip: "Heats hydrogen with a reactor. Huge Isp, great for deep space." },
-    whisper: { name: "Whisper (space engine)", thr: 70, isp: 345, mass: .6, cost: 220000, rel: .96, vac: 1, res: "whisper", tip: "Very efficient in space, but weak at the ground (only 35% thrust)." },
+    wasp: { name: "Wasp", thr: 125, isp: 275, mass: .2, cost: 30000, rel: .92, tip: "A tiny engine for tiny rockets." },
+    spark: { name: "Spark", thr: 450, isp: 265, mass: .45, cost: 60000, rel: .93, tip: "A small starter engine." },
+    pulse: { name: "Pulse", thr: 1400, isp: 285, mass: 1.4, cost: 150000, rel: .95, tip: "A medium engine for a first stage." },
+    thunder: { name: "Thunder", thr: 4500, isp: 300, mass: 4.2, cost: 420000, rel: .96, res: "thunder", tip: "A big, strong engine." },
+    titan: { name: "Titan", thr: 15000, isp: 312, mass: 14, cost: 1400000, rel: .97, res: "titan", tip: "A giant engine for heavy lifting." },
+    comet: { name: "Comet", thr: 2250, isp: 292, mass: 2.4, cost: 260000, rel: .955, res: "comet", tip: "Between Pulse and Thunder." },
+    gale: { name: "Gale (space engine)", thr: 1000, isp: 355, mass: 1.1, cost: 480000, rel: .96, vac: 1, res: "gale", tip: "A strong, efficient engine for space." },
+    nuke: { name: "Nuclear thermal (space)", thr: 1250, isp: 850, mass: 8, cost: 3000000, rel: .9, vac: 1, res: "nuke", tip: "Heats hydrogen with a reactor. Huge Isp, great for deep space." },
+    whisper: { name: "Whisper (space engine)", thr: 350, isp: 345, mass: .6, cost: 220000, rel: .96, vac: 1, res: "whisper", tip: "Very efficient in space, but weak at the ground (only 35% thrust)." },
     srb: { name: "Solid Booster", thr: 5500, isp: 242, mass: 1.6, cost: 140000, rel: .94, solid: 14, res: "srb", tip: "Carries its own 14 tonnes of solid fuel. Cheap, 5x the push, but a lower Isp." }
   };
   const TANKS = { T: { name: "Tiny", fuel: 1, dry: .15, cost: 8000 }, S: { name: "Small", fuel: 3, dry: .35, cost: 15000 }, M: { name: "Medium", fuel: 12, dry: 1.1, cost: 45000 }, L: { name: "Large", fuel: 45, dry: 3.6, cost: 130000 }, XL: { name: "Huge", fuel: 150, dry: 11, cost: 380000, res: "xl" }, G: { name: "Giant", fuel: 400, dry: 28, cost: 1000000, res: "giant" }, MG: { name: "Mega", fuel: 1000, dry: 70, cost: 2500000, res: "mega" }, TT: { name: "Titanic", fuel: 3000, dry: 200, cost: 7000000, res: "tt" } };
@@ -170,7 +170,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
     const base = kg <= 300 ? 15000 : kg <= 3000 ? 6000 : 3000;
     const crew = t >= 3 && ["E", "O", "L"].includes(d.kind) && d.dv <= 14400 && Math.random() < .1;
     const things = { S: THINGS.sub, E: THINGS.leo, F: ["flyby probe", "camera probe", "science flyby craft"], O: ["orbiter satellite", "mapping satellite", "science orbiter"], L: ["lander", "rover", "sample-return lander"], P: ["space telescope", "deep space probe", "sun observer"] }[d.kind];
-    const pay = Math.round(kg * base * d.mult * rr(.95, 1.3) / 1000) * 1000 + (crew ? Math.round(800000 * Math.pow(d.dv / 9400, 2) / 1000) * 1000 : 0);
+    const pay = 3 * (Math.round(kg * base * d.mult * rr(.95, 1.3) / 1000) * 1000 + (crew ? Math.round(800000 * Math.pow(d.dv / 9400, 2) / 1000) * 1000 : 0));
     return { id: S.cid++, who: pick(CUSTOMERS), thing: crew ? "crew capsule with astronauts" : pick(things), dest: d.id, kg: crew ? Math.max(kg, 3000) : kg, pay, crew, heavy };
   }
   function refill() { while (S.contracts.length < 4) S.contracts.push(makeContract()); }
