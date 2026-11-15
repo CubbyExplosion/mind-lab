@@ -322,10 +322,10 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
     const t = tier();
     return `<button class="back" id="rcHome">← All subjects</button><div class="rc-head"><h1>${esc(S.company)}</h1><div class="rc-stats"><span>Cash <b>${money(S.cash)}</b></span>${S.debt > 0 ? `<span>Debt <b class="badc">${money(S.debt)}</b></span>` : ""}<span>${esc(TIERNAMES[t])}</span><span>Launches <b>${S.ok}</b> good / ${S.tries}</span></div></div>
       <p class="sub">You run a launch company: customers order a ride into space for their satellites. Play money only! Build rockets, take orders, and launch heavier and heavier satellites. <label class="rc-co">Company name <input id="rcCo" maxlength="20" value="${esc(S.company)}"></label></p>
-      <div class="rc-tabs">${[["contracts", "Orders"], ["build", "Build"], ["places", "100 Places"], ["research", "Shop & research"], ["eng", "Engineer job"], ["fun", "Fun jobs"], ["bank", "Loans"], ["stocks", "Stocks"], ["learn", "Rocket science"], ["log", "Records"]].map(a => `<button type="button" class="rc-tab ${tab === a[0] ? "on" : ""}" data-t="${a[0]}">${a[1]}</button>`).join("")}</div>`;
+      <div class="rc-tabs">${[["contracts", "Orders"], ["build", "Build"], ["places", "100 Places"], ["research", "Shop & research"], ["eng", "Engineer job"], ["fun", "Fun jobs"], ["deal", "Special deal"], ["bank", "Loans"], ["stocks", "Stocks"], ["learn", "Rocket science"], ["log", "Records"]].map(a => `<button type="button" class="rc-tab ${tab === a[0] ? "on" : ""}" data-t="${a[0]}">${a[1]}</button>`).join("")}</div>`;
   }
   function render() {
-    if (!app) return; const t = { contracts, build, places, research, eng, fun, bank, stocks, learn, log }[tab] || contracts;
+    if (!app) return; const t = { contracts, build, places, research, eng, fun, deal, bank, stocks, learn, log }[tab] || contracts;
     app.innerHTML = head() + '<div class="rc-body" id="rcBody"></div>';
     document.getElementById("rcCo").onchange = e => { S.company = e.target.value.replace(/[^\p{L}\p{N} _&'-]/gu, "").trim().slice(0, 20) || "My Rocket Co"; save(); render(); };
     document.getElementById("rcHome").onclick = () => { if (typeof home === "function") home(); };
@@ -597,6 +597,27 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
       box.innerHTML = `<div class="rc-fjgrid" style="grid-template-columns:repeat(${g},1fr)">` + Array.from({ length: g * g }, (_, i) => `<button type="button" data-o="${i}">${i === odd ? pr[1] : pr[0]}</button>`).join("") + "</div>"; say("One is different. Tap it!");
       box.querySelectorAll("[data-o]").forEach(b => b.onclick = () => { if (!over) end(+b.dataset.o === odd); });
     }
+  }
+
+  // ---------------- special deal: play Explox 100 times ----------------
+  const EXPLOX_URL = "https://cubbyexplosion.github.io/explox-the-best/play/", DEAL_PAY = 5000000;
+  const dealMe = () => { try { return localStorage.getItem("mindlab-profile") || ""; } catch (e) { return ""; } };
+  function deal(el) {
+    const me = dealMe(), key = "sip-explox-deal:" + me; let d = null;
+    if (me) { try { d = JSON.parse(localStorage.getItem(key) || "null"); } catch (e) {} }
+    if (S.exPaid) { el.innerHTML = '<div class="rc-bankbox"><b>Special deal: DONE!</b><div>You played Explox 100 times and got your $5,000,000. This deal is once per account. Thank you!</div></div>'; return; }
+    if (!me) { el.innerHTML = '<div class="rc-bankbox"><b>Special deal: play Explox 100 times, get $5,000,000!</b><div>First sign in to your Mind Lab account with your name and pass code (press <b>Sign in</b> at the top of the page). The deal counts for the account you sign in with.</div></div>'; return; }
+    const n = d ? Math.min(100, d.count || 0) : 0, on = !!(d && d.on);
+    el.innerHTML = `<div class="rc-bankbox"><b>Special deal (only once): play Explox 100 times and get ${money(DEAL_PAY)}!</b>
+      <div>It counts for the account you are signed in with (your pass code account). Each play counts after you have been in Explox for <b>1 minute</b>. You play Explox on this same device and browser.</div>
+      <div class="rc-dealbar"><i style="width:${n}%"></i></div><div><b>${n}/100</b> plays</div>
+      ${on ? "" : '<button class="close" type="button" id="dlStart">Start the deal</button>'}
+      <a class="close" href="${EXPLOX_URL}" target="_blank" rel="noopener" id="dlPlay" style="text-align:center;text-decoration:none">Play Explox</a>
+      <button class="hintbtn" type="button" id="dlCheck">Check my plays</button>
+      ${n >= 100 ? `<button class="close" type="button" id="dlClaim">Claim ${money(DEAL_PAY)}!</button>` : ""}</div>`;
+    const st = el.querySelector("#dlStart"); if (st) st.onclick = () => { try { localStorage.setItem(key, JSON.stringify({ on: true, count: 0, start: Date.now() })); } catch (e) {} snd("star"); deal(el); };
+    el.querySelector("#dlCheck").onclick = () => { snd("tick"); deal(el); };
+    const cl = el.querySelector("#dlClaim"); if (cl) cl.onclick = () => { if (S.exPaid) return; S.exPaid = 1; S.cash += DEAL_PAY; S.earned += DEAL_PAY; save(); snd("star"); render(); };
   }
   // ---------------- loans ----------------
   const LIMITS = [300000, 600000, 1200000, 2500000, 5000000, 10000000, 25000000], RATE = .04;
