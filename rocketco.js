@@ -207,17 +207,47 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
   const BODYNAMES = [["classic", "1 Classic"], ["tapered", "2 Tapered"], ["flared", "3 Flared"], ["barrel", "4 Barrel"], ["hourglass", "5 Hourglass"], ["diamond", "6 Diamond"], ["stepped", "7 Stepped"], ["wavy", "8 Wavy"], ["slim", "9 Slim"], ["chunky", "10 Chunky"]];
   const FINS = { small: [13, 9], big: [22, 13], swept: [26, 9], wing: [18, 22], tail: [34, 6] };
   const THEMES = [["Classic red", { body: "#f4f4f8", stripe: "#e0314f", nose: "#e0314f", fins: "#3a4a7a", flame: "#ff9a2a" }], ["Ocean", { body: "#e6f6ff", stripe: "#1e90ff", nose: "#0b5fb0", fins: "#0b5fb0", flame: "#4ee6e6" }], ["Gold star", { body: "#fff4cc", stripe: "#e0a800", nose: "#e0a800", fins: "#8a5a00", flame: "#ffd34e" }], ["Night", { body: "#2b2f4a", stripe: "#8a7bff", nose: "#8a7bff", fins: "#14172e", flame: "#b08cff" }], ["Mint", { body: "#e8fff3", stripe: "#2fb34a", nose: "#2fb34a", fins: "#1f7a34", flame: "#9cff7a" }], ["Fire", { body: "#fff0e0", stripe: "#e53935", nose: "#ff8a2a", fins: "#a31515", flame: "#ff5a1a" }], ["Candy", { body: "#ffe6f4", stripe: "#ff4fa3", nose: "#ff4fa3", fins: "#a02a78", flame: "#ffb3e0" }], ["Steel", { body: "#c9cfdc", stripe: "#4a5470", nose: "#4a5470", fins: "#2a3048", flame: "#ffb35a" }], ["Neon", { body: "#10142e", stripe: "#39ff14", nose: "#39ff14", fins: "#0aa0ff", flame: "#39ff14" }], ["Sunset", { body: "#fff2d6", stripe: "#ff7a45", nose: "#c2307a", fins: "#5a2a8a", flame: "#ffcf4a" }]];
+
+  // ---------------- 100 body pieces ----------------
+  const PIECES = [["dot", "Dot"], ["ring", "Ring"], ["square", "Square"], ["plate", "Plate"], ["star", "Star"], ["heart", "Heart"], ["tri", "Triangle"], ["diamond", "Diamond"], ["moon", "Moon"], ["bolt", "Bolt"], ["cross", "Cross"], ["window", "Window"], ["smile", "Smile"], ["flame", "Flame"], ["flag", "Flag"], ["gear", "Gear"], ["arrow", "Arrow"], ["band", "Band"], ["rivets", "Rivets"]];
+  const MAXP = 100;
+  let pcSel = "star", pcSize = 2, pcCol = "#ffd34e", pcMir = false, pcErase = false;
+  function pdraw(x, t, px, py, r, col, W) {
+    x.save(); x.translate(px, py); x.fillStyle = col; x.strokeStyle = "#1a1240"; x.lineWidth = Math.max(.8, r * .13); x.lineJoin = "round";
+    const poly = pts => { x.beginPath(); pts.forEach((q, i) => i ? x.lineTo(q[0] * r, q[1] * r) : x.moveTo(q[0] * r, q[1] * r)); x.closePath(); x.fill(); x.stroke(); };
+    if (t === "dot") { x.beginPath(); x.arc(0, 0, r * .6, 0, 7); x.fill(); x.stroke(); }
+    else if (t === "ring") { x.lineWidth = r * .28; x.strokeStyle = col; x.beginPath(); x.arc(0, 0, r * .7, 0, 7); x.stroke(); x.lineWidth = Math.max(.8, r * .1); x.strokeStyle = "#1a1240"; x.beginPath(); x.arc(0, 0, r * .85, 0, 7); x.stroke(); x.beginPath(); x.arc(0, 0, r * .55, 0, 7); x.stroke(); }
+    else if (t === "square") poly([[-.7, -.7], [.7, -.7], [.7, .7], [-.7, .7]]);
+    else if (t === "plate") poly([[-1.1, -.55], [1.1, -.55], [1.1, .55], [-1.1, .55]]);
+    else if (t === "star") { const q = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, d = i % 2 ? .45 : 1; q.push([Math.cos(a) * d, Math.sin(a) * d]); } poly(q); }
+    else if (t === "heart") { x.beginPath(); x.moveTo(0, r * .8); x.bezierCurveTo(-r * 1.3, -r * .1, -r * .6, -r * .95, 0, -r * .3); x.bezierCurveTo(r * .6, -r * .95, r * 1.3, -r * .1, 0, r * .8); x.fill(); x.stroke(); }
+    else if (t === "tri") poly([[0, -.85], [.85, .7], [-.85, .7]]);
+    else if (t === "diamond") poly([[0, -1], [.65, 0], [0, 1], [-.65, 0]]);
+    else if (t === "moon") { x.beginPath(); x.arc(0, 0, r * .85, Math.PI * .35, Math.PI * 1.65); x.arc(r * .35, 0, r * .68, Math.PI * 1.6, Math.PI * .4, true); x.closePath(); x.fill(); x.stroke(); }
+    else if (t === "bolt") poly([[.25, -1], [-.55, .15], [-.05, .15], [-.3, 1], [.6, -.2], [.1, -.2]]);
+    else if (t === "cross") poly([[-.28, -.9], [.28, -.9], [.28, -.28], [.9, -.28], [.9, .28], [.28, .28], [.28, .9], [-.28, .9], [-.28, .28], [-.9, .28], [-.9, -.28], [-.28, -.28]]);
+    else if (t === "window") { x.fillStyle = "#9fe3ff"; x.beginPath(); x.arc(0, 0, r * .7, 0, 7); x.fill(); x.lineWidth = r * .22; x.strokeStyle = col; x.stroke(); x.lineWidth = Math.max(.8, r * .1); x.strokeStyle = "#1a1240"; x.beginPath(); x.arc(0, 0, r * .84, 0, 7); x.stroke(); x.fillStyle = "rgba(255,255,255,.8)"; x.beginPath(); x.arc(-r * .22, -r * .22, r * .2, 0, 7); x.fill(); }
+    else if (t === "smile") { x.beginPath(); x.arc(0, 0, r * .85, 0, 7); x.fill(); x.stroke(); x.fillStyle = "#1a1240"; x.beginPath(); x.arc(-r * .3, -r * .2, r * .11, 0, 7); x.arc(r * .3, -r * .2, r * .11, 0, 7); x.fill(); x.beginPath(); x.arc(0, r * .05, r * .45, .15 * Math.PI, .85 * Math.PI); x.lineWidth = Math.max(1, r * .12); x.stroke(); }
+    else if (t === "flame") { x.beginPath(); x.moveTo(0, -r); x.bezierCurveTo(r * .9, -r * .2, r * .8, r * .9, 0, r * .9); x.bezierCurveTo(-r * .8, r * .9, -r * .9, -r * .2, 0, -r); x.fill(); x.stroke(); x.fillStyle = "rgba(255,255,255,.55)"; x.beginPath(); x.ellipse(0, r * .35, r * .25, r * .38, 0, 0, 7); x.fill(); }
+    else if (t === "flag") { x.beginPath(); x.moveTo(-r * .7, r); x.lineTo(-r * .7, -r); x.lineWidth = Math.max(1, r * .14); x.stroke(); poly([[-.7, -1], [.9, -.6], [-.7, -.1]]); }
+    else if (t === "gear") { const q = []; for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8, d = i % 2 ? .75 : 1; q.push([Math.cos(a) * d, Math.sin(a) * d]); } poly(q); x.fillStyle = "#1a1240"; x.beginPath(); x.arc(0, 0, r * .28, 0, 7); x.fill(); }
+    else if (t === "arrow") poly([[0, -1], [.75, 0], [.28, 0], [.28, .95], [-.28, .95], [-.28, 0], [-.75, 0]]);
+    else if (t === "band") { const bw = (W || r * 4) * .5; x.fillRect(-bw, -r * .32, bw * 2, r * .64); x.strokeRect(-bw, -r * .32, bw * 2, r * .64); }
+    else if (t === "rivets") { const bw = (W || r * 4) * .42; for (let k = 0; k < 5; k++) { x.beginPath(); x.arc(-bw + k * bw / 2, 0, Math.max(1, r * .2), 0, 7); x.fill(); x.stroke(); } }
+    x.restore();
+  }
+  const PSIZE = [0, .09, .14, .21];
   // ---------------- drawing a rocket (also used by the launch) ----------------
   function drawRocket(x, des, cx, base, sc, o) {
     o = o || {}; const L = des.look || LOOK0, stages = o.only ? des.stages.slice(0, o.only) : des.stages; let y = base;
     const wOf = s => { const e = ENGINES[s.eng]; return (e.solid ? 16 : 14) * Math.min(1.4, .7 + (TANKS[s.tank] ? TORD.indexOf(s.tank) * .2 : .3) + (s.count > 1 ? .12 * Math.min(4, s.count) : 0)) * sc; };
-    const flameCol = L.flame; let topW = 20 * sc;
+    const flameCol = L.flame; let topW = 20 * sc, maxW = 0;
     stages.forEach((s, i) => {
       const e = ENGINES[s.eng], w = wOf(s) * (i === 0 ? 1.15 : 1) * Math.pow(.88, i), tanks = e.solid ? 1 : Math.max(1, s.tanks), th = e.solid ? 46 * sc : (TORD.indexOf(s.tank) * 9 + 14) * sc;
       const nz = Math.min(5, s.count);
       // flame + nozzles
-      if (o.flame && i === (o.flameStage || 0)) { for (let k = 0; k < nz; k++) { const fx = cx - w / 2 + (k + .5) * w / nz, fl = (22 + Math.random() * 16) * sc * (o.flame || 1); const g = x.createLinearGradient(fx, y, fx, y + fl); g.addColorStop(0, "#fff"); g.addColorStop(.3, flameCol); g.addColorStop(1, "rgba(255,80,0,0)"); x.fillStyle = g; x.beginPath(); x.moveTo(fx - 4 * sc, y); x.lineTo(fx, y + fl); x.lineTo(fx + 4 * sc, y); x.fill(); } }
-      for (let k = 0; k < nz; k++) { const fx = cx - w / 2 + (k + .5) * w / nz; x.fillStyle = "#555a6a"; x.beginPath(); x.moveTo(fx - 3 * sc, y - 6 * sc); x.lineTo(fx + 3 * sc, y - 6 * sc); x.lineTo(fx + 5 * sc, y); x.lineTo(fx - 5 * sc, y); x.fill(); }
+      if (o.flame && i === (o.flameStage || 0)) { for (let k = 0; k < nz; k++) { const fx = cx - w / 2 + (k + .5) * w / nz, fl = (22 + Math.random() * 16) * sc * (o.flame || 1); const g = x.createLinearGradient(fx, y, fx, y + fl); g.addColorStop(0, "#fff"); g.addColorStop(.3, flameCol); g.addColorStop(1, "rgba(255,80,0,0)"); { const gl = x.createRadialGradient(fx, y + fl * .35, 1, fx, y + fl * .35, fl * .8); gl.addColorStop(0, "rgba(255,220,140,.35)"); gl.addColorStop(1, "rgba(255,120,0,0)"); x.fillStyle = gl; x.fillRect(fx - fl, y - fl * .2, fl * 2, fl * 1.6); } x.fillStyle = g; x.beginPath(); x.moveTo(fx - 4 * sc, y); x.lineTo(fx, y + fl); x.lineTo(fx + 4 * sc, y); x.fill(); } }
+      for (let k = 0; k < nz; k++) { const fx = cx - w / 2 + (k + .5) * w / nz; { const ng2 = x.createLinearGradient(fx - 5 * sc, 0, fx + 5 * sc, 0); ng2.addColorStop(0, "#b4bacc"); ng2.addColorStop(.5, "#5a6078"); ng2.addColorStop(1, "#2a2e42"); x.fillStyle = ng2; } x.beginPath(); x.moveTo(fx - 3 * sc, y - 6 * sc); x.lineTo(fx + 3 * sc, y - 6 * sc); x.lineTo(fx + 5 * sc, y); x.lineTo(fx - 5 * sc, y); x.fill(); }
       y -= 6 * sc;
       // tank body
       const h = th * (e.solid ? 1 : Math.min(2.6, .8 + tanks * .45)); y -= h;
@@ -227,14 +257,17 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
       if (L.stripes) { x.fillStyle = L.stripe; x.fillRect(cx - w, y + h * .12, w * 2, Math.max(2, h * .1)); if (L.stripes > 1) x.fillRect(cx - w, y + h * .78, w * 2, Math.max(2, h * .1)); x.fillStyle = "rgba(0,0,0,.18)"; x.fillRect(cx - w, y + h * .12 + Math.max(2, h * .1) - 1, w * 2, 1.5 * sc); }
       x.fillStyle = "rgba(0,0,0,.16)"; if (h > 30 * sc) x.fillRect(cx - w, y + h * .5, w * 2, Math.max(1, sc * .8)); if (h > 55 * sc) { x.fillRect(cx - w, y + h * .3, w * 2, Math.max(1, sc * .6)); x.fillRect(cx - w, y + h * .7, w * 2, Math.max(1, sc * .6)); }
       x.restore(); bpath(); x.strokeStyle = "#1a1240"; x.lineWidth = Math.max(1, sc * .9); x.stroke();
-      if (i === stages.length - 1 && L.windows && !o.noWin) { for (let k = 0; k < Math.min(3, L.windows); k++) { x.fillStyle = "#9fe3ff"; x.beginPath(); x.arc(cx, y + h * .35 + k * 12 * sc, 3.4 * sc, 0, 7); x.fill(); x.strokeStyle = "#1a1240"; x.stroke(); } }
+      if (i === stages.length - 1 && L.windows && !o.noWin) { for (let k = 0; k < Math.min(3, L.windows); k++) { x.fillStyle = "#9fe3ff"; x.beginPath(); x.arc(cx, y + h * .35 + k * 12 * sc, 3.4 * sc, 0, 7); x.fill(); x.strokeStyle = "#1a1240"; x.stroke(); x.fillStyle = "rgba(255,255,255,.85)"; x.beginPath(); x.arc(cx - 1 * sc, y + h * .35 + k * 12 * sc - 1 * sc, 1.1 * sc, 0, 7); x.fill(); } }
       if (i === 0 && L.logo) { x.fillStyle = "#1a1240"; x.font = "bold " + Math.round(11 * sc) + "px system-ui, sans-serif"; x.textAlign = "center"; x.fillText(String(L.logo).slice(0, 2), cx, y + h * .6); }
       if (i === 0 && des.boost && des.boost.count > 0 && ENGINES[des.boost.eng]) { const nb = Math.min(4, des.boost.count), bw = w * .3, bh = h * .85; [-1, 1].forEach((d, k) => { for (let q = 0; q < Math.ceil(nb / 2) && q < 2; q++) { const bx = cx + d * (w / 2 + bw / 2 + q * bw * .95); x.fillStyle = "#e8e8ee"; x.fillRect(bx - bw / 2, y + h - bh, bw, bh); x.fillStyle = L.nose; x.beginPath(); x.moveTo(bx - bw / 2, y + h - bh); x.lineTo(bx, y + h - bh - bw * 1.1); x.lineTo(bx + bw / 2, y + h - bh); x.fill(); x.strokeStyle = "#1a1240"; x.strokeRect(bx - bw / 2, y + h - bh, bw, bh); } }); }
       // fins on the first stage
       if (i === 0 && L.finShape !== "none") { const fz = FINS[L.finShape] || FINS.small, fh = fz[0] * sc, fw = fz[1] * sc; x.fillStyle = L.fins; x.strokeStyle = "#1a1240"; x.lineWidth = Math.max(1, sc * .9); [-1, 1].forEach(d => { x.beginPath(); x.moveTo(cx + d * w / 2 * BS(1), y + h - fh * (L.finShape === "swept" ? 1.1 : 1)); x.lineTo(cx + d * (w / 2 * BS(1) + fw), y + h + 2 * sc); x.lineTo(cx + d * w / 2 * BS(1), y + h); x.closePath(); x.fill(); x.stroke(); x.fillStyle = "rgba(255,255,255,.22)"; x.fill(); x.fillStyle = L.fins; }); }
-      y -= 3 * sc; x.fillStyle = "#3a3f55"; x.fillRect(cx - w * .42, y, w * .84, 3 * sc); topW = w;
+      y -= 3 * sc; { const rg = x.createLinearGradient(cx - w * .42, 0, cx + w * .42, 0); rg.addColorStop(0, "#8a90a8"); rg.addColorStop(.5, "#4a506a"); rg.addColorStop(1, "#20243a"); x.fillStyle = rg; x.fillRect(cx - w * .42, y, w * .84, 3 * sc); if (sc > .5) { x.fillStyle = "#c8cde0"; for (let k = 0; k < 5; k++) x.fillRect(cx - w * .36 + k * w * .18, y + sc * .8, Math.max(1, sc * .9), Math.max(1, sc * .9)); } } topW = w; maxW = Math.max(maxW, w);
     });
-    if (o.noTop) return y;
+    const bodyTop = y, pcs = (L.pieces || []);
+    const drawPcs = () => { if (!pcs.length || o.noPieces) return; pcs.forEach(q => { const px = cx + q.x * maxW / 2, py = base - q.y * (base - bodyTop); pdraw(x, q.t, px, py, Math.max(2, maxW * (PSIZE[q.s] || .14) * 1.6), q.c, maxW); }); };
+    if (o.geom) { o.geom.cx = cx; o.geom.base = base; o.geom.bodyTop = bodyTop; o.geom.w = maxW; }
+    if (o.noTop) { drawPcs(); return y; }
     // top: nose / capsule
     const tp = TOPS[des.top] || TOPS.fairing, w = topW * .92, nh = (tp.crew ? 30 : 34) * sc;
     x.fillStyle = L.nose; x.beginPath();
@@ -247,7 +280,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
     else { x.moveTo(cx - w / 2, y); x.lineTo(cx, y - nh * 1.3); x.lineTo(cx + w / 2, y); }
     x.closePath(); x.fill(); { const ng = x.createLinearGradient(cx - w / 2, 0, cx + w / 2, 0); ng.addColorStop(0, "rgba(255,255,255,.5)"); ng.addColorStop(.35, "rgba(255,255,255,0)"); ng.addColorStop(1, "rgba(0,0,0,.35)"); x.fillStyle = ng; x.fill(); } x.strokeStyle = "#1a1240"; x.lineWidth = Math.max(1, sc * .9); x.stroke();
     if (tp.crew) { x.fillStyle = "#9fe3ff"; x.beginPath(); x.arc(cx, y - nh * .45, 4 * sc, 0, 7); x.fill(); x.stroke(); }
-    return y - nh;
+    drawPcs(); return y - nh;
   }
 
   // ---------------- pictures of the 100 places (drawn by us, based on what the places really look like) ----------------
@@ -403,13 +436,20 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
         <label>Fins <select data-lks="finShape">${[["none", "None"], ["small", "Small"], ["big", "Big"], ["swept", "Swept"], ["wing", "Wings"], ["tail", "Tall tail"]].map(o => `<option value="${o[0]}" ${L.finShape === o[0] ? "selected" : ""}>${o[1]}</option>`).join("")}</select></label>
         <label>Stripes <select data-lkn="stripes">${[0, 1, 2].map(n => `<option value="${n}" ${L.stripes === n ? "selected" : ""}>${n}</option>`).join("")}</select></label>
         <label>Windows <select data-lkn="windows">${[0, 1, 2, 3].map(n => `<option value="${n}" ${L.windows === n ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+        <div class="rc-pcs"><b>Build your own body: add pieces <span id="pcN">${(L.pieces || []).length}/${MAXP}</span></b>
+          <div class="rc-pgrid">${PIECES.map(p => `<button type="button" class="rc-pbtn ${pcSel === p[0] && !pcErase ? "on" : ""}" data-pp="${p[0]}" title="${p[1]}"><canvas width="34" height="34" data-pt="${p[0]}"></canvas></button>`).join("")}</div>
+          <label>Size <select id="pcSize">${[[1, "Small"], [2, "Medium"], [3, "Big"]].map(o => `<option value="${o[0]}" ${pcSize === o[0] ? "selected" : ""}>${o[1]}</option>`).join("")}</select></label>
+          <label>Piece color <input type="color" id="pcCol" value="${pcCol}"></label>
+          <label><span>Mirror (two sides)</span><input type="checkbox" id="pcMir" ${pcMir ? "checked" : ""}></label>
+          <div class="rc-saved"><button class="hintbtn ${pcErase ? "rc-on" : ""}" id="pcErase" type="button">Eraser: ${pcErase ? "ON" : "off"}</button><button class="hintbtn" id="pcUndo" type="button">Undo</button><button class="hintbtn" id="pcClear" type="button">Clear all</button></div>
+          <p class="rc-sm">Choose a piece, then tap your rocket picture to put it there. You can use up to ${MAXP} pieces!</p></div>
         <p class="note">Use a nickname, not your real name.</p>
         <button class="hintbtn" id="rcSaveD" type="button">Save this design</button>
         ${S.designs.length ? '<div class="rc-saved">' + S.designs.map((d, i) => `<button class="hintbtn" data-ld="${i}" type="button">${esc(d.look.name)}</button>`).join("") + "</div>" : ""}
       </div></div>`;
     const cv = el.querySelector("#rcPrev"), x = cv.getContext("2d");
     const g = x.createLinearGradient(0, 0, 0, 430); g.addColorStop(0, "#1c2a7a"); g.addColorStop(1, "#4cc3ff"); x.fillStyle = g; x.fillRect(0, 0, 300, 430); x.fillStyle = "#3a8a4a"; x.fillRect(0, 400, 300, 30);
-    const mc = document.createElement("canvas").getContext("2d"); mc.canvas.width = 300; mc.canvas.height = 6000; const hh = 5900 - drawRocket(mc, des, 150, 5900, 1, { flame: 0 }), sc = Math.max(.12, Math.min(1.5, 330 / hh)); drawRocket(x, des, 150, 392, sc, { flame: 0 });
+    const mc = document.createElement("canvas").getContext("2d"); mc.canvas.width = 300; mc.canvas.height = 6000; const hh = 5900 - drawRocket(mc, des, 150, 5900, 1, { flame: 0 }), sc = Math.max(.12, Math.min(1.5, 330 / hh)); const GEO = {}; drawRocket(x, des, 150, 392, sc, { flame: 0, geom: GEO });
     x.fillStyle = "rgba(255,255,255,.9)"; x.font = "bold 14px system-ui"; x.textAlign = "center"; x.fillText(L.name, 150, 420);
     const redo = () => { save(); const y = window.scrollY; render(); window.scrollTo(0, y); };
     el.querySelectorAll("[data-i]").forEach(inp => inp.onchange = () => { const s = des.stages[+inp.dataset.i], k = inp.dataset.k; s[k] = (k === "count" || k === "tanks") ? Math.max(1, Math.min(k === "count" ? 30 : 20, +inp.value || 1)) : inp.value; snd("pick"); redo(); });
@@ -424,6 +464,22 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
     el.querySelector("#lkName").oninput = e => { const v = e.target.value.replace(/[^\p{L}\p{N} _-]/gu, "").slice(0, 14); L.name = v || "Rocket"; save(); };
     el.querySelector("#lkName").onchange = redo; el.querySelector("#lkLogo").oninput = e => { L.logo = e.target.value.replace(/[^\p{L}\p{N}]/gu, "").slice(0, 2); save(); }; el.querySelector("#lkLogo").onchange = redo;
     el.querySelectorAll("[data-lk]").forEach(i => i.oninput = () => { L[i.dataset.lk] = i.value; save(); build(el); });
+    el.querySelectorAll("canvas[data-pt]").forEach(c => { const q = c.getContext("2d"); pdraw(q, c.dataset.pt, 17, 17, 11, pcCol, 30); });
+    el.querySelectorAll("[data-pp]").forEach(b => b.onclick = () => { pcSel = b.dataset.pp; pcErase = false; snd("tick"); redo(); });
+    const pcsList = () => (L.pieces = L.pieces || []);
+    el.querySelector("#pcSize").onchange = e => { pcSize = +e.target.value; };
+    el.querySelector("#pcCol").oninput = e => { pcCol = e.target.value; };
+    el.querySelector("#pcCol").onchange = e => { pcCol = e.target.value; redo(); };
+    el.querySelector("#pcMir").onchange = e => { pcMir = e.target.checked; };
+    el.querySelector("#pcErase").onclick = () => { pcErase = !pcErase; redo(); };
+    el.querySelector("#pcUndo").onclick = () => { pcsList().pop(); redo(); };
+    el.querySelector("#pcClear").onclick = () => { if (el.querySelector("#pcSure")) { L.pieces = []; redo(); } else el.querySelector("#pcClear").insertAdjacentHTML("afterend", '<span id="pcSure" class="rc-sm"> Press again to remove all pieces.</span>'); };
+    cv.style.cursor = "crosshair"; cv.onclick = e => {
+      const r = cv.getBoundingClientRect(), px = (e.clientX - r.left) * cv.width / r.width, py = (e.clientY - r.top) * cv.height / r.height, gw = GEO.w || 20, gh = (GEO.base - GEO.bodyTop) || 100, nx = (px - GEO.cx) / (gw / 2), ny = (GEO.base - py) / gh, list = pcsList();
+      if (pcErase) { let bi = -1, bd = 1e9; list.forEach((q, i) => { const dx = GEO.cx + q.x * gw / 2 - px, dy = GEO.base - q.y * gh - py, d = dx * dx + dy * dy; if (d < bd) { bd = d; bi = i; } }); if (bi >= 0 && bd < 30 * 30) { list.splice(bi, 1); snd("tick"); redo(); } return; }
+      if (nx < -1.6 || nx > 1.6 || ny < -.1 || ny > 1.4) return; if (list.length >= MAXP) { const n = el.querySelector("#pcN"); if (n) n.textContent = MAXP + "/" + MAXP + " full!"; return; }
+      list.push({ t: pcSel, x: +nx.toFixed(3), y: +ny.toFixed(3), s: pcSize, c: pcCol }); if (pcMir && Math.abs(nx) > .08 && list.length < MAXP) list.push({ t: pcSel, x: +(-nx).toFixed(3), y: +ny.toFixed(3), s: pcSize, c: pcCol }); snd("clink"); redo();
+    };
     el.querySelectorAll("[data-th]").forEach(b => b.onclick = () => { Object.assign(L, THEMES[+b.dataset.th][1]); save(); build(el); });
     el.querySelectorAll("[data-lks]").forEach(i => i.onchange = () => { L[i.dataset.lks] = i.value; redo(); });
     el.querySelectorAll("[data-lkn]").forEach(i => i.onchange = () => { L[i.dataset.lkn] = +i.value; redo(); });
@@ -735,14 +791,14 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
       const sepAt = L > 1 ? [.36, .66] : []; let stage = 0; sepAt.forEach((s2, i) => { if (p > s2 && i < L - 1) stage = i + 1; });
       const failP = outcome === "ok" ? 2 : failAt; const rx = 320, ry = Math.max(120, 330 - alt * 260), sc = 1.0 - Math.min(.45, alt * .5);
       if (p < failP || outcome === "ok") {
-        if (stage > 0 && p - sepAt[stage - 1] < .06) { const sp = (p - sepAt[stage - 1]) / .06; x.save(); x.globalAlpha = 1 - sp; drawRocket(x, { ...des, top: "none", stages: [des.stages[stage - 1]] }, rx - 40 * sp, ry + 90 + sp * 180, sc * .9 * rScale, { noTop: true, noWin: true }); x.restore(); }
-        const cut = des.stages.slice(stage), vis = { ...des, stages: cut.length ? cut : des.stages }, shake = p < .12 ? (Math.random() - .5) * 3 : 0;
+        if (stage > 0 && p - sepAt[stage - 1] < .06) { const sp = (p - sepAt[stage - 1]) / .06; x.save(); x.globalAlpha = 1 - sp; drawRocket(x, { ...des, look: { ...des.look, pieces: [] }, top: "none", stages: [des.stages[stage - 1]] }, rx - 40 * sp, ry + 90 + sp * 180, sc * .9 * rScale, { noTop: true, noWin: true }); x.restore(); }
+        const cut = des.stages.slice(stage), vis = { ...des, look: stage > 0 ? { ...des.look, pieces: [] } : des.look, stages: cut.length ? cut : des.stages }, shake = p < .12 ? (Math.random() - .5) * 3 : 0;
         let tilt = 0; if (outcome === "ok" && p > .88) tilt = (p - .88) / .12 * 1.3;
         x.save(); x.translate(rx + shake, ry + 60); x.rotate(tilt); x.translate(-rx, -(ry + 60)); drawRocket(x, vis, rx, ry + 60, sc * 1.2 * rScale, { flame: 1 }); x.restore();
         if (Math.random() < .8) parts.push({ x: rx + (Math.random() - .5) * 12, y: ry + 62, vx: (Math.random() - .5) * 20, vy: 40 + Math.random() * 40, l: 1, c: Math.random() < .5 ? "#fff" : "#ffc060" });
       } else if (outcome === "boom") {
         if (!boomed) { boomed = true; snd("boom"); for (let i = 0; i < 60; i++) parts.push({ x: rx, y: ry + 20, vx: (Math.random() - .5) * 260, vy: (Math.random() - .5) * 260, l: 1.4, c: ["#ff6a2a", "#ffd34e", "#fff", "#b02a0a"][R(4)] }); }
-      } else { const fp = (p - failP) / (1 - failP); x.save(); x.translate(rx + fp * 90, ry + fp * fp * 330); x.rotate(fp * 3); drawRocket(x, { ...des, stages: des.stages.slice(0, 1) }, 0, 0, sc * rScale, { flame: 0 }); x.restore(); }
+      } else { const fp = (p - failP) / (1 - failP); x.save(); x.translate(rx + fp * 90, ry + fp * fp * 330); x.rotate(fp * 3); drawRocket(x, { ...des, look: { ...des.look, pieces: [] }, stages: des.stages.slice(0, 1) }, 0, 0, sc * rScale, { flame: 0 }); x.restore(); }
       parts = parts.filter(q => (q.l -= .016) > 0); parts.forEach(q => { q.x += q.vx * .016; q.y += q.vy * .016; x.globalAlpha = Math.max(0, q.l); x.fillStyle = q.c; x.fillRect(q.x, q.y, 4, 4); }); x.globalAlpha = 1;
       const fr = outcome === "ok" ? p : Math.min(p, failP), k = outcome === "ok" ? 1 : Math.min(1, a.dv / a.need), v = Math.pow(fr, .8) * D.spd * 1000 * k, ak = Math.pow(fr, 1.7) * D.alt * k;
       tele.innerHTML = `<span>Stage <b>${Math.min(L, stage + 1)}</b></span><span>Height <b>${Math.round(ak).toLocaleString()} km</b></span><span>Speed <b>${(v / 1000).toFixed(1)} km/s</b></span><span>${p < .08 ? "Liftoff!" : outcome === "boom" && p >= failP ? "FAILURE" : outcome === "short" && p >= failP ? "Out of speed" : stage > 0 && p < .7 ? "Stage separation!" : "Climbing"}</span>`;
