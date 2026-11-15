@@ -15,7 +15,7 @@
     hornet: { name: "Hornet", thr: 3000, isp: 295, mass: 3, cost: 340000, rel: .955, res: "hornet", tip: "A strong mid-size engine." },
     silk: { name: "Silk (big space engine)", thr: 2500, isp: 362, mass: 3.2, cost: 1100000, rel: .96, vac: 1, res: "silk", tip: "A big, very efficient engine for upper stages." },
     colossus: { name: "Colossus", thr: 50000, isp: 318, mass: 45, cost: 5000000, rel: .96, res: "colossus", tip: "An enormous engine for super heavy rockets." },
-    sipu: { name: "SIPU (the S.I.P. Ultra engine)", thr: 400000, isp: 440, mass: 70, cost: 15000000, rel: .985, res: "sipu", tip: "The mighty SIPU! Huge push AND super efficient. The best engine in the game." },
+    sipu: { name: "SIPU (the S.I.P. Ultra engine)", thr: 500000, isp: 440, mass: 10, make: 1, cost: 15000000, rel: .985, res: "sipu", tip: "The mighty SIPU! 500,000 push, only 10 tonnes, and it MAKES ITS OWN FUEL, so no fuel tanks needed!" },
     mammoth: { name: "Mammoth", thr: 110000, isp: 322, mass: 95, cost: 10000000, rel: .955, res: "mammoth", tip: "The biggest engine of all." },
     bigsrb: { name: "Big Solid Booster", thr: 21000, isp: 252, mass: 7, cost: 800000, rel: .94, solid: 70, res: "bigsrb", tip: "A giant solid booster with 70 tonnes of fuel and 5x the push!" },
     wasp: { name: "Wasp", thr: 125, isp: 275, mass: .2, cost: 30000, rel: .92, tip: "A tiny engine for tiny rockets." },
@@ -139,7 +139,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
   if (DLIST.length !== 100) console.warn("places:", DLIST.length);
   const RESEARCH = {
     comet: ["Comet engine", 120000, "A mid-size engine."], gale: ["Gale space engine", 350000, "Very efficient upper-stage engine."], nuke: ["Nuclear thermal engine", 2500000, "Isp 850! For the far planets."], giant: ["Giant fuel tank", 700000, "400 tonnes of fuel in one tank."],
-    hornet: ["Hornet engine", 150000, "A strong mid-size engine."], silk: ["Silk big space engine", 900000, "Very efficient and strong, for upper stages."], colossus: ["Colossus engine", 3000000, "10,000 kN of push!"], mammoth: ["Mammoth engine", 8000000, "22,000 kN of push. The biggest."], sipu: ["SIPU engine", 5000000, "The S.I.P. Ultra engine: the strongest and most efficient engine in the game!"], bigsrb: ["Big Solid Booster", 600000, "A giant strap-on booster."], mega: ["Mega fuel tank", 2000000, "1,000 tonnes of fuel in one tank."], tt: ["Titanic fuel tank", 6000000, "3,000 tonnes of fuel in one tank."], stage4: ["Fourth stage", 800000, "Build rockets with 4 stages."], stage5: ["Fifth stage", 2000000, "Build rockets with 5 stages."], wide: ["Wide fairing", 200000, "Carries satellites up to 25,000 kg."], megaf: ["Mega fairing", 900000, "Carries satellites up to 150,000 kg."],
+    hornet: ["Hornet engine", 150000, "A strong mid-size engine."], silk: ["Silk big space engine", 900000, "Very efficient and strong, for upper stages."], colossus: ["Colossus engine", 3000000, "10,000 kN of push!"], mammoth: ["Mammoth engine", 8000000, "22,000 kN of push. The biggest."], sipu: ["SIPU engine", 5000000, "500,000 push, just 10 tonnes, and it makes its own fuel!"], bigsrb: ["Big Solid Booster", 600000, "A giant strap-on booster."], mega: ["Mega fuel tank", 2000000, "1,000 tonnes of fuel in one tank."], tt: ["Titanic fuel tank", 6000000, "3,000 tonnes of fuel in one tank."], stage4: ["Fourth stage", 800000, "Build rockets with 4 stages."], stage5: ["Fifth stage", 2000000, "Build rockets with 5 stages."], wide: ["Wide fairing", 200000, "Carries satellites up to 25,000 kg."], megaf: ["Mega fairing", 900000, "Carries satellites up to 150,000 kg."],
     thunder: ["Thunder engine", 200000, "A big engine. You will need it for orbit."], titan: ["Titan engine", 900000, "The biggest engine."], whisper: ["Whisper space engine", 250000, "Great for upper stages."], srb: ["Solid Booster", 120000, "Cheap, powerful fuel-filled booster."],
     xl: ["Huge fuel tank", 300000, "150 tonnes of fuel in one tank."], meth: ["Methane fuel", 200000, "Slightly better than kerosene."], hydro: ["Hydrogen fuel", 500000, "Best Isp, but the tanks are big and heavy."],
     stage3: ["Third stage", 250000, "Build rockets with 3 stages."], light: ["Light fairing", 150000, "Saves 250 kg."], reuse: ["Landing legs", 600000, "Your first stage can land, and you get 60% of its price back (75% of the time)."],
@@ -183,14 +183,14 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
     const bonus = (S.res.test1 ? .015 : 0) + (S.res.test2 ? .015 : 0) + (S.res.test3 ? .015 : 0) + (ex.avionics ? .025 : 0), st = [];
     for (let i = des.stages.length - 1; i >= 0; i--) {
       const s = des.stages[i], e = ENGINES[s.eng], f = FUELS[s.fuel] || FUELS.kero, t = TANKS[s.tank] || TANKS.S, n = s.count;
-      const tanks = e.solid ? 0 : s.tanks;
-      const dry = e.mass * n + tanks * t.dry * f.dry, fuel = e.solid ? e.solid * n : tanks * t.fuel, wet = dry + fuel;
-      const ve = e.isp * (e.solid ? 1 : f.isp) * G0;
-      let dv = fuel > 0 ? ve * Math.log((above + wet) / (above + dry)) : 0, thrust = e.thr * n * (e.vac && i === 0 ? .35 : 1), wetT = wet, c1 = e.cost * n + tanks * t.cost * f.cost;
+      const tanks = (e.solid || e.make) ? 0 : s.tanks;
+      const dry = e.mass * n + tanks * t.dry * f.dry, fuel = e.solid ? e.solid * n : e.make ? 0 : tanks * t.fuel, wet = dry + fuel;
+      const ve = e.isp * ((e.solid || e.make) ? 1 : f.isp) * G0;
+      let dv = e.make ? ve * Math.log(13) : fuel > 0 ? ve * Math.log((above + wet) / (above + dry)) : 0, thrust = e.thr * n * (e.vac && i === 0 ? .35 : 1), wetT = wet, c1 = e.cost * n + tanks * t.cost * f.cost;
       if (i === 0 && bo) {   // strap-on boosters burn together with the first stage, then fall away
         const be = ENGINES[bo.eng], nb = bo.count, Fb = be.thr * nb * 1, fuelB = be.solid * nb, dryB = be.mass * nb, veB = be.isp * G0, mdB = Fb / veB, tb = fuelB / mdB, md1 = thrust / ve, m1 = Math.min(fuel, md1 * tb);
         const m0 = above + wet + fuelB + dryB, veEff = (Fb + thrust) / (mdB + md1), dvA = veEff * Math.log(m0 / (m0 - fuelB - m1)), mA = m0 - fuelB - m1 - dryB, rest = fuel - m1;
-        dv = dvA + (rest > 0 ? ve * Math.log(mA / (mA - rest)) : 0); thrust += Fb; wetT = wet + fuelB + dryB; c1 += be.cost * nb; rel *= Math.pow(be.rel + bonus, 1 + .15 * (nb - 1));
+        dv = dvA + (rest > 0 ? ve * Math.log(mA / (mA - rest)) : 0) + (e.make ? ve * Math.log(13) : 0); thrust += Fb; wetT = wet + fuelB + dryB; c1 += be.cost * nb; rel *= Math.pow(be.rel + bonus, 1 + .15 * (nb - 1));
       }
       const twr = thrust / (G0 * (above + wetT));
       cost += c1; rel *= Math.pow(e.rel + bonus, 1 + .15 * (n - 1));
@@ -241,17 +241,17 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
   // ---------------- drawing a rocket (also used by the launch) ----------------
   function drawRocket(x, des, cx, base, sc, o) {
     o = o || {}; const L = des.look || LOOK0, stages = o.only ? des.stages.slice(0, o.only) : des.stages; let y = base;
-    const wOf = s => { const e = ENGINES[s.eng]; return (e.solid ? 16 : 14) * Math.min(1.4, .7 + (TANKS[s.tank] ? TORD.indexOf(s.tank) * .2 : .3) + (s.count > 1 ? .12 * Math.min(4, s.count) : 0)) * sc; };
+    const wOf = s => { const e = ENGINES[s.eng]; return ((e.solid || e.make) ? 16 : 14) * Math.min(1.4, .7 + (TANKS[s.tank] ? TORD.indexOf(s.tank) * .2 : .3) + (s.count > 1 ? .12 * Math.min(4, s.count) : 0)) * sc; };
     const flameCol = L.flame; let topW = 20 * sc, maxW = 0;
     stages.forEach((s, i) => {
-      const e = ENGINES[s.eng], w = wOf(s) * (i === 0 ? 1.15 : 1) * Math.pow(.88, i), tanks = e.solid ? 1 : Math.max(1, s.tanks), th = e.solid ? 46 * sc : (TORD.indexOf(s.tank) * 9 + 14) * sc;
+      const e = ENGINES[s.eng], w = wOf(s) * (i === 0 ? 1.15 : 1) * Math.pow(.88, i), tanks = (e.solid || e.make) ? 1 : Math.max(1, s.tanks), th = (e.solid || e.make) ? 46 * sc : (TORD.indexOf(s.tank) * 9 + 14) * sc;
       const nz = Math.min(5, s.count);
       // flame + nozzles
       if (o.flame && i === (o.flameStage || 0)) { for (let k = 0; k < nz; k++) { const fx = cx - w / 2 + (k + .5) * w / nz, fl = (22 + Math.random() * 16) * sc * (o.flame || 1); const g = x.createLinearGradient(fx, y, fx, y + fl); g.addColorStop(0, "#fff"); g.addColorStop(.3, flameCol); g.addColorStop(1, "rgba(255,80,0,0)"); { const gl = x.createRadialGradient(fx, y + fl * .35, 1, fx, y + fl * .35, fl * .8); gl.addColorStop(0, "rgba(255,220,140,.35)"); gl.addColorStop(1, "rgba(255,120,0,0)"); x.fillStyle = gl; x.fillRect(fx - fl, y - fl * .2, fl * 2, fl * 1.6); } x.fillStyle = g; x.beginPath(); x.moveTo(fx - 4 * sc, y); x.lineTo(fx, y + fl); x.lineTo(fx + 4 * sc, y); x.fill(); } }
       for (let k = 0; k < nz; k++) { const fx = cx - w / 2 + (k + .5) * w / nz; { const ng2 = x.createLinearGradient(fx - 5 * sc, 0, fx + 5 * sc, 0); ng2.addColorStop(0, "#b4bacc"); ng2.addColorStop(.5, "#5a6078"); ng2.addColorStop(1, "#2a2e42"); x.fillStyle = ng2; } x.beginPath(); x.moveTo(fx - 3 * sc, y - 6 * sc); x.lineTo(fx + 3 * sc, y - 6 * sc); x.lineTo(fx + 5 * sc, y); x.lineTo(fx - 5 * sc, y); x.fill(); }
       y -= 6 * sc;
       // tank body
-      const h = th * (e.solid ? 1 : Math.min(2.6, .8 + tanks * .45)); y -= h;
+      const h = th * ((e.solid || e.make) ? 1 : Math.min(2.6, .8 + tanks * .45)); y -= h;
       const BS = BODYSHAPES[L.bodyShape] || BODYSHAPES.classic, bpath = () => { x.beginPath(); for (let k = 0; k <= 10; k++) { const t = k / 10, hw = w / 2 * BS(t); k ? x.lineTo(cx - hw, y + h * t) : x.moveTo(cx - hw, y); } for (let k = 10; k >= 0; k--) { const t = k / 10; x.lineTo(cx + w / 2 * BS(t), y + h * t); } x.closePath(); };
       x.save(); bpath(); x.fillStyle = L.body; x.fill(); x.clip();
       const gg = x.createLinearGradient(cx - w * .75, 0, cx + w * .75, 0); gg.addColorStop(0, "rgba(255,255,255,.55)"); gg.addColorStop(.28, "rgba(255,255,255,.1)"); gg.addColorStop(.65, "rgba(0,0,0,0)"); gg.addColorStop(1, "rgba(0,0,0,.4)"); x.fillStyle = gg; x.fillRect(cx - w, y, w * 2, h);
@@ -402,7 +402,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
         ${des.stages.map((s, i) => `<div class="rc-stage"><h3>Stage ${i + 1}${i === 0 ? " (bottom, lights first)" : ""}</h3>
           <label>Engine <select data-i="${i}" data-k="eng">${opt(ENGINES, s.eng)}</select></label>
           <label>How many <input type="number" min="1" max="30" value="${s.count}" data-i="${i}" data-k="count"></label>
-          ${ENGINES[s.eng].solid ? '<p class="note">This booster carries its own fuel.</p>' : `<label>Fuel tank <select data-i="${i}" data-k="tank">${opt(TANKS, s.tank)}</select></label>
+          ${(ENGINES[s.eng].solid || ENGINES[s.eng].make) ? '<p class="note">This engine carries or makes its own fuel.</p>' : `<label>Fuel tank <select data-i="${i}" data-k="tank">${opt(TANKS, s.tank)}</select></label>
           <label>Tanks <input type="number" min="1" max="20" value="${s.tanks}" data-i="${i}" data-k="tanks"></label>
           <label>Fuel <select data-i="${i}" data-k="fuel">${opt(FUELS, s.fuel)}</select></label>`}
           <div class="rc-sm">Δv ${Math.round(a.st[i].dv).toLocaleString()} m/s · push ${Math.round(a.st[i].thrust).toLocaleString()} kN · weight ${a.st[i].wet.toFixed(1)} t${des.stages.length > 1 ? ` <button class="hintbtn rc-x" data-del="${i}" type="button">Remove stage</button>` : ""}</div></div>`).join("")}
