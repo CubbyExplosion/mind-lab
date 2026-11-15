@@ -457,7 +457,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
 
   // ---------------- engineer job ----------------
   let engQ = null, engMsg = "";
-  const engPay = () => 10000 + 1000 * tier();
+  const engPay = () => 100000 + 10000 * tier();
   const ENGQ = [
     ["What does a rocket need to get off the ground?", "Lots of push from its engines", ["A big wing", "A long runway", "A parachute"], "Engines push the rocket up, harder than gravity pulls it down."],
     ["What do rockets burn to make their push?", "Fuel", ["Water only", "Sand", "Cheese"], "Fuel burns and shoots out the back, pushing the rocket up."],
