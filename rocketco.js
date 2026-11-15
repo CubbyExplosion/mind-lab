@@ -512,16 +512,18 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
   }
 
   // ---------------- fun jobs (100 mini jobs) ----------------
-  const FJA = ["Tiny", "Speedy", "Giant", "Sparkly", "Sleepy", "Super", "Wobbly", "Golden", "Frosty", "Cosmic", "Bouncy", "Mighty", "Silly", "Neon", "Fluffy"];
+  const FJA = ["Tiny", "Speedy", "Giant", "Sparkly", "Sleepy", "Super", "Wobbly", "Golden", "Frosty", "Cosmic", "Bouncy", "Mighty", "Silly", "Neon", "Fluffy", "Lucky", "Jolly", "Zippy", "Shiny", "Brave"];
   const FJB = [["Pop the bubbles", "🫧", "tap"], ["Copy the lights", "💡", "memory"], ["Stop the rocket", "🚀", "timing"], ["Count the stars", "⭐", "count"], ["Line up the moons", "🌙", "sort"], ["Pour the sand", "⏳", "sand"], ["Find the odd one", "🔍", "odd"]];
   const FJ = []; for (let i = 0; i < 100; i++) { const b = FJB[i % 7], L = Math.floor(i / 7); FJ.push({ id: i, name: b[0] + " (" + FJA[L] + ")", icon: b[1], kind: b[2], L, pay: Math.round((20000 + i * 4800) / 1000) * 1000 }); }
+  const FJB2 = [["Whack the aliens", "👾", "whack"], ["Match the pairs", "🃏", "pairs"], ["Quick reaction", "⚡", "react"], ["Pick the bigger one", "⚖️", "bigger"], ["Match the color", "🎨", "color"]];
+  for (let i = 100; i < 200; i++) { const b = FJB2[i % 5], L = Math.floor((i - 100) / 5); FJ.push({ id: i, name: b[0] + " (" + FJA[L] + ")", icon: b[1], kind: b[2], L, pay: Math.round((22000 + (i - 100) * 4800) / 1000) * 1000 }); }
   let fjOn = null, fjTimers = [];
   const fjClear = () => { fjTimers.forEach(t => { clearInterval(t); clearTimeout(t); }); fjTimers = []; };
   const fjT = (f, ms, once) => { const t = once ? setTimeout(f, ms) : setInterval(f, ms); fjTimers.push(t); return t; };
   function fun(el) {
     fjClear(); S.fj = S.fj || {}; const done = Object.keys(S.fj).length;
     if (fjOn != null) return fjPlay(el, FJ[fjOn]);
-    el.innerHTML = `<p class="note">100 fun little jobs! Each one is quick and easy. Finish a job to get paid, up to <b>${money(FJ[99].pay)}</b>. You get paid once per job, so try them all! Done: <b>${done}/100</b>. If you miss, just try again.</p>
+    el.innerHTML = `<p class="note">${FJ.length} fun little jobs! Each one is quick and easy. Finish a job to get paid, up to <b>${money(FJ[199].pay)}</b>. You get paid once per job, so try them all! Done: <b>${done}/${FJ.length}</b>. If you miss, just try again.</p>
       <div class="rc-fj">${FJ.map(j => `<button type="button" class="rc-fjc ${S.fj[j.id] ? "done" : ""}" data-j="${j.id}"><span>${j.icon}</span><b>${esc(j.name)}</b><em>${S.fj[j.id] ? "Done!" : money(j.pay)}</em></button>`).join("")}</div>`;
     el.querySelectorAll("[data-j]").forEach(b => b.onclick = () => { fjOn = +b.dataset.j; fun(el); });
   }
@@ -564,6 +566,32 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
       say("Hold the button to pour sand up to the yellow line, then let go!");
       const stop = () => { if (hold == null) return; clearInterval(hold); hold = null; used = true; end(Math.abs(lv - tg) <= tol); };
       pb.onpointerdown = e => { if (used || over) return; hold = setInterval(() => { lv = Math.min(100, lv + 1); sd.style.height = lv + "%"; }, 25); fjTimers.push(hold); }; pb.onpointerup = stop; pb.onpointerleave = stop; pb.onpointercancel = stop;
+    } else if (j.kind === "whack") {
+      const need = 6 + Math.floor(L / 2), g = L > 9 ? 12 : 9, ms = Math.max(480, 1100 - L * 30); let hits = 0, miss = 0, cur = -1;
+      box.innerHTML = `<div class="rc-fjgrid" style="grid-template-columns:repeat(${g === 12 ? 4 : 3},1fr);max-width:360px">` + Array.from({ length: g }, (_, i) => `<button type="button" data-w="${i}"></button>`).join("") + "</div>"; const cells = [...box.querySelectorAll("[data-w]")];
+      const show = () => { if (over) return; cells.forEach(c => c.innerHTML = ""); cur = R(0, g - 1); cells[cur].innerHTML = j.icon; }; const stat = () => say(`Whack the alien! Hits <b>${hits}/${need}</b> · Escaped ${miss}/3`);
+      stat(); show(); let was = cur; fjT(() => { if (over) return; if (cur === was && cur !== -1 && cells[cur].innerHTML) { miss++; stat(); if (miss >= 3) return end(false); } show(); was = cur; }, ms);
+      cells.forEach((c, i) => c.onclick = () => { if (over || i !== cur || !c.innerHTML) return; hits++; snd("clink"); c.innerHTML = ""; cur = -1; stat(); if (hits >= need) end(true); });
+    } else if (j.kind === "pairs") {
+      const n = 3 + Math.min(5, Math.floor(L / 3)), faces = ["🚀", "🌙", "⭐", "🪐", "🛰️", "👽", "☄️", "🌍"], cl = ["#ff5a5a", "#5aff8a", "#5aa8ff", "#ffd34e", "#d28bff", "#ff9a2a", "#4ee6e6", "#ff7ac8"]; const deck = shuf([...Array(n).keys(), ...Array(n).keys()]); let first = null, lock = false, found = 0, tries = 0;
+      box.innerHTML = '<div class="rc-fjgrid" style="grid-template-columns:repeat(4,1fr);max-width:400px">' + deck.map((v, i) => `<button type="button" data-c="${i}" class="rc-card2">?</button>`).join("") + "</div>"; const cs = [...box.querySelectorAll("[data-c]")]; say("Flip two cards. Find all the pairs!");
+      const up = (c, v) => { c.innerHTML = faces[v]; c.style.borderColor = cl[v]; c.style.background = "#32407e"; }, dn = c => { c.innerHTML = "?"; c.style.borderColor = ""; c.style.background = ""; };
+      cs.forEach((c, i) => c.onclick = () => { if (over || lock || c.disabled || first === i) return; up(c, deck[i]); snd("tick"); if (first === null) { first = i; return; } tries++; const a = first; first = null; if (deck[a] === deck[i]) { found++; cs[a].disabled = c.disabled = true; snd("clink"); say(`Pairs found: <b>${found}/${n}</b> · tries ${tries}`); if (found >= n) end(true); } else { lock = true; setTimeout(() => { dn(cs[a]); dn(c); lock = false; }, 800); say(`Pairs found: <b>${found}/${n}</b> · tries ${tries}`); } });
+    } else if (j.kind === "react") {
+      const rounds = 3, lim = Math.max(380, 1000 - L * 30); let r = 0, ready = false, t0 = 0;
+      box.innerHTML = '<button type="button" class="rc-fjreact" id="fjR">Get ready...</button>'; const b = box.querySelector("#fjR");
+      const next = () => { if (over) return; ready = false; b.className = "rc-fjreact"; b.textContent = "Wait for green... (round " + (r + 1) + "/" + rounds + ")"; fjT(() => { ready = true; t0 = performance.now(); b.className = "rc-fjreact go"; b.textContent = "TAP NOW!"; }, R(1200, 3000), true); };
+      say("Tap the big button when it turns GREEN. Don't tap too early!"); next();
+      b.onclick = () => { if (over) return; if (!ready) return end(false); const t = performance.now() - t0; if (t > lim * 1.6) return end(false); r++; snd("clink"); if (r >= rounds) end(true); else { fjClear(); say(`Great! ${Math.round(t)} ms`); next(); } };
+    } else if (j.kind === "bigger") {
+      const rounds = 6, mx = [9, 20, 50, 99, 500, 999][Math.min(5, Math.floor(L / 3))]; let r = 0, A = 0, B = 0;
+      box.innerHTML = '<div class="rc-fjopts"><button type="button" class="close rc-big" id="fjA"></button><button type="button" class="close rc-big" id="fjB"></button></div>'; const a = box.querySelector("#fjA"), bb = box.querySelector("#fjB");
+      const nx = () => { do { A = R(1, mx); B = R(1, mx); } while (A === B); a.textContent = A; bb.textContent = B; say(`Tap the BIGGER number! (${r + 1}/${rounds})`); }; nx();
+      const pick2 = v => { if (over) return; if (v !== Math.max(A, B)) return end(false); r++; snd("clink"); if (r >= rounds) end(true); else nx(); }; a.onclick = () => pick2(A); bb.onclick = () => pick2(B);
+    } else if (j.kind === "color") {
+      const all = [["Red", "#ff4a4a"], ["Green", "#3ddc6a"], ["Blue", "#4a8cff"], ["Yellow", "#ffd34e"], ["Purple", "#b06bff"], ["Orange", "#ff9a2a"]], k = Math.min(6, 3 + Math.floor(L / 6)), rounds = 5; let r = 0, want = null;
+      box.innerHTML = '<div class="rc-fjdot" id="fjDot"></div><div class="rc-fjopts" id="fjCo"></div>'; const dot = box.querySelector("#fjDot"), co = box.querySelector("#fjCo");
+      const nx = () => { const set = shuf(all.slice()).slice(0, k); want = set[0]; dot.style.background = want[1]; co.innerHTML = ""; shuf(set.slice()).forEach(c => { const b = document.createElement("button"); b.type = "button"; b.className = "close"; b.textContent = c[0]; b.onclick = () => { if (over) return; if (c !== want) return end(false); r++; snd("clink"); if (r >= rounds) end(true); else nx(); }; co.appendChild(b); }); say(`What color is the circle? (${r + 1}/${rounds})`); }; nx();
     } else {
       const g = 3 + Math.min(1, Math.floor(L / 7)), pairs = [["🌕", "🌖"], ["🚀", "🛸"], ["⭐", "🌟"], ["🪐", "🌍"], ["🔴", "🟠"], ["🛰️", "📡"]], pr = pairs[R(0, pairs.length - 1)], odd = R(0, g * g - 1);
       box.innerHTML = `<div class="rc-fjgrid" style="grid-template-columns:repeat(${g},1fr)">` + Array.from({ length: g * g }, (_, i) => `<button type="button" data-o="${i}">${i === odd ? pr[1] : pr[0]}</button>`).join("") + "</div>"; say("One is different. Tap it!");

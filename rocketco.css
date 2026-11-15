@@ -74,3 +74,7 @@
 .rc-fjbox .rc-dbar { width: 100%; max-width: 560px; height: 44px; }
 .rc-fjbox .rc-dbar .mk { width: 16px; margin-left: -8px; top: -3px; height: 50px; background: #ffd34e; border: 3px solid #fff; border-radius: 6px; box-shadow: 0 0 14px #ffd34e, 0 0 0 2px #1a1240; z-index: 3; }
 .rc-fjbox .rc-dbar .zone { background: rgba(107, 226, 143, .75); }
+
+.rc-card2 { height: 70px; font-size: 30px !important; font-weight: 900; color: #ffd34e; } .rc-card2:disabled { opacity: .55; }
+.rc-fjreact { width: 100%; max-width: 420px; height: 200px; border-radius: 24px; border: 5px solid #1a1240; background: #c0392b; color: #fff; font: 900 22px inherit; cursor: pointer; } .rc-fjreact.go { background: #27ae60; }
+.rc-fjdot { width: 130px; height: 130px; border-radius: 50%; border: 6px solid #fff; box-shadow: 0 0 20px rgba(255,255,255,.35); }
