@@ -86,3 +86,5 @@
 .rc-pcs { display: grid; gap: 8px; padding: 10px; border-radius: 14px; background: #1b2260; border: 3px solid #ffd34e; } .rc-pcs b { font-size: 14px; } .rc-pgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
 .rc-pbtn { padding: 3px; border-radius: 10px; border: 3px solid #1a1240; background: #232a6b; cursor: pointer; line-height: 0; } .rc-pbtn.on { border-color: #ffd34e; background: #3b2f6e; } .rc-pbtn:hover { border-color: #6be28f; } .rc-pbtn canvas { width: 100%; height: auto; }
 .rc-on { background: #ff6a6a !important; color: #fff !important; }
+
+.rc-ask { display:block; font-weight:800; margin:6px 0; } .rc-pin { width: 130px; font: inherit; font-weight: 900; padding: 4px 6px; border-radius: 8px; border: 3px solid #1a1240; }
