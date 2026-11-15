@@ -548,7 +548,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
     } else if (j.kind === "timing") {
       const zw = Math.max(28, 50 - L * 1.5), zs = R(8, 92 - zw), sp = .4 + L * .03; let x = 0, d = 1;
       box.innerHTML = `<div class="rc-dbar"><div class="zone" style="left:${zs}%;width:${zw}%"></div><div class="mk" id="fjMk"></div></div><button class="close rc-big" type="button" id="fjStop">STOP!</button>`; const mk = box.querySelector("#fjMk");
-      say("Press STOP when the white line is in the green!"); fjT(() => { x += d * sp; if (x >= 100) { x = 100; d = -1; } if (x <= 0) { x = 0; d = 1; } mk.style.left = x + "%"; }, 16);
+      say("Press STOP when the big yellow marker is in the green!"); fjT(() => { x += d * sp; if (x >= 100) { x = 100; d = -1; } if (x <= 0) { x = 0; d = 1; } mk.style.left = x + "%"; }, 16);
       box.querySelector("#fjStop").onclick = () => { if (over) return; const ok = x >= zs && x <= zs + zw; end(ok); };
     } else if (j.kind === "count") {
       const n = 3 + Math.min(Math.floor(L / 2), 6); box.innerHTML = '<div class="rc-fjf"></div><div class="rc-fjopts"></div>'; const f = box.firstChild, o = box.lastChild;
