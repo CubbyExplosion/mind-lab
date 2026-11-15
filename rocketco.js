@@ -434,7 +434,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
   function mktStep(launchOk, quiet) {
     if (!quiet) S.shifts = 5;
     const m = S.mkt; m.day++; const ev = Math.random() < (quiet ? .06 : .35) ? pick(NEWS) : null;
-    STOCKS.forEach(st => { const h = m.hist[st[0]], p = h[h.length - 1]; let r = Math.log(st[2] / p) * .004 + .007 + st[3] * .6 * gauss();
+    STOCKS.forEach(st => { const h = m.hist[st[0]], p = h[h.length - 1]; let r = Math.log(st[2] / p) * .004 + (quiet ? .007 : .035) + st[3] * .6 * gauss();
       if (ev && (ev[0] === st[0] || ev[0] === "*")) r += ev[2]; if (launchOk === true || launchOk === false) { if (st[0] === "ROKT" || st[0] === "SATS") r += launchOk ? .012 : -.012; }
       h.push(Math.max(1, Math.round(p * Math.exp(r) * 100) / 100)); if (h.length > 120) h.shift(); });
     if (ev && !quiet) { m.news.unshift("Day " + m.day + ": " + ev[1]); m.news = m.news.slice(0, 8); }
