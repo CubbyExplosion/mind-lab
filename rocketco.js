@@ -514,9 +514,9 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
   // ---------------- fun jobs (100 mini jobs) ----------------
   const FJA = ["Tiny", "Speedy", "Giant", "Sparkly", "Sleepy", "Super", "Wobbly", "Golden", "Frosty", "Cosmic", "Bouncy", "Mighty", "Silly", "Neon", "Fluffy", "Lucky", "Jolly", "Zippy", "Shiny", "Brave"];
   const FJB = [["Pop the bubbles", "🫧", "tap"], ["Copy the lights", "💡", "memory"], ["Stop the rocket", "🚀", "timing"], ["Count the stars", "⭐", "count"], ["Line up the moons", "🌙", "sort"], ["Pour the sand", "⏳", "sand"], ["Find the odd one", "🔍", "odd"]];
-  const FJ = []; for (let i = 0; i < 100; i++) { const b = FJB[i % 7], L = Math.floor(i / 7); FJ.push({ id: i, name: b[0] + " (" + FJA[L] + ")", icon: b[1], kind: b[2], L, pay: Math.round((20000 + i * 4800) / 1000) * 1000 }); }
+  const FJ = []; for (let i = 0; i < 100; i++) { const b = FJB[i % 7], L = Math.floor(i / 7); FJ.push({ id: i, name: b[0] + " (" + FJA[L] + ")", icon: b[1], kind: b[2], L, pay: Math.round((20000 + i * 4800) / 1000) * 2000 }); }
   const FJB2 = [["Whack the aliens", "👾", "whack"], ["Match the pairs", "🃏", "pairs"], ["Quick reaction", "⚡", "react"], ["Pick the bigger one", "⚖️", "bigger"], ["Match the color", "🎨", "color"]];
-  for (let i = 100; i < 200; i++) { const b = FJB2[i % 5], L = Math.floor((i - 100) / 5); FJ.push({ id: i, name: b[0] + " (" + FJA[L] + ")", icon: b[1], kind: b[2], L, pay: Math.round((22000 + (i - 100) * 4800) / 1000) * 1000 }); }
+  for (let i = 100; i < 200; i++) { const b = FJB2[i % 5], L = Math.floor((i - 100) / 5); FJ.push({ id: i, name: b[0] + " (" + FJA[L] + ")", icon: b[1], kind: b[2], L, pay: Math.round((22000 + (i - 100) * 4800) / 1000) * 2000 }); }
   let fjOn = null, fjTimers = [];
   const fjClear = () => { fjTimers.forEach(t => { clearInterval(t); clearTimeout(t); }); fjTimers = []; };
   const fjT = (f, ms, once) => { const t = once ? setTimeout(f, ms) : setInterval(f, ms); fjTimers.push(t); return t; };
