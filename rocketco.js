@@ -15,7 +15,7 @@
     hornet: { name: "Hornet", thr: 3000, isp: 295, mass: 3, cost: 340000, rel: .955, res: "hornet", tip: "A strong mid-size engine." },
     silk: { name: "Silk (big space engine)", thr: 2500, isp: 362, mass: 3.2, cost: 1100000, rel: .96, vac: 1, res: "silk", tip: "A big, very efficient engine for upper stages." },
     colossus: { name: "Colossus", thr: 50000, isp: 318, mass: 45, cost: 5000000, rel: .96, res: "colossus", tip: "An enormous engine for super heavy rockets." },
-    sipu: { name: "SIPU (the S.I.P. Ultra engine)", thr: 500000, isp: 440, mass: 10, make: 1, cost: 15000000, rel: .985, res: "sipu", tip: "The mighty SIPU! 500,000 push, only 10 tonnes, and it MAKES ITS OWN FUEL, so no fuel tanks needed! Double the speed of any other engine." },
+    sipu: { name: "SIPU (the S.I.P. Ultra engine)", thr: 500000, isp: 440, mass: 10, make: 1, cost: 15000000, rel: .985, res: "sipu", tip: "The mighty SIPU! 500,000 push, only 10 tonnes, and it MAKES ITS OWN FUEL, so no fuel tanks needed! Every SIPU engine adds double the speed." },
     mammoth: { name: "Mammoth", thr: 110000, isp: 322, mass: 95, cost: 10000000, rel: .955, res: "mammoth", tip: "The biggest engine of all." },
     bigsrb: { name: "Big Solid Booster", thr: 21000, isp: 252, mass: 7, cost: 800000, rel: .94, solid: 70, res: "bigsrb", tip: "A giant solid booster with 70 tonnes of fuel and 5x the push!" },
     wasp: { name: "Wasp", thr: 125, isp: 275, mass: .2, cost: 30000, rel: .92, tip: "A tiny engine for tiny rockets." },
@@ -186,11 +186,11 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
       const tanks = (e.solid || e.make) ? 0 : s.tanks;
       const dry = e.mass * n + tanks * t.dry * f.dry, fuel = e.solid ? e.solid * n : e.make ? 0 : tanks * t.fuel, wet = dry + fuel;
       const ve = e.isp * ((e.solid || e.make) ? 1 : f.isp) * G0;
-      let dv = e.make ? 2 * ve * Math.log(13) : fuel > 0 ? ve * Math.log((above + wet) / (above + dry)) : 0, thrust = e.thr * n * (e.vac && i === 0 ? .35 : 1), wetT = wet, c1 = e.cost * n + tanks * t.cost * f.cost;
+      let dv = e.make ? n * 2 * ve * Math.log(13) : fuel > 0 ? ve * Math.log((above + wet) / (above + dry)) : 0, thrust = e.thr * n * (e.vac && i === 0 ? .35 : 1), wetT = wet, c1 = e.cost * n + tanks * t.cost * f.cost;
       if (i === 0 && bo) {   // strap-on boosters burn together with the first stage, then fall away
         const be = ENGINES[bo.eng], nb = bo.count, Fb = be.thr * nb * 1, fuelB = be.solid * nb, dryB = be.mass * nb, veB = be.isp * G0, mdB = Fb / veB, tb = fuelB / mdB, md1 = thrust / ve, m1 = Math.min(fuel, md1 * tb);
         const m0 = above + wet + fuelB + dryB, veEff = (Fb + thrust) / (mdB + md1), dvA = veEff * Math.log(m0 / (m0 - fuelB - m1)), mA = m0 - fuelB - m1 - dryB, rest = fuel - m1;
-        dv = dvA + (rest > 0 ? ve * Math.log(mA / (mA - rest)) : 0) + (e.make ? 2 * ve * Math.log(13) : 0); thrust += Fb; wetT = wet + fuelB + dryB; c1 += be.cost * nb; rel *= Math.pow(be.rel + bonus, 1 + .15 * (nb - 1));
+        dv = dvA + (rest > 0 ? ve * Math.log(mA / (mA - rest)) : 0) + (e.make ? n * 2 * ve * Math.log(13) : 0); thrust += Fb; wetT = wet + fuelB + dryB; c1 += be.cost * nb; rel *= Math.pow(be.rel + bonus, 1 + .15 * (nb - 1));
       }
       const twr = thrust / (G0 * (above + wetT));
       cost += c1; rel *= Math.pow(e.rel + bonus, 1 + .15 * (n - 1));
