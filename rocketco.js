@@ -322,7 +322,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
     const t = tier();
     return `<button class="back" id="rcHome">← All subjects</button><div class="rc-head"><h1>${esc(S.company)}</h1><div class="rc-stats"><span>Cash <b>${money(S.cash)}</b></span>${S.debt > 0 ? `<span>Debt <b class="badc">${money(S.debt)}</b></span>` : ""}<span>${esc(TIERNAMES[t])}</span><span>Launches <b>${S.ok}</b> good / ${S.tries}</span></div></div>
       <p class="sub">You run a launch company: customers order a ride into space for their satellites. Play money only! Build rockets, take orders, and launch heavier and heavier satellites. <label class="rc-co">Company name <input id="rcCo" maxlength="20" value="${esc(S.company)}"></label></p>
-      <div class="rc-tabs">${[["contracts", "Orders"], ["build", "Build"], ["places", "100 Places"], ["research", "Shop & research"], ["eng", "Engineer job"], ["fun", "Fun jobs"], ["deal", "Special deal"], ["bank", "Loans"], ["stocks", "Stocks"], ["learn", "Rocket science"], ["log", "Records"]].map(a => `<button type="button" class="rc-tab ${tab === a[0] ? "on" : ""}" data-t="${a[0]}">${a[1]}</button>`).join("")}</div>`;
+      <div class="rc-tabs">${[["contracts", "Orders"], ["build", "Build"], ["places", "100 Places"], ["research", "Shop & research"], ["eng", "Engineer job"], ["fun", "Fun jobs"], ["deal", "Special deals"], ["bank", "Loans"], ["stocks", "Stocks"], ["learn", "Rocket science"], ["log", "Records"]].map(a => `<button type="button" class="rc-tab ${tab === a[0] ? "on" : ""}" data-t="${a[0]}">${a[1]}</button>`).join("")}</div>`;
   }
   function render() {
     if (!app) return; const t = { contracts, build, places, research, eng, fun, deal, bank, stocks, learn, log }[tab] || contracts;
@@ -599,25 +599,30 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
     }
   }
 
-  // ---------------- special deal: play Explox 100 times ----------------
-  const EXPLOX_URL = "https://cubbyexplosion.github.io/explox-the-best/play/", DEAL_PAY = 5000000;
+  // ---------------- special deals: play a game 100 times, subscribe ----------------
+  const DEALS = [{ id: "explox", name: "Explox", url: "https://cubbyexplosion.github.io/explox-the-best/play/", pay: 5000000, key: "sip-explox-deal:" }, { id: "citylife", name: "City Life", url: "https://cubbyexplosion.github.io/city-life-game/play/", pay: 5000000, key: "sip-citylife-deal:" }];
+  const SUB_URL = "https://www.youtube.com/channel/UCIdFOg3xN0mP2RxihrIumMQ", SUB_PAY = 10000000;
   const dealMe = () => { try { return localStorage.getItem("mindlab-profile") || ""; } catch (e) { return ""; } };
   function deal(el) {
-    const me = dealMe(), key = "sip-explox-deal:" + me; let d = null;
-    if (me) { try { d = JSON.parse(localStorage.getItem(key) || "null"); } catch (e) {} }
-    if (S.exPaid) { el.innerHTML = '<div class="rc-bankbox"><b>Special deal: DONE!</b><div>You played Explox 100 times and got your $5,000,000. This deal is once per account. Thank you!</div></div>'; return; }
-    if (!me) { el.innerHTML = '<div class="rc-bankbox"><b>Special deal: play Explox 100 times, get $5,000,000!</b><div>First sign in to your Mind Lab account with your name and pass code (press <b>Sign in</b> at the top of the page). The deal counts for the account you sign in with.</div></div>'; return; }
-    const n = d ? Math.min(100, d.count || 0) : 0, on = !!(d && d.on);
-    el.innerHTML = `<div class="rc-bankbox"><b>Special deal (only once): play Explox 100 times and get ${money(DEAL_PAY)}!</b>
-      <div>It counts for the account you are signed in with (your pass code account). Each play counts after you have been in Explox for <b>1 minute</b>. You play Explox on this same device and browser.</div>
-      <div class="rc-dealbar"><i style="width:${n}%"></i></div><div><b>${n}/100</b> plays</div>
-      ${on ? "" : '<button class="close" type="button" id="dlStart">Start the deal</button>'}
-      <a class="close" href="${EXPLOX_URL}" target="_blank" rel="noopener" id="dlPlay" style="text-align:center;text-decoration:none">Play Explox</a>
-      <button class="hintbtn" type="button" id="dlCheck">Check my plays</button>
-      ${n >= 100 ? `<button class="close" type="button" id="dlClaim">Claim ${money(DEAL_PAY)}!</button>` : ""}</div>`;
-    const st = el.querySelector("#dlStart"); if (st) st.onclick = () => { try { localStorage.setItem(key, JSON.stringify({ on: true, count: 0, start: Date.now() })); } catch (e) {} snd("star"); deal(el); };
+    const me = dealMe(); S.dealPaid = S.dealPaid || {}; if (S.exPaid) { S.dealPaid.explox = 1; delete S.exPaid; save(); }
+    const card = D => {
+      const key = D.key + me; let d = null; if (me) { try { d = JSON.parse(localStorage.getItem(key) || "null"); } catch (e) {} }
+      if (S.dealPaid[D.id]) return `<div class="rc-bankbox"><b>${D.name}: DONE!</b><div>You played ${D.name} 100 times and got your ${money(D.pay)}. This deal is once per account.</div></div>`;
+      const n = d ? Math.min(100, d.count || 0) : 0, on = !!(d && d.on);
+      return `<div class="rc-bankbox"><b>${D.name}: play 100 times, get ${money(D.pay)}!</b>
+        <div class="rc-dealbar"><i style="width:${n}%"></i></div><div><b>${n}/100</b> plays (each play counts after 1 minute in the game)</div>
+        ${me ? "" : "<div>Sign in first (press <b>Sign in</b> at the top).</div>"}
+        ${me && !on ? `<button class="close" type="button" data-start="${D.id}">Start this deal</button>` : ""}
+        <a class="close" href="${D.url}" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">Play ${D.name}</a>
+        ${n >= 100 ? `<button class="close" type="button" data-claim="${D.id}">Claim ${money(D.pay)}!</button>` : ""}</div>`;
+    };
+    const sub = S.dealPaid.sub ? `<div class="rc-bankbox"><b>Subscribe deal: DONE!</b><div>Thanks for subscribing! You got ${money(SUB_PAY)}.</div></div>` : `<div class="rc-bankbox"><b>Subscribe to the channel and get ${money(SUB_PAY)}! (once)</b><div>Press the first button to open the channel, subscribe, then come back and press the second button.</div><a class="close" href="${SUB_URL}" target="_blank" rel="noopener" style="text-align:center;text-decoration:none">Open the channel</a><button class="close" type="button" data-claim="sub">I subscribed! Give me ${money(SUB_PAY)}</button></div>`;
+    el.innerHTML = `<p class="note">Special deals! Each one works <b>once per account</b>. For the game deals, sign in with your name and pass code, press Start, then play on this same device. Press <b>Check my plays</b> to update the count. <button class="hintbtn" type="button" id="dlCheck">Check my plays</button></p>${DEALS.map(card).join("")}${sub}<p class="rc-sm">The Subscribe deal works on trust: only press the button if you really subscribed!</p>`;
     el.querySelector("#dlCheck").onclick = () => { snd("tick"); deal(el); };
-    const cl = el.querySelector("#dlClaim"); if (cl) cl.onclick = () => { if (S.exPaid) return; S.exPaid = 1; S.cash += DEAL_PAY; S.earned += DEAL_PAY; save(); snd("star"); render(); };
+    el.querySelectorAll("[data-start]").forEach(b => b.onclick = () => { const D = DEALS.find(x => x.id === b.dataset.start); try { localStorage.setItem(D.key + me, JSON.stringify({ on: true, count: 0, start: Date.now() })); } catch (e) {} snd("star"); deal(el); });
+    el.querySelectorAll("[data-claim]").forEach(b => b.onclick = () => { const id = b.dataset.claim; if (S.dealPaid[id]) return; let pay = SUB_PAY;
+      if (id !== "sub") { const D = DEALS.find(x => x.id === id); let d = null; try { d = JSON.parse(localStorage.getItem(D.key + me) || "null"); } catch (e) {} if (!d || d.count < 100) return; pay = D.pay; }
+      S.dealPaid[id] = 1; S.cash += pay; S.earned += pay; save(); snd("star"); render(); });
   }
   // ---------------- loans ----------------
   const LIMITS = [300000, 600000, 1200000, 2500000, 5000000, 10000000, 25000000], RATE = .04;
