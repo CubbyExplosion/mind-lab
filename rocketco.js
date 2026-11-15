@@ -16,7 +16,7 @@
     silk: { name: "Silk (big space engine)", thr: 500, isp: 362, mass: 3.2, cost: 1100000, rel: .96, vac: 1, res: "silk", tip: "A big, very efficient engine for upper stages." },
     colossus: { name: "Colossus", thr: 10000, isp: 318, mass: 45, cost: 5000000, rel: .96, res: "colossus", tip: "An enormous engine for super heavy rockets." },
     mammoth: { name: "Mammoth", thr: 22000, isp: 322, mass: 95, cost: 10000000, rel: .955, res: "mammoth", tip: "The biggest engine of all." },
-    bigsrb: { name: "Big Solid Booster", thr: 4200, isp: 252, mass: 7, cost: 800000, rel: .94, solid: 70, res: "bigsrb", tip: "A giant solid booster with 70 tonnes of fuel." },
+    bigsrb: { name: "Big Solid Booster", thr: 21000, isp: 252, mass: 7, cost: 800000, rel: .94, solid: 70, res: "bigsrb", tip: "A giant solid booster with 70 tonnes of fuel and 5x the push!" },
     wasp: { name: "Wasp", thr: 25, isp: 275, mass: .2, cost: 30000, rel: .92, tip: "A tiny engine for tiny rockets." },
     spark: { name: "Spark", thr: 90, isp: 265, mass: .45, cost: 60000, rel: .93, tip: "A small starter engine." },
     pulse: { name: "Pulse", thr: 280, isp: 285, mass: 1.4, cost: 150000, rel: .95, tip: "A medium engine for a first stage." },
@@ -26,7 +26,7 @@
     gale: { name: "Gale (space engine)", thr: 200, isp: 355, mass: 1.1, cost: 480000, rel: .96, vac: 1, res: "gale", tip: "A strong, efficient engine for space." },
     nuke: { name: "Nuclear thermal (space)", thr: 250, isp: 850, mass: 8, cost: 3000000, rel: .9, vac: 1, res: "nuke", tip: "Heats hydrogen with a reactor. Huge Isp, great for deep space." },
     whisper: { name: "Whisper (space engine)", thr: 70, isp: 345, mass: .6, cost: 220000, rel: .96, vac: 1, res: "whisper", tip: "Very efficient in space, but weak at the ground (only 35% thrust)." },
-    srb: { name: "Solid Booster", thr: 1100, isp: 242, mass: 1.6, cost: 140000, rel: .94, solid: 14, res: "srb", tip: "Carries its own 14 tonnes of solid fuel. Cheap and strong, but a lower Isp." }
+    srb: { name: "Solid Booster", thr: 5500, isp: 242, mass: 1.6, cost: 140000, rel: .94, solid: 14, res: "srb", tip: "Carries its own 14 tonnes of solid fuel. Cheap, 5x the push, but a lower Isp." }
   };
   const TANKS = { T: { name: "Tiny", fuel: 1, dry: .15, cost: 8000 }, S: { name: "Small", fuel: 3, dry: .35, cost: 15000 }, M: { name: "Medium", fuel: 12, dry: 1.1, cost: 45000 }, L: { name: "Large", fuel: 45, dry: 3.6, cost: 130000 }, XL: { name: "Huge", fuel: 150, dry: 11, cost: 380000, res: "xl" }, G: { name: "Giant", fuel: 400, dry: 28, cost: 1000000, res: "giant" }, MG: { name: "Mega", fuel: 1000, dry: 70, cost: 2500000, res: "mega" }, TT: { name: "Titanic", fuel: 3000, dry: 200, cost: 7000000, res: "tt" } };
   const TORD = ["T", "S", "M", "L", "XL", "G", "MG", "TT"], BOOSTS = ["srb", "bigsrb"];
@@ -152,7 +152,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
   // pieces you can buy for the satellite: they weigh something, cost money and earn a bonus when it works
   const SATP = { solar: ["Big solar panels", 40, 25000, 6], ant: ["Better antenna", 20, 30000, 5], cam: ["HD camera", 35, 60000, 9], bat: ["Battery pack", 50, 20000, 4], thr: ["Thrusters for fixes", 30, 45000, 6], sci: ["Science sensors", 25, 50000, 7], shield: ["Radiation shield", 45, 35000, 5], fuel: ["Extra fuel (longer life)", 60, 20000, 5], mirror: ["Star mirror", 70, 90000, 12], laser: ["Laser link", 40, 120000, 14], cpu: ["Backup computer", 15, 40000, 6], gold: ["Gold-plated coat", 5, 15000, 2] };
   const SATNAMES = ["Starling", "Comet Jr", "Skyeye", "Orbiter One", "Moonbeam", "Sparkle", "Pathfinder", "Aurora", "Nimbus", "Voyager Kid", "Lumi", "Zippy"];
-  const LOOK0 = { body: "#f4f4f8", stripe: "#e0314f", nose: "#e0314f", fins: "#3a4a7a", flame: "#ff9a2a", noseShape: "cone", finShape: "small", stripes: 1, windows: 1, name: "Rocket 1", logo: "S" };
+  const LOOK0 = { body: "#f4f4f8", stripe: "#e0314f", nose: "#e0314f", fins: "#3a4a7a", flame: "#ff9a2a", noseShape: "cone", finShape: "small", bodyShape: "classic", stripes: 1, windows: 1, name: "Rocket 1", logo: "S" };
 
   let S = null, app = null, tab = "contracts", sel = null, lessonOpen = 0;
   function fresh() {
@@ -203,6 +203,10 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
     return { st, dv: dvTot, need, twr0, cost, total, rel: Math.min(.995, rel), crewOk, fairOk, cap: top.cap, low, lift: twr0 >= 1, enough: dvTot >= need };
   }
 
+  const BODYSHAPES = { classic: t => 1, tapered: t => .72 + .28 * t, flared: t => .9 + .3 * t, barrel: t => 1 + .2 * Math.sin(Math.PI * t), hourglass: t => 1 - .2 * Math.sin(Math.PI * t), diamond: t => .7 + .5 * Math.sin(Math.PI * t), stepped: t => t < .5 ? .8 : 1.08, wavy: t => 1 + .1 * Math.sin(t * Math.PI * 6), slim: t => .78, chunky: t => 1.22 };
+  const BODYNAMES = [["classic", "1 Classic"], ["tapered", "2 Tapered"], ["flared", "3 Flared"], ["barrel", "4 Barrel"], ["hourglass", "5 Hourglass"], ["diamond", "6 Diamond"], ["stepped", "7 Stepped"], ["wavy", "8 Wavy"], ["slim", "9 Slim"], ["chunky", "10 Chunky"]];
+  const FINS = { small: [13, 9], big: [22, 13], swept: [26, 9], wing: [18, 22], tail: [34, 6] };
+  const THEMES = [["Classic red", { body: "#f4f4f8", stripe: "#e0314f", nose: "#e0314f", fins: "#3a4a7a", flame: "#ff9a2a" }], ["Ocean", { body: "#e6f6ff", stripe: "#1e90ff", nose: "#0b5fb0", fins: "#0b5fb0", flame: "#4ee6e6" }], ["Gold star", { body: "#fff4cc", stripe: "#e0a800", nose: "#e0a800", fins: "#8a5a00", flame: "#ffd34e" }], ["Night", { body: "#2b2f4a", stripe: "#8a7bff", nose: "#8a7bff", fins: "#14172e", flame: "#b08cff" }], ["Mint", { body: "#e8fff3", stripe: "#2fb34a", nose: "#2fb34a", fins: "#1f7a34", flame: "#9cff7a" }], ["Fire", { body: "#fff0e0", stripe: "#e53935", nose: "#ff8a2a", fins: "#a31515", flame: "#ff5a1a" }], ["Candy", { body: "#ffe6f4", stripe: "#ff4fa3", nose: "#ff4fa3", fins: "#a02a78", flame: "#ffb3e0" }], ["Steel", { body: "#c9cfdc", stripe: "#4a5470", nose: "#4a5470", fins: "#2a3048", flame: "#ffb35a" }], ["Neon", { body: "#10142e", stripe: "#39ff14", nose: "#39ff14", fins: "#0aa0ff", flame: "#39ff14" }], ["Sunset", { body: "#fff2d6", stripe: "#ff7a45", nose: "#c2307a", fins: "#5a2a8a", flame: "#ffcf4a" }]];
   // ---------------- drawing a rocket (also used by the launch) ----------------
   function drawRocket(x, des, cx, base, sc, o) {
     o = o || {}; const L = des.look || LOOK0, stages = o.only ? des.stages.slice(0, o.only) : des.stages; let y = base;
@@ -217,14 +221,17 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
       y -= 6 * sc;
       // tank body
       const h = th * (e.solid ? 1 : Math.min(2.6, .8 + tanks * .45)); y -= h;
-      x.fillStyle = L.body; x.fillRect(cx - w / 2, y, w, h); x.fillStyle = "rgba(0,0,0,.12)"; x.fillRect(cx + w * .15, y, w * .35, h); x.fillStyle = "rgba(255,255,255,.35)"; x.fillRect(cx - w * .4, y, w * .12, h);
-      x.strokeStyle = "#1a1240"; x.lineWidth = Math.max(1, sc * .8); x.strokeRect(cx - w / 2, y, w, h);
-      if (L.stripes) { x.fillStyle = L.stripe; x.fillRect(cx - w / 2, y + h * .12, w, Math.max(2, h * .1)); if (L.stripes > 1) x.fillRect(cx - w / 2, y + h * .78, w, Math.max(2, h * .1)); }
+      const BS = BODYSHAPES[L.bodyShape] || BODYSHAPES.classic, bpath = () => { x.beginPath(); for (let k = 0; k <= 10; k++) { const t = k / 10, hw = w / 2 * BS(t); k ? x.lineTo(cx - hw, y + h * t) : x.moveTo(cx - hw, y); } for (let k = 10; k >= 0; k--) { const t = k / 10; x.lineTo(cx + w / 2 * BS(t), y + h * t); } x.closePath(); };
+      x.save(); bpath(); x.fillStyle = L.body; x.fill(); x.clip();
+      const gg = x.createLinearGradient(cx - w * .75, 0, cx + w * .75, 0); gg.addColorStop(0, "rgba(255,255,255,.55)"); gg.addColorStop(.28, "rgba(255,255,255,.1)"); gg.addColorStop(.65, "rgba(0,0,0,0)"); gg.addColorStop(1, "rgba(0,0,0,.4)"); x.fillStyle = gg; x.fillRect(cx - w, y, w * 2, h);
+      if (L.stripes) { x.fillStyle = L.stripe; x.fillRect(cx - w, y + h * .12, w * 2, Math.max(2, h * .1)); if (L.stripes > 1) x.fillRect(cx - w, y + h * .78, w * 2, Math.max(2, h * .1)); x.fillStyle = "rgba(0,0,0,.18)"; x.fillRect(cx - w, y + h * .12 + Math.max(2, h * .1) - 1, w * 2, 1.5 * sc); }
+      x.fillStyle = "rgba(0,0,0,.16)"; if (h > 30 * sc) x.fillRect(cx - w, y + h * .5, w * 2, Math.max(1, sc * .8)); if (h > 55 * sc) { x.fillRect(cx - w, y + h * .3, w * 2, Math.max(1, sc * .6)); x.fillRect(cx - w, y + h * .7, w * 2, Math.max(1, sc * .6)); }
+      x.restore(); bpath(); x.strokeStyle = "#1a1240"; x.lineWidth = Math.max(1, sc * .9); x.stroke();
       if (i === stages.length - 1 && L.windows && !o.noWin) { for (let k = 0; k < Math.min(3, L.windows); k++) { x.fillStyle = "#9fe3ff"; x.beginPath(); x.arc(cx, y + h * .35 + k * 12 * sc, 3.4 * sc, 0, 7); x.fill(); x.strokeStyle = "#1a1240"; x.stroke(); } }
       if (i === 0 && L.logo) { x.fillStyle = "#1a1240"; x.font = "bold " + Math.round(11 * sc) + "px system-ui, sans-serif"; x.textAlign = "center"; x.fillText(String(L.logo).slice(0, 2), cx, y + h * .6); }
       if (i === 0 && des.boost && des.boost.count > 0 && ENGINES[des.boost.eng]) { const nb = Math.min(4, des.boost.count), bw = w * .3, bh = h * .85; [-1, 1].forEach((d, k) => { for (let q = 0; q < Math.ceil(nb / 2) && q < 2; q++) { const bx = cx + d * (w / 2 + bw / 2 + q * bw * .95); x.fillStyle = "#e8e8ee"; x.fillRect(bx - bw / 2, y + h - bh, bw, bh); x.fillStyle = L.nose; x.beginPath(); x.moveTo(bx - bw / 2, y + h - bh); x.lineTo(bx, y + h - bh - bw * 1.1); x.lineTo(bx + bw / 2, y + h - bh); x.fill(); x.strokeStyle = "#1a1240"; x.strokeRect(bx - bw / 2, y + h - bh, bw, bh); } }); }
       // fins on the first stage
-      if (i === 0 && L.finShape !== "none") { const fh = (L.finShape === "big" ? 22 : L.finShape === "swept" ? 26 : 13) * sc, fw = (L.finShape === "big" ? 13 : 9) * sc; x.fillStyle = L.fins; [[-1], [1]].forEach(([d]) => { x.beginPath(); x.moveTo(cx + d * w / 2, y + h - fh * (L.finShape === "swept" ? 1.1 : 1)); x.lineTo(cx + d * (w / 2 + fw), y + h + 2 * sc); x.lineTo(cx + d * w / 2, y + h); x.closePath(); x.fill(); x.stroke(); }); }
+      if (i === 0 && L.finShape !== "none") { const fz = FINS[L.finShape] || FINS.small, fh = fz[0] * sc, fw = fz[1] * sc; x.fillStyle = L.fins; x.strokeStyle = "#1a1240"; x.lineWidth = Math.max(1, sc * .9); [-1, 1].forEach(d => { x.beginPath(); x.moveTo(cx + d * w / 2 * BS(1), y + h - fh * (L.finShape === "swept" ? 1.1 : 1)); x.lineTo(cx + d * (w / 2 * BS(1) + fw), y + h + 2 * sc); x.lineTo(cx + d * w / 2 * BS(1), y + h); x.closePath(); x.fill(); x.stroke(); x.fillStyle = "rgba(255,255,255,.22)"; x.fill(); x.fillStyle = L.fins; }); }
       y -= 3 * sc; x.fillStyle = "#3a3f55"; x.fillRect(cx - w * .42, y, w * .84, 3 * sc); topW = w;
     });
     if (o.noTop) return y;
@@ -233,9 +240,12 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
     x.fillStyle = L.nose; x.beginPath();
     if (tp.crew) { x.moveTo(cx - w / 2, y); x.lineTo(cx - w * .3, y - nh); x.lineTo(cx + w * .3, y - nh); x.lineTo(cx + w / 2, y); }
     else if (L.noseShape === "round") { x.moveTo(cx - w / 2, y); x.quadraticCurveTo(cx - w / 2, y - nh * 1.15, cx, y - nh * 1.15); x.quadraticCurveTo(cx + w / 2, y - nh * 1.15, cx + w / 2, y); }
+    else if (L.noseShape === "needle") { x.moveTo(cx - w / 2, y); x.quadraticCurveTo(cx - w * .12, y - nh * .7, cx, y - nh * 1.9); x.quadraticCurveTo(cx + w * .12, y - nh * .7, cx + w / 2, y); }
+    else if (L.noseShape === "bullet") { x.moveTo(cx - w / 2, y); x.bezierCurveTo(cx - w / 2, y - nh * 1.1, cx - w * .2, y - nh * 1.5, cx, y - nh * 1.5); x.bezierCurveTo(cx + w * .2, y - nh * 1.5, cx + w / 2, y - nh * 1.1, cx + w / 2, y); }
+    else if (L.noseShape === "dome") { x.moveTo(cx - w / 2, y); x.quadraticCurveTo(cx - w / 2, y - nh * .75, cx, y - nh * .75); x.quadraticCurveTo(cx + w / 2, y - nh * .75, cx + w / 2, y); }
     else if (L.noseShape === "flat") { x.moveTo(cx - w / 2, y); x.lineTo(cx - w * .22, y - nh * .8); x.lineTo(cx + w * .22, y - nh * .8); x.lineTo(cx + w / 2, y); }
     else { x.moveTo(cx - w / 2, y); x.lineTo(cx, y - nh * 1.3); x.lineTo(cx + w / 2, y); }
-    x.closePath(); x.fill(); x.strokeStyle = "#1a1240"; x.lineWidth = Math.max(1, sc * .8); x.stroke();
+    x.closePath(); x.fill(); { const ng = x.createLinearGradient(cx - w / 2, 0, cx + w / 2, 0); ng.addColorStop(0, "rgba(255,255,255,.5)"); ng.addColorStop(.35, "rgba(255,255,255,0)"); ng.addColorStop(1, "rgba(0,0,0,.35)"); x.fillStyle = ng; x.fill(); } x.strokeStyle = "#1a1240"; x.lineWidth = Math.max(1, sc * .9); x.stroke();
     if (tp.crew) { x.fillStyle = "#9fe3ff"; x.beginPath(); x.arc(cx, y - nh * .45, 4 * sc, 0, 7); x.fill(); x.stroke(); }
     return y - nh;
   }
@@ -386,9 +396,11 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
       <div class="rc-look"><h3>Look</h3>
         <label>Name <input id="lkName" maxlength="14" value="${esc(L.name)}"></label>
         <label>Logo letter <input id="lkLogo" maxlength="2" value="${esc(L.logo)}"></label>
+        <div class="rc-themes"><b>Color themes</b>${THEMES.map((t, i) => `<button type="button" class="rc-th" data-th="${i}" title="${t[0]}" style="background:linear-gradient(90deg,${t[1].body} 0 35%,${t[1].stripe} 35% 65%,${t[1].nose} 65%)"></button>`).join("")}</div>
         ${[["body", "Body"], ["stripe", "Stripes"], ["nose", "Nose"], ["fins", "Fins"], ["flame", "Flame"]].map(k => `<label>${k[1]} <input type="color" data-lk="${k[0]}" value="${L[k[0]]}"></label>`).join("")}
-        <label>Nose <select data-lks="noseShape">${[["cone", "Pointy"], ["round", "Round"], ["flat", "Flat"]].map(o => `<option value="${o[0]}" ${L.noseShape === o[0] ? "selected" : ""}>${o[1]}</option>`).join("")}</select></label>
-        <label>Fins <select data-lks="finShape">${[["none", "None"], ["small", "Small"], ["big", "Big"], ["swept", "Swept"]].map(o => `<option value="${o[0]}" ${L.finShape === o[0] ? "selected" : ""}>${o[1]}</option>`).join("")}</select></label>
+        <label>Body shape <select data-lks="bodyShape">${BODYNAMES.map(o => `<option value="${o[0]}" ${(L.bodyShape || "classic") === o[0] ? "selected" : ""}>${o[1]}</option>`).join("")}</select></label>
+        <label>Nose <select data-lks="noseShape">${[["cone", "Pointy"], ["round", "Round"], ["flat", "Flat"], ["needle", "Needle"], ["bullet", "Bullet"], ["dome", "Dome"]].map(o => `<option value="${o[0]}" ${L.noseShape === o[0] ? "selected" : ""}>${o[1]}</option>`).join("")}</select></label>
+        <label>Fins <select data-lks="finShape">${[["none", "None"], ["small", "Small"], ["big", "Big"], ["swept", "Swept"], ["wing", "Wings"], ["tail", "Tall tail"]].map(o => `<option value="${o[0]}" ${L.finShape === o[0] ? "selected" : ""}>${o[1]}</option>`).join("")}</select></label>
         <label>Stripes <select data-lkn="stripes">${[0, 1, 2].map(n => `<option value="${n}" ${L.stripes === n ? "selected" : ""}>${n}</option>`).join("")}</select></label>
         <label>Windows <select data-lkn="windows">${[0, 1, 2, 3].map(n => `<option value="${n}" ${L.windows === n ? "selected" : ""}>${n}</option>`).join("")}</select></label>
         <p class="note">Use a nickname, not your real name.</p>
@@ -412,6 +424,7 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
     el.querySelector("#lkName").oninput = e => { const v = e.target.value.replace(/[^\p{L}\p{N} _-]/gu, "").slice(0, 14); L.name = v || "Rocket"; save(); };
     el.querySelector("#lkName").onchange = redo; el.querySelector("#lkLogo").oninput = e => { L.logo = e.target.value.replace(/[^\p{L}\p{N}]/gu, "").slice(0, 2); save(); }; el.querySelector("#lkLogo").onchange = redo;
     el.querySelectorAll("[data-lk]").forEach(i => i.oninput = () => { L[i.dataset.lk] = i.value; save(); build(el); });
+    el.querySelectorAll("[data-th]").forEach(b => b.onclick = () => { Object.assign(L, THEMES[+b.dataset.th][1]); save(); build(el); });
     el.querySelectorAll("[data-lks]").forEach(i => i.onchange = () => { L[i.dataset.lks] = i.value; redo(); });
     el.querySelectorAll("[data-lkn]").forEach(i => i.onchange = () => { L[i.dataset.lkn] = +i.value; redo(); });
     el.querySelector("#rcSaveD").onclick = () => { S.designs.push(JSON.parse(JSON.stringify(des))); S.designs = S.designs.slice(-8); save(); snd("star"); redo(); };
@@ -625,10 +638,10 @@ kleopatra|Asteroid Kleopatra landing|14100|300000000|L`;
       S.dealPaid[id] = 1; S.cash += pay; S.earned += pay; save(); snd("star"); render(); });
   }
   // ---------------- loans ----------------
-  const LIMITS = [300000, 600000, 1200000, 2500000, 5000000, 10000000, 25000000], RATE = .04;
+  const LIMITS = [1500000, 3000000, 6000000, 12500000, 25000000, 50000000, 125000000], RATE = .01;
   function bank(el) {
     const lim = LIMITS[tier()], avail = Math.max(0, lim - S.debt);
-    const amts = [100000, 250000, 500000, 1000000, 5000000].filter(a => a <= lim);
+    const amts = [500000, 1000000, 5000000, 10000000, 25000000, 100000000].filter(a => a <= lim);
     el.innerHTML = `<p class="note">The bank lends you money for rockets, but you pay <b>${RATE * 100}% interest after every launch</b>. Borrowing too much is risky!</p>
       <div class="rc-bankbox"><div>Cash <b>${money(S.cash)}</b></div><div>You owe <b class="${S.debt ? "badc" : ""}">${money(S.debt)}</b></div><div>The bank will lend you up to <b>${money(lim)}</b> in total (you can still borrow <b>${money(avail)}</b>). Win more orders and the limit goes up.</div><div>Interest you will pay after the next launch: <b>${money(Math.round(S.debt * RATE))}</b></div></div>
       <h3>Borrow</h3><div class="rc-loanbtns">${amts.map(a => `<button class="close" data-b="${a}" ${a > avail ? "disabled" : ""}>${money(a)}</button>`).join("")}<button class="close" data-b="max" ${avail <= 0 ? "disabled" : ""}>Borrow the most (${money(avail)})</button></div>
