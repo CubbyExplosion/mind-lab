@@ -329,10 +329,18 @@ sunsolarwindca|Sun: solar wind catcher|14607|150000000|P
 sunmercurydist|Sun: Mercury-distance orbit|14614|150000000|P
 sunearthl4poin|Sun-Earth L4 point|10600|1500000|P
 sunearthl5poin|Sun-Earth L5 point|10607|1500000|P
-moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
+moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P
+jupcloudcity|Jupiter: cloud city (floating)|15800|630000000|L
+jupredspot|Jupiter: Great Red Spot station|15850|630000000|L
+satcloudcity|Saturn: cloud city (floating)|16200|1200000000|L
+satringview|Saturn: ring-view platform|16250|1200000000|L
+urancloud|Uranus: cloud station|16700|2700000000|L
+uranicy|Uranus: icy depths platform|16750|2700000000|L
+nepcloud|Neptune: cloud station|17000|4300000000|L
+nepwind|Neptune: windy platform|17050|4300000000|L`;
   const DESTS = {}, DLIST = [];
   PLACES.split("\n").forEach(r => { const f = r.split("|"), dv = +f[2], tier = dv <= 2500 ? 0 : dv <= 9800 ? 1 : dv <= 11500 ? 2 : dv <= 12800 ? 3 : dv <= 13700 ? 4 : dv <= 15000 ? 5 : 6; const d = { id: f[0], name: f[1], dv, alt: +f[3], kind: f[4], tier, spd: Math.min(14, dv / 1000 * .8), mult: f[0] === "sub" ? .17 : Math.max(.5, Math.pow(dv / 9400, 3)) }; DESTS[d.id] = d; DLIST.push(d); });
-  if (DLIST.length !== 296) console.warn("places:", DLIST.length);
+  if (DLIST.length !== 304) console.warn("places:", DLIST.length);
   const RESEARCH = {
     comet: ["Comet engine", 120000, "A mid-size engine."], gale: ["Gale space engine", 350000, "Very efficient upper-stage engine."], nuke: ["Nuclear thermal engine", 2500000, "Isp 850! For the far planets."], giant: ["Giant fuel tank", 700000, "400 tonnes of fuel in one tank."],
     hornet: ["Hornet engine", 150000, "A strong mid-size engine."], silk: ["Silk big space engine", 900000, "Very efficient and strong, for upper stages."], colossus: ["Colossus engine", 3000000, "10,000 kN of push!"], mammoth: ["Mammoth engine", 8000000, "22,000 kN of push. The biggest."], sipu: ["SIPU engine", 5000000, "500,000 push, just 10 tonnes, and it makes its own fuel!"], bigsrb: ["Big Solid Booster", 600000, "A giant strap-on booster."], mega: ["Mega fuel tank", 2000000, "1,000 tonnes of fuel in one tank."], tt: ["Titanic fuel tank", 6000000, "3,000 tonnes of fuel in one tank."], stage4: ["Fourth stage", 800000, "Build rockets with 4 stages."], stage5: ["Fifth stage", 2000000, "Build rockets with 5 stages."], wide: ["Wide fairing", 200000, "Carries satellites up to 25,000 kg."], megaf: ["Mega fairing", 900000, "Carries satellites up to 150,000 kg."],
@@ -485,13 +493,14 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
   { const NEWB = {leo2: "earth", hubble: "earth", tiangong: "earth", equator: "earth", starlink: "earth", tdrs: "earth", apollo17: "moon", copernicus: "moon", imbrium: "moon", aristarch: "moon", moonpole: "moon", lavatube: "moon", gale: "mars", hellas: "mars", elysium: "mars", marsice: "mars", gusev: "mars", marshigh: "mars", maxwell: "venus", venhigh: "venus", caloris: "mercury", occator: "ceres", rheasil: "vesta", redspot: "jupiter", juppolar: "jupiter", loki: "io", conamara: "europa", galileoreg: "ganymede", valhalla: "callisto", satring: "saturn", satinner: "saturn", kraken: "titan", dunes: "titan", tiger: "enceladus", uranring: "uranus", darkspot: "neptune", geyser: "triton", tombaugh: "pluto", pluhigh: "pluto", erosorb: "eros", bennuorb: "bennu", itofly: "itokawa", psyorb: "psyche", churorb: "churyumov", halleyclose: "halley", stickney: "phobos", deimorb: "deimos", hypland: "hyperion", pholand: "phoebe", dioneorb: "dione"}; Object.keys(NEWB).forEach(id => { PB[NEWB[id]] = (PB[NEWB[id]] || "") + " " + id; }); }
   { const NEWB2 = {leo3: "earth", nano: "earth", weather: "earth", spy: "earth", navi: "earth", geo2: "earth", sub3: "earth", moonnorth: "moon", moonmare: "moon", moonrim: "moon", moonlow: "moon", moonrock: "moon", moonbase: "moon", marsnorth: "mars", marsdunes: "mars", marscave: "mars", marsmoon: "mars", marsfly2: "mars", venpole: "venus", venlava: "venus", merpole: "mercury", merlow: "mercury", cerice: "ceres", cerhigh: "ceres", vesmount: "vesta", jupstorm: "jupiter", iovolc: "io", euice: "europa", euocean: "europa", gancrat: "ganymede", calice: "callisto", satstorm: "saturn", satgap: "saturn", titlake: "titan", titmount: "titan", encplume: "enceladus", rhorb: "rhea", iaporb: "iapetus", miranorb: "miranda", titanorb: "titania", oberorb: "oberon", arielorb: "ariel", tritorb: "triton", nepstorm: "neptune", charorb: "charon", plumount: "pluto", erisorb: "eris", cometland2: "halley", hyakland: "hyaku", halebland: "halebopp"}; Object.keys(NEWB2).forEach(id => { PB[NEWB2[id]] = (PB[NEWB2[id]] || "") + " " + id; }); }
   { const NEWB3 = {cargoshipdocko: "earth", spacehotelorbi: "earth", studentsatelli: "earth", spacefactoryor: "earth", rocketfueldepo: "earth", spacejunkclean: "earth", spacelaborbit: "earth", radiotelescope: "earth", cloudtophop100: "earth", spacepostcardh: "earth", schoolrocketho: "earth", moonmarecrisiu: "moon", moonrimahyginu: "moon", moonschrodinge: "moon", moonmonshadley: "moon", moonoceanuspro: "moon", moontsiolkovsk: "moon", moonplatocrate: "moon", moonmonsrumker: "moon", moonmessiercra: "moon", moonsurveyor3s: "moon", moonfrozenorbi: "moon", moonhaloorbit: "moon", marsutopiaplan: "mars", marsarsiamons: "mars", marsmeridianip: "mars", marsnoctislaby: "mars", marsargyrebasi: "mars", marstharsisbul: "mars", marsmawrthvall: "mars", marscerberusfo: "mars", marsloworbit: "mars", marsrelayorbit: "mars", venusishtarter: "venus", venusaphrodite: "venus", venusbetaregio: "venus", mercuryrachman: "mercury", mercuryhollows: "mercury", mercurytolstoj: "mercury", ceresahunamons: "ceres", cereskerwancra: "ceres", vestaveneneiab: "vesta", vestamarciacra: "vesta", jupiterequator: "jupiter", jupiterhighorb: "jupiter", iopillanpatera: "io", iotvashtarvolc: "io", ioprometheuspl: "io", europapwyllcra: "europa", europatheramac: "europa", europatyreimpa: "europa", ganymedetroscr: "ganymede", ganymedenichol: "ganymede", callistoasgard: "callisto", callistobrancr: "callisto", saturnpolarorb: "saturn", saturnringskim: "saturn", titanligeiasea: "titan", titanxanadu: "titan", titanselkcrate: "titan", enceladusbaghd: "enceladus", enceladusdamas: "enceladus", rheatirawabasi: "rhea", iapetuscassini: "iapetus", iapetusequator: "iapetus", mimasherschelc: "mimas", uranuspolarorb: "uranus", uranushighorbi: "uranus", neptunepolaror: "neptune", neptuneringorb: "neptune", tritoncantalou: "triton", tritonmazomba: "triton", plutosputnikpl: "pluto", plutowrightmon: "pluto", plutocthulhuma: "pluto", charonmordorma: "charon", charonvulcanpl: "charon", erospsychecrat: "eros", bennunightinga: "bennu", ryuguorbit: "ryugu", itokawaorbit: "itokawa", apophisorbit: "apophis", idadactylmoonl: "ida", lutetiaorbit: "lutetia", kleopatraorbit: "kleopatra", arrokothlandin: "arrokoth", makemakeorbit: "makemake", haumeaorbit: "haumea", sednaorbit: "sedna", halleyorbit: "halley", sunsecondclose: "sunpass", sunsolarwindca: "sunpass", sunmercurydist: "sunpass", sunearthl4poin: "l1", sunearthl5poin: "l1", moonl2halofars: "gateway"}; Object.keys(NEWB3).forEach(id => { PB[NEWB3[id]] = (PB[NEWB3[id]] || "") + " " + id; }); }
+  { const NEWB4 = { jupcloudcity: "jupiter", jupredspot: "jupiter", satcloudcity: "saturn", satringview: "saturn", urancloud: "uranus", uranicy: "uranus", nepcloud: "neptune", nepwind: "neptune" }; Object.keys(NEWB4).forEach(id => { PB[NEWB4[id]] = (PB[NEWB4[id]] || "") + " " + id; }); }
   const PBODY = {}; Object.keys(PB).forEach(k => PB[k].split(" ").forEach(id => { PBODY[id] = k; }));
   const ROCK = { moon: ["#b0aeb8", "#4c4c58", "#eceaf2", 90], mercury: ["#a39a8e", "#403b36", "#ddd4c6", 110], ceres: ["#8c8982", "#3a3834", "#cac6be", 60], ganymede: ["#8c8272", "#3c352c", "#cabda8", 50], callisto: ["#4e463a", "#1a1612", "#8c8070", 140], rhea: ["#b8b8bc", "#505058", "#f0f0f4", 70], iapetus: ["#c8c8cc", "#46464c", "#f4f4f8", 50], mimas: ["#aaaab0", "#484850", "#e4e4ea", 60], dione: ["#bcbcc2", "#505058", "#f0f0f6", 60], tethys: ["#c4c4ca", "#54545c", "#f4f4fa", 50], miranda: ["#a8a8b0", "#484850", "#e0e0e8", 50], titania: ["#a0a0a8", "#44444c", "#dcdce4", 60], oberon: ["#8c8890", "#3c3a40", "#c8c4cc", 70], ariel: ["#b4b4bc", "#4c4c54", "#e8e8f0", 50], charon: ["#a8a4a8", "#444044", "#e0dce0", 50], eris: ["#e8e8f0", "#7a7a8a", "#ffffff", 20], makemake: ["#b46a46", "#58301c", "#e8a47c", 30], sedna: ["#b0402a", "#4a1a10", "#e87a5a", 10] };
   const HAZE = { venus: ["#ecca7a", "#8a6a30", "#fff2c4"], titan: ["#dc9c3c", "#6c4412", "#ffd890"], uranus: ["#8fe3e6", "#3a8a98", "#d4ffff"], neptune: ["#2f5fd8", "#14307a", "#7aa0ff"] };
   const POTATO = { phobos: ["#8a7a6e", 1.4], deimos: ["#9a8a7e", 1.2], vesta: ["#9a9288", 1.05], eros: ["#a89478", 2.2], bennu: ["#4a4642", 1.05], ryugu: ["#585450", 1.05], itokawa: ["#a88e70", 2.4], psyche: ["#8c8c94", 1.5], apophis: ["#8a8478", 1.6], ida: ["#a09484", 1.8], lutetia: ["#8c8680", 1.3], kleopatra: ["#9c9488", 3], hyperion: ["#b09c84", 1.5], phoebe: ["#5c5852", 1.1], amalthea: ["#a85a40", 1.8], himalia: ["#7a7670", 1.2], haumea: ["#f0f0f8", 1.9], arrokoth: ["#a85a3a", 2.6], churyumov: ["#4a4642", 2.2] };
   const PARENT = { moon: "earth", phobos: "mars", deimos: "mars", io: "jupiter", europa: "jupiter", ganymede: "jupiter", callisto: "jupiter", amalthea: "jupiter", himalia: "jupiter", titan: "saturn", enceladus: "saturn", rhea: "saturn", iapetus: "saturn", mimas: "saturn", dione: "saturn", tethys: "saturn", hyperion: "saturn", phoebe: "saturn", triton: "neptune", miranda: "uranus", titania: "uranus", oberon: "uranus", ariel: "uranus", charon: "pluto" };
   const hsh = str => { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
-  const mkr = seed => { let q = seed >>> 0 || 1; return () => (q = (Math.imul(q, 1664525) + 1013904223) >>> 0) / 4294967296; };
+  const mkr = seed => { let q = seed >>> 0 || 1; return () => (q = (Math.imul(q, 1664525) + 1013904223) >>> 0) / 4294967304; };
   const lit = (x, cx, cy, r, c0, c1, c2) => { const g = x.createRadialGradient(cx - r * .38, cy - r * .38, r * .08, cx, cy, r); g.addColorStop(0, c2); g.addColorStop(.5, c0); g.addColorStop(1, c1); x.fillStyle = g; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fill(); };
   const night = (x, cx, cy, r) => { const g = x.createRadialGradient(cx - r * .45, cy - r * .45, r * .55, cx + r * .3, cy + r * .3, r * 1.3); g.addColorStop(0, "rgba(0,0,12,0)"); g.addColorStop(1, "rgba(0,0,12,.5)"); x.fillStyle = g; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fill(); };
   const clip = (x, cx, cy, r, fn) => { x.save(); x.beginPath(); x.arc(cx, cy, r, 0, 7); x.clip(); fn(); x.restore(); };
@@ -519,7 +528,7 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
     else lit(x, cx, cy, r, "#9a9aa4", "#3a3a44", "#d8d8e0");
   }
   function surface(x, key, W, H, rn, place) {
-    const air = { mars: ["#d9a07a", "#b8683e", "#a8532e", "#5a2a16"], venus: ["#d8903a", "#8a4a1a", "#7a4a2a", "#3a2412"], titan: ["#d89a3a", "#8a5a1a", "#7a5226", "#3a2410"] }[key];
+    const air = { mars: ["#d9a07a", "#b8683e", "#a8532e", "#5a2a16"], venus: ["#d8903a", "#8a4a1a", "#7a4a2a", "#3a2412"], titan: ["#d89a3a", "#8a5a1a", "#7a5226", "#3a2410"], jupiter: ["#e0b080", "#a8683a", "#d8a878", "#6a4426"], saturn: ["#ecd8a0", "#b89a5a", "#e0c888", "#7a6232"], uranus: ["#a8e8f0", "#5ab8c8", "#98dce6", "#3a8a98"], neptune: ["#5a8ae8", "#2a4ab0", "#4a78d8", "#1a2e78"] }[key];
     const g = x.createLinearGradient(0, 0, 0, H * .6); if (air) { g.addColorStop(0, air[0]); g.addColorStop(1, air[1]); x.fillStyle = g; x.fillRect(0, 0, W, H); } else starsBg(x, W, H, rn, 160);
     const par = PARENT[key]; if (par) drawBody(x, par, W * .72, H * .24, key === "moon" ? 38 : par === "jupiter" || par === "saturn" ? 90 : 55, rn); else if (!air || key === "mars") { x.fillStyle = "#fff8d0"; x.beginPath(); x.arc(W * .8, H * .2, key === "mercury" ? 34 : 8, 0, 7); x.fill(); }
     const base = air ? air[2] : ROCK[key] ? ROCK[key][0] : POTATO[key] ? POTATO[key][0] : key === "europa" ? "#e8dcc8" : key === "enceladus" ? "#eef4ff" : key === "io" ? "#d8c040" : key === "pluto" ? "#c8a888" : key === "triton" ? "#e8c8c0" : "#9a9aa4", dark = air ? air[3] : "#2a2a32";
@@ -565,7 +574,7 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
     const t = tier();
     return `<button class="back" id="rcHome">← All subjects</button><div class="rc-head"><h1>${esc(S.company)}</h1><div class="rc-stats"><span>Cash <b>${money(S.cash)}</b></span>${S.debt > 0 ? `<span>Debt <b class="badc">${money(S.debt)}</b></span>` : ""}<span>${esc(TIERNAMES[t])}</span><span>Launches <b>${S.ok}</b> good / ${S.tries}</span></div></div>
       <p class="sub">You run a launch company: customers order a ride into space for their satellites. Play money only! Build rockets, take orders, and launch heavier and heavier satellites. <label class="rc-co">Company name <input id="rcCo" maxlength="20" value="${esc(S.company)}"></label></p>
-      <div class="rc-tabs">${[["contracts", "Orders"], ["build", "Build"], ["places", "296 Places"], ["research", "Shop & research"], ["eng", "Engineer job"], ["fun", "Fun jobs"], ["base", "My Base"], ["deal", "Special deals"], ["bank", "Loans"], ["stocks", "Stocks"], ["learn", "Rocket science"], ["log", "Records"]].map(a => `<button type="button" class="rc-tab ${tab === a[0] ? "on" : ""}" data-t="${a[0]}">${a[1]}</button>`).join("")}</div>`;
+      <div class="rc-tabs">${[["contracts", "Orders"], ["build", "Build"], ["places", "304 Places"], ["research", "Shop & research"], ["eng", "Engineer job"], ["fun", "Fun jobs"], ["base", "My Base"], ["deal", "Special deals"], ["bank", "Loans"], ["stocks", "Stocks"], ["learn", "Rocket science"], ["log", "Records"]].map(a => `<button type="button" class="rc-tab ${tab === a[0] ? "on" : ""}" data-t="${a[0]}">${a[1]}</button>`).join("")}</div>`;
   }
   function render() {
     if (!app) return; const t = { contracts, build, places, research, eng, fun, base: baseTab, deal, bank, stocks, learn, log }[tab] || contracts;
@@ -695,7 +704,7 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
 
   function places(el) {
     const t = tier(), seen = Object.keys(S.visited).length;
-    el.innerHTML = `<p class="note">296 real places to go! You have visited <b>${seen} / 296</b>. Every place is open for orders from the start. Build a rocket with enough speed (delta-v) and the first trip there pays a bonus.</p><div class="rc-places">${DLIST.map(d => { const v = S.visited[d.id]; return `<div class="rc-place ${v ? "seen" : ""}"><canvas class="rc-pic" width="200" height="100" data-pid="${d.id}"></canvas><b>${esc(d.name)}</b><small>Needs ${d.dv.toLocaleString()} m/s · ${d.alt >= 1e9 ? (d.alt / 1e9).toFixed(1) + " billion km" : d.alt >= 1e6 ? Math.round(d.alt / 1e6) + " million km" : d.alt.toLocaleString() + " km"} away</small><small>Level needed: <b class="${d.tier <= t ? "okc" : "badc"}">${d.tier + 1} · ${TIERNAMES[d.tier]}</b></small><em>${v ? "Visited " + v + "x" : d.tier <= t ? "Open" : "Open, but a big challenge!"}</em></div>`; }).join("")}</div>`; pics(el);
+    el.innerHTML = `<p class="note">304 real places to go! You have visited <b>${seen} / 304</b>. Every place is open for orders from the start. Build a rocket with enough speed (delta-v) and the first trip there pays a bonus.</p><div class="rc-places">${DLIST.map(d => { const v = S.visited[d.id]; return `<div class="rc-place ${v ? "seen" : ""}"><canvas class="rc-pic" width="200" height="100" data-pid="${d.id}"></canvas><b>${esc(d.name)}</b><small>Needs ${d.dv.toLocaleString()} m/s · ${d.alt >= 1e9 ? (d.alt / 1e9).toFixed(1) + " billion km" : d.alt >= 1e6 ? Math.round(d.alt / 1e6) + " million km" : d.alt.toLocaleString() + " km"} away</small><small>Level needed: <b class="${d.tier <= t ? "okc" : "badc"}">${d.tier + 1} · ${TIERNAMES[d.tier]}</b></small><em>${v ? "Visited " + v + "x" : d.tier <= t ? "Open" : "Open, but a big challenge!"}</em></div>`; }).join("")}</div>`; pics(el);
   }
   function pics(el) { el.querySelectorAll("canvas[data-pid]").forEach(cv => { try { drawPlace(cv.getContext("2d"), cv.dataset.pid, cv.width, cv.height, "orb"); } catch (e) {} }); }
   // ---------------- stock market (pretend companies, pretend money) ----------------
@@ -1057,12 +1066,12 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
     const des = JSON.parse(JSON.stringify(S.design)), D = DESTS[c.dest], sname = o.name;
     S.cash -= a.cost + o.pieceCost + o.prem; S.tries++; save();
     let outcome = "ok", failAt = 1, why = "";
-    if (!a.enough) { outcome = "short"; failAt = .92; }
+    if (!a.enough) { outcome = "short"; failAt = 1; }
     else if (Math.random() > a.rel) { outcome = "boom"; failAt = rr(.12, .85); why = "An engine failed."; }
     const L = des.stages.length, mc = document.createElement("canvas").getContext("2d"); mc.canvas.width = 300; mc.canvas.height = 6000; const rScale = Math.max(.12, Math.min(1, 230 / (5900 - drawRocket(mc, des, 150, 5900, 1.2, { flame: 0 }))));
     app.innerHTML = `<div class="rc-launch"><canvas id="rcL" width="640" height="420"></canvas><div class="rc-tele" id="rcT"></div><div class="rc-deploy" id="rcD" hidden><p>Your rocket is at <b>${esc(D.name)}</b>! Press <b>Deploy</b> when the marker is in the <b class="okc">green zone</b>.</p><div class="rc-dbar"><i class="zone" id="rcZ"></i><i class="mk" id="rcM"></i></div><button class="close" id="rcDep" type="button">Deploy ${esc(sname)}!</button></div></div>`;
     const cv = document.getElementById("rcL"), x = cv.getContext("2d"), tele = document.getElementById("rcT"), dep = document.getElementById("rcD"), zone = document.getElementById("rcZ"), mk = document.getElementById("rcM");
-    let t0 = 0, raf = 0, done = false, parts = [], boomed = false, phase = "climb", tOrbit = 0, tDep = 0, deployOK = false, z0 = .2 + Math.random() * .4, marker = 0;
+    let tCr = 0, tLd = 0, t0 = 0, raf = 0, done = false, parts = [], boomed = false, phase = "climb", tOrbit = 0, tDep = 0, deployOK = false, z0 = .2 + Math.random() * .4, marker = 0;
     const CLIMB = 9; snd("launch");
     zone.style.left = z0 * 100 + "%"; zone.style.width = "34%";
     document.getElementById("rcDep").onclick = () => { if (phase !== "orbit") return; deployOK = marker >= z0 && marker <= z0 + .34; phase = "deploying"; tDep = performance.now(); dep.hidden = true; snd(deployOK ? "pop" : "wrong"); };
@@ -1104,8 +1113,33 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
     const step = ts => {
       if (!t0) t0 = ts;
       x.clearRect(0, 0, 640, 420);
+      if (phase === "cruise" || phase === "land") { // flying across space to the place, then landing
+        const key = PBODY[c.dest] || "moon", rn2 = mkr(hsh(c.dest)), isL = D.kind === "L", short = outcome === "short";
+        if (phase === "cruise") {
+          const TR = 6000, q = Math.min(1, (ts - tCr) / TR), fr = short ? Math.max(.2, Math.min(.8, a.dv / a.need * .8)) : 1, pq = Math.min(q, fr * q / Math.max(q, .0001) * (short ? 1 : 1)), mq = short ? Math.min(q * fr, fr) : q;
+          starsBg(x, 640, 420, rn2, 130);
+          drawBody(x, "earth", 90 - q * 70, 340 + q * 60, 150 - q * 110, rn2);
+          drawBody(x, key, 540, 150, 12 + q * q * 70, rn2, ts / 1000);
+          x.strokeStyle = "rgba(255,255,255,.3)"; x.setLineDash([6, 8]); x.beginPath(); x.moveTo(110, 320); x.lineTo(530, 160); x.stroke(); x.setLineDash([]);
+          const ex = 110 + (530 - 110) * mq, ey = 320 + (160 - 320) * mq, ang = Math.atan2(530 - 110, -(160 - 320));
+          x.save(); x.translate(ex, ey); x.rotate(ang); drawRocket(x, { ...des, look: { ...des.look, pieces: [] } }, 0, 22, Math.min(.5, .4 * rScale * 1.2 + .05), { flame: short && q >= 1 ? 0 : 1 }); x.restore();
+          if (!short || q < 1) parts.push({ x: ex - 6, y: ey + 6, vx: -30, vy: 18, l: .7, c: "#ffc060" });
+          label(short && q >= 1 ? "Out of speed! The engines went quiet..." : "Flying to " + D.name + "...", 26);
+          tele.innerHTML = `<span>Going to <b>${esc(D.name)}</b></span><span>Distance <b>${Math.round(D.alt * mq).toLocaleString()} km</b></span><span>${short && q >= 1 ? "Out of speed" : "Cruising"}</span>`;
+          parts = parts.filter(z => (z.l -= .016) > 0); parts.forEach(z => { z.x += z.vx * .016; z.y += z.vy * .016; x.globalAlpha = Math.max(0, z.l); x.fillStyle = z.c; x.fillRect(z.x, z.y, 3, 3); }); x.globalAlpha = 1;
+          if (q >= 1 && !fin) { if (short) { finishLater("short", ts); } else if (isL) { phase = "land"; tLd = ts; } else { phase = "orbit"; tOrbit = ts; dep.hidden = c.trip; snd("hum"); if (c.trip) finishLater("ok", ts); } }
+        } else {
+          const q = Math.min(1, (ts - tLd) / 3500); drawPlace(x, c.dest, 640, 420, "surf", ts / 1000);
+          const gx = 640 * .3 + 8, gy = 420 * .62 + 30 - 36, sy = -150 + q * 150 + gy - 0;
+          x.save(); x.translate(gx - 20 + (1 - q) * 160, sy - 40 * (1 - q) * 0); drawRocket(x, { ...des, look: { ...des.look, pieces: [] } }, 0, 0, Math.min(.3, .26 * rScale * 1.2 + .03), { flame: q < .92 ? 1 : 0 }); x.restore();
+          label(q < 1 ? "Landing on " + D.name + "..." : "Touchdown!", 26);
+          tele.innerHTML = `<span>Landing at <b>${esc(D.name)}</b></span><span>Height <b>${Math.round((1 - q) * 100).toLocaleString()} km</b></span><span>${q < 1 ? "Descending" : "Landed"}</span>`;
+          if (q >= 1 && !fin) { if (c.trip) finishLater("ok", ts); else { phase = "orbit"; tOrbit = ts; dep.hidden = false; snd("hum"); } }
+        }
+        if (!done) raf = requestAnimationFrame(step); return;
+      }
       if (phase !== "climb") { // in orbit: the rocket coasts above the Earth
-        drawPlace(x, c.dest, 640, 420, "orb", ts / 1000);
+        drawPlace(x, c.dest, 640, 420, D.kind === "L" ? "surf" : "orb", ts / 1000);
         const rx = 320 + Math.sin(ts / 2500) * 10, ry = 62;
         x.save(); x.translate(rx, ry); x.rotate(Math.PI / 2); drawRocket(x, { ...des, top: des.top }, 0, 26, Math.min(.55, .45 * rScale * 1.2 + .05), { flame: 0 }); x.restore();
         if (phase === "orbit") { marker = 1 - Math.abs(((ts - tOrbit) / 1000 * .6) % 2 - 1); mk.style.left = marker * 100 + "%"; drawSat(rx + 48, ry, 0, .7, true); label("Ready to deploy " + sname, 26); if (ts - tOrbit > 15000) { phase = "deploying"; deployOK = false; tDep = performance.now(); dep.hidden = true; finishLater("forgot", ts); } }
@@ -1118,7 +1152,7 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
       sky(p, spaceF);
       const groundY = 380 + alt * 900; if (groundY < 440) { x.fillStyle = "#3a8a4a"; x.fillRect(0, groundY, 640, 80); x.fillStyle = "#777"; x.fillRect(250, groundY - 10, 140, 10); }
       const sepAt = L > 1 ? [.36, .66] : []; let stage = 0; sepAt.forEach((s2, i) => { if (p > s2 && i < L - 1) stage = i + 1; });
-      const failP = outcome === "ok" ? 2 : failAt; const rx = 320, ry = Math.max(120, 330 - alt * 260), sc = 1.0 - Math.min(.45, alt * .5);
+      const failP = outcome === "ok" || outcome === "short" ? 2 : failAt; const rx = 320, ry = Math.max(120, 330 - alt * 260), sc = 1.0 - Math.min(.45, alt * .5);
       if (p < failP || outcome === "ok") {
         if (stage > 0 && p - sepAt[stage - 1] < .06) { const sp = (p - sepAt[stage - 1]) / .06; x.save(); x.globalAlpha = 1 - sp; drawRocket(x, { ...des, look: { ...des.look, pieces: [] }, top: "none", stages: [des.stages[stage - 1]] }, rx - 40 * sp, ry + 90 + sp * 180, sc * .9 * rScale, { noTop: true, noWin: true }); x.restore(); }
         const cut = des.stages.slice(stage), vis = { ...des, look: stage > 0 ? { ...des.look, pieces: [] } : des.look, stages: cut.length ? cut : des.stages }, shake = p < .12 ? (Math.random() - .5) * 3 : 0;
@@ -1131,9 +1165,8 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
       parts = parts.filter(q => (q.l -= .016) > 0); parts.forEach(q => { q.x += q.vx * .016; q.y += q.vy * .016; x.globalAlpha = Math.max(0, q.l); x.fillStyle = q.c; x.fillRect(q.x, q.y, 4, 4); }); x.globalAlpha = 1;
       const fr = outcome === "ok" ? p : Math.min(p, failP), k = outcome === "ok" ? 1 : Math.min(1, a.dv / a.need), v = Math.pow(fr, .8) * D.spd * 1000 * k, ak = Math.pow(fr, 1.7) * D.alt * k;
       tele.innerHTML = `<span>Stage <b>${Math.min(L, stage + 1)}</b></span><span>Height <b>${Math.round(ak).toLocaleString()} km</b></span><span>Speed <b>${(v / 1000).toFixed(1)} km/s</b></span><span>${p < .08 ? "Liftoff!" : outcome === "boom" && p >= failP ? "FAILURE" : outcome === "short" && p >= failP ? "Out of speed" : stage > 0 && p < .7 ? "Stage separation!" : "Climbing"}</span>`;
-      if (outcome === "ok" && p >= 1 && c.trip) { finish("ok"); return; }
-      if (outcome === "ok" && p >= 1) { phase = "orbit"; tOrbit = ts; dep.hidden = false; snd("hum"); }
-      else if ((outcome === "boom" && p > failP + .12) || (outcome === "short" && p >= failP)) { finish(outcome); return; }
+      if ((outcome === "ok" || outcome === "short") && p >= 1) { if (PBODY[c.dest] === "earth" && outcome === "ok") { if (c.trip) { finish("ok"); return; } phase = "orbit"; tOrbit = ts; dep.hidden = false; snd("hum"); } else { phase = "cruise"; tCr = ts; snd("hum"); } }
+      else if (outcome === "boom" && p > failP + .12) { finish(outcome); return; }
       raf = requestAnimationFrame(step);
     };
     let fin = false; const finishLater = (res, ts) => { fin = true; setTimeout(() => finish(res), 250); };
