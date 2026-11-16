@@ -575,12 +575,14 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
     app.querySelectorAll(".rc-tab").forEach(b => b.onclick = () => { tab = b.dataset.t; fjOn = null; fjClear(); render(); });
     t(document.getElementById("rcBody")); window.scrollTo(0, 0);
   }
-  const cur = () => S.contracts.find(c => c.id === sel) || null;
+  const cur = () => S.contracts.find(c => c.id === sel) || (S.trip && S.trip.id === sel ? S.trip : null);
 
   function contracts(el) {
     el.innerHTML = `<p class="note">Customers send you orders. Pick an order, then build a rocket to carry their satellite. Heavier and farther orders pay much more.</p><div class="rc-cards">${S.contracts.map(c => {
       const d = DESTS[c.dest]; return `<div class="rc-card ${c.heavy ? "heavy" : ""} ${sel === c.id ? "sel" : ""}"><canvas class="rc-pic" width="220" height="110" data-pid="${c.dest}"></canvas><b>${esc(c.who)}</b>${c.heavy ? '<em class="rc-hv">HEAVY!</em>' : ""}<div>${esc(c.thing)}</div><div>Weight: <b>${c.kg.toLocaleString()} kg</b></div><div>Goes to: <b>${esc(d.name)}</b></div>${c.crew ? "<div>Needs a <b>crew capsule</b></div>" : ""}<div class="rc-pay">They offer ${money(c.pay)}</div><label class="rc-ask">You choose the price: $<input type="number" class="rc-pin" data-pr="${c.id}" value="${c.pay}" min="1000" step="1000"></label><div class="rc-sm" data-msg="${c.id}">Ask for more, but if it is too much they say no!</div><button class="close" data-id="${c.id}">Take this order</button></div>`;
-    }).join("")}</div><button class="hintbtn" id="rcNew" type="button">Look for other orders</button>`;
+    }).join("")}</div><button class="hintbtn" id="rcNew" type="button">Look for other orders</button>
+      <div class="rc-bsfx" style="margin-top:14px"><h3 style="margin:0 0 6px">Fly there yourself!</h3><p class="rc-sm">Ride in your own rocket to any place you want. It needs the <b>Crew capsule</b> on top, at least ${CREWNEED} crew living at your base (see My Base), and the same normal speed boost as any order to reach that place. You do not get paid, but you get the first-visit bonus!</p><select id="rcTripSel">${DLIST.map(d => `<option value="${d.id}" ${S.tripDest === d.id ? "selected" : ""}>${esc(d.name)} (needs ${d.dv.toLocaleString()} m/s)</option>`).join("")}</select> <button class="close" id="rcTrip" type="button">Plan my trip</button></div>`;
+    el.querySelector("#rcTrip").onclick = () => { const id = el.querySelector("#rcTripSel").value; S.tripDest = id; S.trip = { id: S.cid++, who: "You", thing: "Your own trip (you ride along!)", dest: id, kg: 3000, pay: 0, crew: true, trip: true }; save(); sel = S.trip.id; tab = "build"; snd("pick"); render(); };
     pics(el);
     el.querySelectorAll("[data-id]").forEach(b => b.onclick = () => { const id = +b.dataset.id, c = S.contracts.find(x => x.id === id); if (!c) return; const inp = el.querySelector('[data-pr="' + id + '"]'), want = Math.round(+(inp && inp.value) || c.pay), msg = el.querySelector('[data-msg="' + id + '"]'); if (!c.max) c.max = Math.round(c.pay * (1.4 + Math.random() * 1.6)); if (want < 1000) { if (msg) msg.innerHTML = "<b>Pick at least $1,000.</b>"; return; } if (want > c.max) { snd("tick"); c.tries = (c.tries || 0) + 1; if (msg) msg.innerHTML = "<b class='badc'>" + money(want) + " is too much! They say no. Try a lower price.</b>"; save(); return; } c.pay = want; save(); sel = id; tab = "build"; snd("pick"); render(); });
     el.querySelector("#rcNew").onclick = () => { S.contracts = []; refill(); save(); snd("swish"); render(); };
@@ -1052,14 +1054,14 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
       if (done) return; done = true; cancelAnimationFrame(raf);
       let pay = 0, first = 0, text = "", okk = res === "ok", refund = 0, owed = 0, paidBy = 0;
       if ((S.res.reuse || (des.extras && des.extras.fins)) && a.st[0] && res !== "boom" && Math.random() < .72) { refund = Math.round(a.st[0].cost * .6); S.cash += refund; }
-      S.contracts = S.contracts.filter(k => k.id !== c.id); sel = null;
+      S.contracts = S.contracts.filter(k => k.id !== c.id); if (c.trip) S.trip = null; sel = null;
       if (okk) {
         pay = Math.round(c.pay * (1 + o.bonus + baseFx().pay)); if (!S.visited[c.dest]) first = 50000 * (D.tier + 1); S.visited[c.dest] = (S.visited[c.dest] || 0) + 1;
         S.cash += pay + first; S.ok++; S.earned += pay + first; S.best = Math.max(S.best, c.kg);
-        text = "delivered the satellite \"" + sname + "\" (" + (c.kg + o.pieceKg).toLocaleString() + " kg) to " + D.name + " and earned " + money(pay) + (first ? " plus a first-visit bonus of " + money(first) : "") + "!";
+        text = c.trip ? "carried you and the crew to " + D.name + "! You are really there! " + (first ? "First-visit bonus: " + money(first) + "!" : "") : "delivered the satellite \"" + sname + "\" (" + (c.kg + o.pieceKg).toLocaleString() + " kg) to " + D.name + " and earned " + money(pay) + (first ? " plus a first-visit bonus of " + money(first) : "") + "!";
       } else {
-        if (S.sat.insure) paidBy = o.liab; else { owed = o.liab; S.cash -= owed; }
-        text = res === "short" ? "ran out of speed before reaching " + D.name + "." : res === "boom" ? why : res === "forgot" ? "never let go of the satellite \"" + sname + "\"." : "dropped the satellite \"" + sname + "\" when deploying.";
+        if (c.trip) { owed = 0; } else if (S.sat.insure) paidBy = o.liab; else { owed = o.liab; S.cash -= owed; }
+        text = c.trip ? (res === "short" ? "ran out of speed before reaching " + D.name + ". The crew came home safely." : "had a problem, but the crew escaped safely in the escape pod!") : res === "short" ? "ran out of speed before reaching " + D.name + "." : res === "boom" ? why : res === "forgot" ? "never let go of the satellite \"" + sname + "\"." : "dropped the satellite \"" + sname + "\" when deploying.";
       }
       if (!S.mkt || S.mkt.v !== 2) { mktInit(); S.mkt.v = 2; } mktStep(okk);
       let interest = 0; if (S.debt > 0) { interest = Math.round(S.debt * RATE); S.debt += interest; }
@@ -1112,6 +1114,7 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
       parts = parts.filter(q => (q.l -= .016) > 0); parts.forEach(q => { q.x += q.vx * .016; q.y += q.vy * .016; x.globalAlpha = Math.max(0, q.l); x.fillStyle = q.c; x.fillRect(q.x, q.y, 4, 4); }); x.globalAlpha = 1;
       const fr = outcome === "ok" ? p : Math.min(p, failP), k = outcome === "ok" ? 1 : Math.min(1, a.dv / a.need), v = Math.pow(fr, .8) * D.spd * 1000 * k, ak = Math.pow(fr, 1.7) * D.alt * k;
       tele.innerHTML = `<span>Stage <b>${Math.min(L, stage + 1)}</b></span><span>Height <b>${Math.round(ak).toLocaleString()} km</b></span><span>Speed <b>${(v / 1000).toFixed(1)} km/s</b></span><span>${p < .08 ? "Liftoff!" : outcome === "boom" && p >= failP ? "FAILURE" : outcome === "short" && p >= failP ? "Out of speed" : stage > 0 && p < .7 ? "Stage separation!" : "Climbing"}</span>`;
+      if (outcome === "ok" && p >= 1 && c.trip) { finish("ok"); return; }
       if (outcome === "ok" && p >= 1) { phase = "orbit"; tOrbit = ts; dep.hidden = false; snd("hum"); }
       else if ((outcome === "boom" && p > failP + .12) || (outcome === "short" && p >= failP)) { finish(outcome); return; }
       raf = requestAnimationFrame(step);
