@@ -396,8 +396,8 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
     const bfx = baseFx(); let need = Math.max(400, dest.dv - bfx.dv), low = 0;
     st.forEach((s, i) => { if (i > 0 && s.twr < .25) { need += 400; low++; } });
     if (twr0 < 1.15 && twr0 >= 1) need *= 1 + (1.15 - twr0) * .8;
-    const crewOk = !c || !c.crew || top.crew, fairOk = kg <= top.cap;
-    return { st, dv: dvTot, need, twr0, cost: cost * (1 - bfx.disc), total, rel: Math.min(.995, rel + bfx.rel), crewOk, fairOk, cap: top.cap, low, lift: twr0 >= 1, enough: dvTot >= need };
+    const crewOk = !c || !c.crew || top.crew, homeOk = !c || !c.crew || baseFx().live >= CREWNEED, fairOk = kg <= top.cap;
+    return { st, dv: dvTot, need, twr0, cost: cost * (1 - bfx.disc), total, rel: Math.min(.995, rel + bfx.rel), crewOk, homeOk, fairOk, cap: top.cap, low, lift: twr0 >= 1, enough: dvTot >= need };
   }
 
   const BODYSHAPES = { classic: t => 1, tapered: t => .72 + .28 * t, flared: t => .9 + .3 * t, barrel: t => 1 + .2 * Math.sin(Math.PI * t), hourglass: t => 1 - .2 * Math.sin(Math.PI * t), diamond: t => .7 + .5 * Math.sin(Math.PI * t), stepped: t => t < .5 ? .8 : 1.08, wavy: t => 1 + .1 * Math.sin(t * Math.PI * 6), slim: t => .78, chunky: t => 1.22 };
@@ -623,8 +623,8 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
           ${bar("Δv you have", a.dv, Math.max(a.need, a.dv, 1), a.enough ? "ok" : "bad")}${bar("Δv needed (m/s)", a.need, Math.max(a.need, a.dv, 1), "need")}
           <p class="rc-sm">Push at liftoff compared with weight (TWR): <b class="${a.twr0 >= 1.15 ? "okc" : a.lift ? "warn" : "badc"}">${a.twr0.toFixed(2)}</b> ${a.twr0 >= 1.15 ? "(good)" : a.lift ? "(slow, wastes fuel)" : "(too heavy to lift!)"}</p>
           <p class="rc-sm">Rocket weight ${a.total.toFixed(1)} tonnes · Rocket price <b>${money(a.cost)}</b> (+ satellite pieces ${money(pc)}) · Engines work ${Math.round(a.rel * 100)}% of the time${a.low ? " · weak upper stage: extra Δv needed" : ""}</p>
-          ${c && !a.crewOk ? '<p class="rc-sm badc">This order needs the Crew capsule as the top part.</p>' : ""}${c && !a.fairOk ? `<p class="rc-sm badc">This satellite (${c.kg.toLocaleString()} kg) is too big for this top part. It can carry up to ${a.cap.toLocaleString()} kg. Pick a wider fairing (research it in the shop).</p>` : ""}</div>
-        <button class="close rc-go" id="rcGo" type="button" ${c && a.lift && a.crewOk && a.fairOk && S.cash >= total ? "" : "disabled"}>${!c ? "Take an order first" : S.cash < total ? "Not enough cash" : !a.lift ? "Too heavy to lift" : !a.crewOk ? "Needs a crew capsule" : !a.fairOk ? "Needs a wider fairing" : "LAUNCH! (" + money(total) + ")"}</button>
+          ${c && !a.crewOk ? '<p class="rc-sm badc">This order needs the Crew capsule as the top part.</p>' : ""}${c && c.crew && !a.homeOk ? `<p class="rc-sm badc">The astronauts need a home! Build crew houses in <b>My Base</b> and hire at least ${CREWNEED} crew there.</p>` : ""}${c && !a.fairOk ? `<p class="rc-sm badc">This satellite (${c.kg.toLocaleString()} kg) is too big for this top part. It can carry up to ${a.cap.toLocaleString()} kg. Pick a wider fairing (research it in the shop).</p>` : ""}</div>
+        <button class="close rc-go" id="rcGo" type="button" ${c && a.lift && a.crewOk && a.homeOk && a.fairOk && S.cash >= total ? "" : "disabled"}>${!c ? "Take an order first" : S.cash < total ? "Not enough cash" : !a.lift ? "Too heavy to lift" : !a.crewOk ? "Needs a crew capsule" : !a.homeOk ? "Crew needs a home" : !a.fairOk ? "Needs a wider fairing" : "LAUNCH! (" + money(total) + ")"}</button>
       </div>
       <div class="rc-look"><h3>Look</h3>
         <label>Name <input id="lkName" maxlength="14" value="${esc(L.name)}"></label>
@@ -944,13 +944,15 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
     crane: { name: "Big crane", cost: 200000, fx: ["disc", .015, 4], tx: "rockets cost 1.5% less (up to 4)" }, solar: { name: "Solar panels", cost: 100000, fx: ["disc", .005, 6], tx: "rockets cost 0.5% less (up to 6)" },
     visitor: { name: "Visitor center", cost: 300000, fx: ["pay", .02, 5], tx: "orders pay 2% more (up to 5)" }, shop: { name: "Gift shop", cost: 120000, fx: ["pay", .01, 5], tx: "orders pay 1% more (up to 5)" },
     hotel: { name: "Fan hotel", cost: 800000, fx: ["pay", .03, 3], tx: "orders pay 3% more (up to 3)" },
+    house: { name: "Crew house (4 beds)", cost: 150000, beds: 4, tx: "4 crew can live here" }, dorm: { name: "Crew dorm (20 beds)", cost: 600000, beds: 20, tx: "20 crew can live here" }, apts: { name: "Crew apartments (60 beds)", cost: 1600000, beds: 60, tx: "60 crew can live here" },
     statue: { name: "Rocket statue", cost: 50000 }, tree: { name: "Tree", cost: 5000 }, palm: { name: "Palm tree", cost: 5000 }, flag: { name: "Flag", cost: 10000 }, tent: { name: "Party tent", cost: 20000 }, truck: { name: "Truck", cost: 30000 }
   };
-  const BMAX = 100;
+  const BMAX = 1000, CREWCOST = 25000, CREWNEED = 4;
   function baseFx() {
     const b = S.base || {}, cnt = {}; (b.items || []).forEach(i => { cnt[i.t] = (cnt[i.t] || 0) + 1; });
-    const f = { rel: 0, disc: 0, pay: 0, dv: (BSITES.find(s => s.id === b.site) || BSITES[0]).dv };
-    Object.keys(cnt).forEach(t => { const it = BITEMS[t]; if (it && it.fx) f[it.fx[0]] += it.fx[1] * Math.min(cnt[t], it.fx[2]); });
+    const f = { rel: 0, disc: 0, pay: 0, beds: 0, dv: (BSITES.find(s => s.id === b.site) || BSITES[0]).dv };
+    Object.keys(cnt).forEach(t => { const it = BITEMS[t]; if (it && it.fx) f[it.fx[0]] += it.fx[1] * Math.min(cnt[t], it.fx[2]); if (it && it.beds) f.beds += it.beds * cnt[t]; });
+    f.live = Math.min(S.crew || 0, f.beds); f.rel += Math.min(.03, f.live * .001);
     f.disc = Math.min(.35, f.disc); return f;
   }
   function bDraw(x, t, cx, by, s) {
@@ -971,6 +973,9 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
     else if (t === "visitor") { rc(-35, 0, 70, 26, "#fff2dc"); tri(-40, 26, 40, 26, 0, 44, "#d84a3a"); rc(-8, 0, 16, 16, "#6a4a2a"); rc(-28, 8, 14, 10, "#6ab8ff"); rc(14, 8, 14, 10, "#6ab8ff"); }
     else if (t === "shop") { rc(-22, 0, 44, 20, "#ffd0e0"); rc(-26, 20, 52, 5, "#e0316f"); rc(-16, 5, 14, 10, "#fff"); ci(14, 10, 4, "#ffd34e"); }
     else if (t === "hotel") { rc(-30, 0, 60, 72, "#e4ecff"); for (let r = 0; r < 5; r++) for (let c = 0; c < 4; c++) rc(-24 + c * 13, 8 + r * 12, 8, 7, (r + c) % 3 ? "#ffd34e" : "#4a78d8"); rc(-34, 72, 68, 4, "#556"); ln(0, 76, 0, 92, "#888", 1.5); ci(0, 94, 4, "#ffd34e"); }
+    else if (t === "house") { rc(-24, 0, 48, 24, "#ffe8c8"); tri(-30, 24, 30, 24, 0, 42, "#c0503a"); rc(-5, 0, 10, 15, "#6a4a2a"); rc(-19, 8, 9, 8, "#6ab8ff"); rc(10, 8, 9, 8, "#6ab8ff"); }
+    else if (t === "dorm") { rc(-40, 0, 80, 40, "#cfe0f4"); for (let r = 0; r < 3; r++) for (let c = 0; c < 6; c++) rc(-35 + c * 12, 6 + r * 11, 7, 6, "#ffd34e"); rc(-44, 40, 88, 4, "#5a6a88"); rc(-6, 0, 12, 10, "#556"); }
+    else if (t === "apts") { rc(-34, 0, 68, 96, "#e8d8f4"); for (let r = 0; r < 8; r++) for (let c = 0; c < 5; c++) rc(-29 + c * 12, 6 + r * 11, 7, 6, (r * 3 + c) % 4 ? "#ffd34e" : "#6a86d8"); rc(-38, 96, 76, 4, "#5a4a78"); ci(0, 104, 4, "#e0453a"); }
     else if (t === "solar") { for (let k = 0; k < 3; k++) { x.fillStyle = "#2a4a9a"; x.beginPath(); x.moveTo(cx + (-34 + k * 24) * s, by - 6 * s); x.lineTo(cx + (-14 + k * 24) * s, by - 6 * s); x.lineTo(cx + (-8 + k * 24) * s, by - 20 * s); x.lineTo(cx + (-28 + k * 24) * s, by - 20 * s); x.closePath(); x.fill(); ln(-24 + k * 24, 0, -24 + k * 24, 7, "#666", 1); } }
     else if (t === "tree") { rc(-2, 0, 4, 14, "#6a4a2a"); ci(0, 22, 11, "#2f9a4a"); ci(-6, 17, 7, "#3aae54"); }
     else if (t === "palm") { rc(-1.5, 0, 3, 34, "#8a6a3a"); for (let k = -2; k <= 2; k++) ln(0, 34, k * 11, 28 - Math.abs(k) * 3, "#2f9a4a", 3); }
@@ -1006,12 +1011,16 @@ moonl2halofars|Moon: L2 halo (far side relay)|12300|384400|P`;
       <canvas id="bsCv" class="rc-bscv" width="760" height="340"></canvas>
       <div class="rc-bstools"><button type="button" class="hintbtn ${btool === "place" ? "rc-on" : ""}" data-bt="place">Build</button><button type="button" class="hintbtn ${btool === "move" ? "rc-on" : ""}" data-bt="move">Move buildings (drag)</button><button type="button" class="hintbtn ${btool === "erase" ? "rc-on" : ""}" data-bt="erase">Remove (get half back)</button><span id="bsN" class="rc-sm"></span></div>
       <div class="rc-bsfx" id="bsFx"></div>
+      <div class="rc-bsfx" id="bsCrew"></div>
       <h3>Buildings</h3><div class="rc-bspal">${Object.keys(BITEMS).map(k => { const it = BITEMS[k]; return `<button type="button" class="rc-bsb ${bsel === k && btool === "place" ? "on" : ""}" data-bi="${k}"><canvas width="64" height="64" data-bp="${k}"></canvas><b>${it.name}</b><span>${money(it.cost)}</span><small>${it.tx || (it.cost <= 30000 ? "just for looks" : "looks cool")}</small></button>`; }).join("")}</div>
       <h3>Move your base</h3><p class="rc-sm">Your buildings come with you. Moving costs money. Close to the equator the spinning Earth gives your rockets a free push (extra speed).</p>
       <div class="rc-bssites">${BSITES.map(s => `<div class="rc-bsite ${s.id === b.site ? "here" : ""}"><b>${s.name}</b><div>Free push: <b>+${s.dv} m/s</b></div><div class="rc-sm">${s.note}</div>${s.id === b.site ? "<em>Your base is here!</em>" : `<button type="button" class="close" data-mv="${s.id}" ${S.cash < s.cost ? "disabled" : ""}>Move here (${money(s.cost)})</button>`}</div>`).join("")}</div>`;
     const cv = el.querySelector("#bsCv"), upd = () => {
       basePaint(cv); const hd = document.querySelector(".rc-stats b"); if (hd) hd.textContent = money(S.cash); el.querySelector("#bsN").textContent = b.items.length + "/" + BMAX + " buildings";
-      const f = baseFx(); el.querySelector("#bsFx").innerHTML = `<b>Your base gives:</b> engines <b class="okc">+${(f.rel * 100).toFixed(1)}%</b> safer · rockets <b class="okc">${Math.round(f.disc * 100)}%</b> cheaper · orders pay <b class="okc">+${Math.round(f.pay * 100)}%</b> more · free push <b class="okc">+${f.dv} m/s</b>`; };
+      const f = baseFx(); el.querySelector("#bsFx").innerHTML = `<b>Your base gives:</b> engines <b class="okc">+${(f.rel * 100).toFixed(1)}%</b> safer · rockets <b class="okc">${Math.round(f.disc * 100)}%</b> cheaper · orders pay <b class="okc">+${Math.round(f.pay * 100)}%</b> more · free push <b class="okc">+${f.dv} m/s</b>`;
+      const cr = S.crew || 0, room = f.beds - cr; el.querySelector("#bsCrew").innerHTML = `<b>Your crew:</b> ${cr} hired · ${f.beds} beds · <b class="${cr > f.beds ? "badc" : "okc"}">${f.live} living at the base</b> (each gives +0.1% safer, up to +3%)${cr > f.beds ? ' <span class="badc">Some crew have nowhere to live! Build more houses.</span>' : ""}<br><button type="button" class="close" data-hire="1" ${S.cash < CREWCOST || room < 1 ? "disabled" : ""}>Hire 1 (${money(CREWCOST)})</button> <button type="button" class="close" data-hire="10" ${S.cash < CREWCOST * 10 || room < 10 ? "disabled" : ""}>Hire 10 (${money(CREWCOST * 10)})</button> <button type="button" class="hintbtn" data-fire="1" ${cr < 1 ? "disabled" : ""}>Let 1 go</button><div class="rc-sm">Crew capsule orders need at least ${CREWNEED} crew living at your base. You can only hire as many as you have beds.</div>`;
+      el.querySelectorAll("[data-hire]").forEach(q => q.onclick = () => { const n = +q.dataset.hire; if (S.cash < CREWCOST * n || f.beds - (S.crew || 0) < n) return; S.cash -= CREWCOST * n; S.crew = (S.crew || 0) + n; save(); snd("clink"); upd(); });
+      el.querySelectorAll("[data-fire]").forEach(q => q.onclick = () => { if ((S.crew || 0) > 0) { S.crew--; save(); upd(); } }); };
     el.querySelectorAll("canvas[data-bp]").forEach(c => { const q = c.getContext("2d"); bDraw(q, c.dataset.bp, 32, 60, .5); });
     el.querySelectorAll("[data-bt]").forEach(bn => bn.onclick = () => { btool = bn.dataset.bt; const y = window.scrollY; baseTab(el); window.scrollTo(0, y); });
     el.querySelectorAll("[data-bi]").forEach(bn => bn.onclick = () => { bsel = bn.dataset.bi; btool = "place"; snd("tick"); const y = window.scrollY; baseTab(el); window.scrollTo(0, y); });
