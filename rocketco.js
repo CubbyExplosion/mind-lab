@@ -733,7 +733,7 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
     const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { io.unobserve(e.target); draw(e.target); } }), { rootMargin: "200px" }); cvs.forEach(cv => io.observe(cv));
   }
   // ---------------- competition: pretend rival companies (computer-run, no real people) ----------------
-  const RIVALS = [["Skyward Rockets", 5, 3, "#4aa8ff"], ["Orbit Express", 12, 6, "#6be28f"], ["Nova Launch", 20, 10, "#ffd34e"], ["Red Planet Co", 30, 15, "#ff7a5a"], ["Cosmo Corp", 60, 22, "#c08cff"], ["Galaxy Giants", 120, 35, "#ff6ab8"]];
+  const RIVALS = [["Skyward Rockets", 5, 3, "#4aa8ff"], ["Star Haulers", 8, 4.5, "#8affea"], ["Orbit Express", 12, 6, "#6be28f"], ["Nova Launch", 20, 10, "#ffd34e"], ["Red Planet Co", 30, 15, "#ff7a5a"], ["Cosmo Corp", 60, 22, "#c08cff"], ["Jet Stream Inc", 90, 28, "#ffa94a"], ["Galaxy Giants", 120, 35, "#ff6ab8"], ["Mega Mars Ltd", 150, 45, "#e0e07a"], ["Infinity Aerospace", 250, 70, "#ffffff"]];
   const rivalScore = (r, w) => { const q = mkr(hsh(r[0] + w)); return Math.max(0, Math.round(r[2] * (.55 + q() * .9))); };
   const rivalTotal = r => { if (!S.compStart) S.compStart = Date.now(); return r[1] + Math.floor((Date.now() - S.compStart) / 86400000 * r[2] / 7 * .8); };
   function compCheck() {
