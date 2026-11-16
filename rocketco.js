@@ -1138,6 +1138,8 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
     upd();
   }
 
+  // how long the flight takes: short trips ~3 s, the farthest places up to 2 minutes
+  const cruiseMs = alt => Math.min(120000, Math.max(3000, 3000 + Math.pow(Math.max(0, (Math.log10(Math.max(1000, alt)) - 5.5) / 4.7), 2.2) * 117000));
   function launch(c, a, o) {
     const des = JSON.parse(JSON.stringify(S.design)), D = DESTS[c.dest], sname = o.name;
     S.cash -= a.cost + o.pieceCost + o.prem; S.tries++; save();
@@ -1193,8 +1195,8 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
       if (phase === "cruise" || phase === "land") { // flying across space to the place, then landing
         const key = PBODY[c.dest] || "moon", rn2 = mkr(hsh(c.dest)), isL = D.kind === "L", short = outcome === "short";
         if (phase === "cruise") {
-          const TR0 = Math.max(3000, (Math.log10(Math.max(1000, D.alt)) - 4) * 3000); if (skipCr) { tCr = ts - TR0; skipCr = false; }
-          const TR = Math.max(3000, (Math.log10(Math.max(1000, D.alt)) - 4) * 3000), q = Math.min(1, (ts - tCr) / TR), fr = short ? Math.max(.2, Math.min(.8, a.dv / a.need * .8)) : 1, pq = Math.min(q, fr * q / Math.max(q, .0001) * (short ? 1 : 1)), mq = short ? Math.min(q * fr, fr) : q;
+          const TR0 = cruiseMs(D.alt); if (skipCr) { tCr = ts - TR0; skipCr = false; }
+          const TR = cruiseMs(D.alt), q = Math.min(1, (ts - tCr) / TR), fr = short ? Math.max(.2, Math.min(.8, a.dv / a.need * .8)) : 1, pq = Math.min(q, fr * q / Math.max(q, .0001) * (short ? 1 : 1)), mq = short ? Math.min(q * fr, fr) : q;
           starsBg(x, 640, 420, rn2, 130);
           drawBody(x, "earth", 90 - q * 70, 340 + q * 60, 150 - q * 110, rn2);
           drawBody(x, key, 540, 150, 12 + q * q * 70, rn2, ts / 1000);
