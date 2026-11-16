@@ -733,7 +733,8 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
     const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { io.unobserve(e.target); draw(e.target); } }), { rootMargin: "200px" }); cvs.forEach(cv => io.observe(cv));
   }
   // ---------------- competition: pretend rival companies (computer-run, no real people) ----------------
-  const RIVALS = [["Skyward Rockets", 5, 3, "#4aa8ff"], ["Star Haulers", 8, 4.5, "#8affea"], ["Orbit Express", 12, 6, "#6be28f"], ["Nova Launch", 20, 10, "#ffd34e"], ["Red Planet Co", 30, 15, "#ff7a5a"], ["Cosmo Corp", 60, 22, "#c08cff"], ["Jet Stream Inc", 90, 28, "#ffa94a"], ["Galaxy Giants", 120, 35, "#ff6ab8"], ["Mega Mars Ltd", 150, 45, "#e0e07a"], ["Infinity Aerospace", 250, 70, "#ffffff"]];
+  const RIVALS = [["Skyward Rockets", 5, 3, "#4aa8ff"], ["Star Haulers", 8, 4.5, "#8affea"], ["Orbit Express", 12, 6, "#6be28f"], ["Nova Launch", 20, 10, "#ffd34e"], ["Red Planet Co", 30, 15, "#ff7a5a"], ["Cosmo Corp", 60, 22, "#c08cff"], ["Jet Stream Inc", 90, 28, "#ffa94a"], ["Galaxy Giants", 120, 35, "#ff6ab8"], ["Mega Mars Ltd", 150, 45, "#e0e07a"], ["Infinity Aerospace", 250, 70, "#ffffff"],
+    ["Firefly Aerospace", 15, 12, "#ffb347", 1], ["JAXA (Japan)", 40, 18, "#ff5a5a", 1], ["Rocket Lab", 50, 25, "#7ad0ff", 1], ["ISRO (India)", 70, 30, "#ffa040", 1], ["Arianespace", 100, 40, "#5a8aff", 1], ["United Launch Alliance", 130, 55, "#a0b0ff", 1], ["Roscosmos (Russia)", 160, 65, "#e06060", 1], ["China Space (CASC)", 220, 100, "#ff4040", 1], ["Blue Origin", 280, 130, "#4ab0ff", 1], ["SpaceX", 400, 200, "#e8e8f0", 1]].sort((a, b) => a[2] - b[2]);
   const rivalScore = (r, w) => { const q = mkr(hsh(r[0] + w)); return Math.max(0, Math.round(r[2] * (.55 + q() * .9))); };
   const rivalTotal = r => { if (!S.compStart) S.compStart = Date.now(); return r[1] + Math.floor((Date.now() - S.compStart) / 86400000 * r[2] / 7 * .8); };
   function compCheck() {
@@ -745,12 +746,12 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
     compCheck(); const t = tier(), w = Math.floor(Date.now() / WEEK), mine = S.ok - S.wk.base; S.beat = S.beat || {};
     let won = [];
     RIVALS.forEach((r, i) => { const tot = rivalTotal(r); if (S.ok > tot && !S.beat[r[0]]) { S.beat[r[0]] = 1; const pr = 1000000 * (i + 1) * (t + 1); S.cash += pr; won.push(r[0] + " (" + money(pr) + ")"); } }); if (won.length) { save(); snd("star"); }
-    const rows = RIVALS.map(r => ({ n: r[0], v: rivalTotal(r), c: r[3] })).concat([{ n: esc(S.company) + " (YOU)", v: S.ok, c: "#3ddc6a", me: 1 }]).sort((a, b) => b.v - a.v), max = Math.max(1, rows[0].v);
+    const rows = RIVALS.map(r => ({ n: r[0], v: rivalTotal(r), c: r[3], real: r[4] })).concat([{ n: esc(S.company) + " (YOU)", v: S.ok, c: "#3ddc6a", me: 1 }]).sort((a, b) => b.v - a.v), max = Math.max(1, rows[0].v);
     const days = Math.max(0, 7 - ((Date.now() / 86400000) % 7)), wk = RIVALS.map(r => [r[0], Math.round(r[2] * .55), Math.round(r[2] * 1.45)]);
-    el.innerHTML = `<p class="note">Race the <b>pretend rival companies</b>! They are run by the computer, not real people. Beat a rival's total launches to win a prize, and finish high in the <b>weekly cup</b> for big money.</p>
+    el.innerHTML = `<p class="note">Race the <b>pretend rival companies</b>! There are <b>20</b> of them: 10 made-up and 10 <b>real rocket companies</b>. Their scores are pretend and are run by the computer, not real people. Beat a rival's total launches to win a prize, and finish high in the <b>weekly cup</b> for big money.</p>
       ${won.length ? `<div class="rc-bsfx"><b class="okc">You passed ${won.map(esc).join(", ")}!</b> Prize money added!</div>` : ""}
       ${S.cup ? `<div class="rc-bsfx"><b>Last week's cup:</b> you finished <b>#${S.cup.rank}</b> with ${S.cup.mine} good launches (best rival: ${esc(S.cup.top[0])}, ${S.cup.top[1]}). ${S.cup.prize ? `You won <b class="okc">${money(S.cup.prize)}</b>!` : "Top 3 win money. Try again this week!"}</div>` : ""}
-      <h3>Leaderboard (all good launches)</h3><div class="rc-lb">${rows.map((r, i) => `<div class="rc-lbr ${r.me ? "me" : ""}"><span>${i + 1}</span><b>${r.n.includes("(YOU)") ? r.n : esc(r.n)}</b><i style="width:${Math.max(2, r.v / max * 100)}%;background:${r.c}"></i><em>${r.v.toLocaleString()}</em></div>`).join("")}</div>
+      <h3>Leaderboard (all good launches)</h3><div class="rc-lb">${rows.map((r, i) => `<div class="rc-lbr ${r.me ? "me" : ""}"><span>${i + 1}</span><b>${r.n.includes("(YOU)") ? r.n : esc(r.n)}${r.real ? ' <small class="rc-sm">(real company)</small>' : ""}</b><i style="width:${Math.max(2, r.v / max * 100)}%;background:${r.c}"></i><em>${r.v.toLocaleString()}</em></div>`).join("")}</div>
       <h3>Weekly cup</h3><p class="rc-sm">Your good launches this week: <b>${mine}</b>. The cup ends in about <b>${days.toFixed(1)} days</b>. 1st place wins ${money(5000000 * (t + 1))}, 2nd ${money(2000000 * (t + 1))}, 3rd ${money(1000000 * (t + 1))}. The rivals usually do: ${wk.map(z => esc(z[0]) + " " + z[1] + "-" + z[2]).join(", ")}.</p>`;
   }
   // ---------------- stock market (pretend companies, pretend money) ----------------
