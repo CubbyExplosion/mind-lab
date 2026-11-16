@@ -1091,7 +1091,7 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
     try { const mc = document.createElement("canvas").getContext("2d"); mc.canvas.width = 300; mc.canvas.height = 6000; baseCache = { key, hh: 5900 - drawRocket(mc, S.design, 150, 5900, 1, { flame: 0 }) }; } catch (e) { baseCache = { key, hh: 200 }; }
     return baseCache.hh;
   }
-  function basePaint(cv) {
+  function basePaint(cv, noRocket) {
     const x = cv.getContext("2d"), W = cv.width, H = cv.height, hy = H * .5, site = BSITES.find(s => s.id === S.base.site) || BSITES[0];
     const g = x.createLinearGradient(0, 0, 0, hy); g.addColorStop(0, site.sky[0]); g.addColorStop(1, site.sky[1]); x.fillStyle = g; x.fillRect(0, 0, W, hy);
     x.fillStyle = "rgba(255,255,255,.8)"; [[.12, .14], [.4, .1], [.72, .18]].forEach(c => { x.beginPath(); x.ellipse(W * c[0], H * c[1], 46, 14, 0, 0, 7); x.ellipse(W * c[0] + 26, H * c[1] + 5, 34, 11, 0, 0, 7); x.fill(); });
@@ -1103,7 +1103,7 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
     else { x.fillStyle = site.ground; x.fillRect(0, hy, W, H - hy); x.fillStyle = "rgba(0,0,0,.07)"; for (let k = 0; k < 30; k++) x.fillRect((k * 83) % W, hy + 6 + (k * 47) % (H - hy - 10), 26, 3); }
     const items = S.base.items.map((it, i) => ({ it, i })).sort((a, b) => a.it.y - b.it.y); let rockOn = false;
     items.forEach(o => { const it = o.it, px = it.x * W, py = hy + 24 + it.y * (H - hy - 34), sc = .55 + .7 * it.y; bDraw(x, it.t, px, py, sc * (it.t === "pad" || it.t === "tower" ? 1.15 : 1));
-      if (it.t === "pad" && !rockOn) { rockOn = true; const hh = baseRocketH(), sc2 = Math.min(1, 125 * sc / hh); try { drawRocket(x, S.design, px, py - 8 * sc, sc2, { flame: 0 }); } catch (e) {} } });
+      if (it.t === "pad" && !rockOn && !noRocket) { rockOn = true; const hh = baseRocketH(), sc2 = Math.min(1, 125 * sc / hh); try { drawRocket(x, S.design, px, py - 8 * sc, sc2, { flame: 0 }); } catch (e) {} } });
     x.fillStyle = "rgba(0,0,0,.45)"; x.fillRect(6, 6, 250, 24); x.fillStyle = "#fff"; x.font = "bold 13px system-ui"; x.fillText(site.name, 12, 23);
   }
   function baseTab(el) {
@@ -1149,7 +1149,7 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
     const L = des.stages.length, mc = document.createElement("canvas").getContext("2d"); mc.canvas.width = 300; mc.canvas.height = 6000; const rScale = Math.max(.12, Math.min(1, 230 / (5900 - drawRocket(mc, des, 150, 5900, 1.2, { flame: 0 }))));
     app.innerHTML = `<div class="rc-launch"><canvas id="rcL" width="640" height="420"></canvas><div class="rc-tele" id="rcT"></div><div class="rc-deploy" id="rcD" hidden><p>Your rocket is at <b>${esc(D.name)}</b>! Press <b>Deploy</b> when the marker is in the <b class="okc">green zone</b>.</p><div class="rc-dbar"><i class="zone" id="rcZ"></i><i class="mk" id="rcM"></i></div><button class="close" id="rcDep" type="button">Deploy ${esc(sname)}!</button></div></div>`;
     const cv = document.getElementById("rcL"), x = cv.getContext("2d"), tele = document.getElementById("rcT"), dep = document.getElementById("rcD"), zone = document.getElementById("rcZ"), mk = document.getElementById("rcM");
-    let skipCr = false, tCr = 0, tLd = 0, t0 = 0, raf = 0, done = false, parts = [], boomed = false, phase = "climb", tOrbit = 0, tDep = 0, deployOK = false, z0 = .2 + Math.random() * .4, marker = 0;
+    let baseBg = null, basePad = { x: 320, y: 292 }, skipCr = false, tCr = 0, tLd = 0, t0 = 0, raf = 0, done = false, parts = [], boomed = false, phase = "climb", tOrbit = 0, tDep = 0, deployOK = false, z0 = .2 + Math.random() * .4, marker = 0;
     const CLIMB = 9; snd("launch");
     tele.onclick = e => { if (e.target && e.target.id === "rcSkip") skipCr = true; };
     zone.style.left = z0 * 100 + "%"; zone.style.width = "34%";
@@ -1230,7 +1230,12 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
       }
       const p = Math.min(1, (ts - t0) / 1000 / CLIMB), alt = Math.pow(p, 1.7), spaceF = Math.min(1, alt * 1.3);
       sky(p, spaceF);
-      const groundY = 380 + alt * 900; if (groundY < 440) { x.fillStyle = "#3a8a4a"; x.fillRect(0, groundY, 640, 80); x.fillStyle = "#777"; x.fillRect(250, groundY - 10, 140, 10); }
+      const groundY = 380 + alt * 900;
+      if (groundY < 440 + 120) { // take off from YOUR base (your site, pad and buildings)
+        if (!baseBg) { try { baseBg = document.createElement("canvas"); baseBg.width = 640; baseBg.height = 340; basePaint(baseBg, true); const pd = (S.base.items || []).find(i => i.t === "pad") || { x: .5, y: .72 }; basePad = { x: pd.x * 640, y: 194 + pd.y * 136 }; } catch (e) { baseBg = false; } }
+        if (baseBg) { const ox = Math.max(-80, Math.min(80, 320 - basePad.x)), oy = 392 - basePad.y + alt * 900; x.drawImage(baseBg, ox, oy); if (ox > 0) { x.fillStyle = "rgba(0,0,0,0)"; } }
+        else if (groundY < 440) { x.fillStyle = "#3a8a4a"; x.fillRect(0, groundY, 640, 80); x.fillStyle = "#777"; x.fillRect(250, groundY - 10, 140, 10); }
+      }
       const sepAt = L > 1 ? [.36, .66] : []; let stage = 0; sepAt.forEach((s2, i) => { if (p > s2 && i < L - 1) stage = i + 1; });
       const failP = outcome === "ok" || outcome === "short" ? 2 : failAt; const rx = 320, ry = Math.max(120, 330 - alt * 260), sc = 1.0 - Math.min(.45, alt * .5);
       if (p < failP || outcome === "ok") {
