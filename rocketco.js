@@ -711,18 +711,37 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
   const STOCKS = [["ROKT", "Skyward Rockets", 2400, .035], ["FUEL", "Cryo Fuel Co", 900, .03], ["SATS", "Orbit Satellites", 3800, .04], ["TOUR", "Moon Tours Ltd", 650, .07], ["MINE", "Asteroid Mining Inc", 420, .09], ["COMM", "Nova Telecom", 3100, .025], ["FOOD", "Space Snacks", 300, .05], ["ROBO", "Rover Robotics", 1700, .045], ["SOLR", "Sun Energy", 1200, .04], ["MARS", "Mars Colony Corp", 250, .12]];
   const NEWS = [["ROKT", "Skyward Rockets wins a big launch deal", .06], ["ROKT", "Skyward Rockets has a rocket failure", -.07], ["FUEL", "Cryo Fuel Co finds a cheaper fuel recipe", .06], ["FUEL", "A fuel factory has a fire", -.06], ["SATS", "Orbit Satellites launches 100 new satellites", .06], ["SATS", "Orbit Satellites loses a satellite", -.06], ["TOUR", "Moon Tours sells out its first trip", .1], ["TOUR", "Moon Tours has a safety scare", -.1], ["MINE", "Asteroid Mining finds gold in a rock", .15], ["MINE", "Asteroid Mining's probe breaks", -.12], ["COMM", "Nova Telecom signs a giant phone deal", .05], ["FOOD", "Space Snacks adds a new flavour", .04], ["ROBO", "Rover Robotics wins a Mars order", .08], ["SOLR", "Sun Energy builds a bigger solar farm", .05], ["MARS", "Mars Colony Corp plans a new base", .18], ["MARS", "Mars Colony Corp runs out of money", -.2], ["*", "The whole space industry is booming!", .03], ["*", "Worried news makes everyone sell", -.03]];
   const gauss = () => { let u = 0; while (!u) u = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(6.283 * Math.random()); };
+  // a pretend sudden crash about once a week (real time)
+  const WEEK = 7 * 86400000;
+  function maybeCrash() {
+    if (!S || !S.mkt || S.mkt.v !== 2) return false; const m = S.mkt;
+    if (!m.crashAt) { m.crashAt = Date.now() + WEEK; save(); return false; }
+    if (Date.now() < m.crashAt) return false;
+    STOCKS.forEach(st => { const h = m.hist[st[0]], p = h[h.length - 1], drop = Math.min(.6, .22 + st[3] * 2 + Math.random() * .12); h.push(Math.max(1, Math.round(p * (1 - drop) * 100) / 100)); if (h.length > 120) h.shift(); });
+    m.rebound = 14; m.news.unshift("SUDDEN CRASH! The pretend market fell fast. (Not real!)"); m.news = m.news.slice(0, 8); m.crashAt = Date.now() + WEEK * (.85 + Math.random() * .3);
+    S.crashNote = 1; save(); return true;
+  }
+  function crashToast(noR) {
+    if (!S.crashNote || document.getElementById("rcCrash")) return; S.crashNote = 0; save();
+    const d = document.createElement("div"); d.id = "rcCrash"; d.style.cssText = "position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:99998;max-width:92vw;width:420px;background:#5a1020;color:#fff;border:3px solid #ff6a6a;border-radius:14px;padding:12px 16px;font:700 15px system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.5)";
+    d.innerHTML = '<b style="font-size:18px">SUDDEN MARKET CRASH!</b><div style="font-weight:500;margin:6px 0">All the pretend stocks just dropped fast. This is <b>fake</b> and happens about once a week. Prices slowly come back. Real crashes are why grown-ups spread their money around!</div><button type="button" style="background:#ffd34e;color:#1a1240;border:0;border-radius:10px;padding:6px 14px;font:800 14px system-ui;cursor:pointer">OK</button>';
+    d.querySelector("button").onclick = () => d.remove(); document.body.appendChild(d); snd("boom"); if (tab === "stocks" && !noR) render();
+  }
+  setInterval(() => { if (document.getElementById("rcBody") && maybeCrash()) crashToast(); }, 30000);
   function mktStep(launchOk, quiet) {
+    maybeCrash();
     if (!quiet) S.shifts = 5;
     const m = S.mkt; m.day++; const ev = Math.random() < (quiet ? .06 : .35) ? pick(NEWS) : null;
-    STOCKS.forEach(st => { const h = m.hist[st[0]], p = h[h.length - 1]; let r = Math.log(st[2] / p) * .004 + (quiet ? .007 : .175) + st[3] * .6 * gauss();
+    STOCKS.forEach(st => { const h = m.hist[st[0]], p = h[h.length - 1]; let r = Math.log(st[2] / p) * .004 + (quiet ? .007 : .175) + st[3] * .6 * gauss() + (m.rebound > 0 && !quiet ? .015 : 0);
       if (ev && (ev[0] === st[0] || ev[0] === "*")) r += ev[2]; if (launchOk === true || launchOk === false) { if (st[0] === "ROKT" || st[0] === "SATS") r += launchOk ? .06 : -.03; }
       h.push(Math.max(1, Math.round(p * Math.exp(r) * 100) / 100)); if (h.length > 120) h.shift(); });
+    if (m.rebound > 0 && !quiet) m.rebound--;
     if (ev && !quiet) { m.news.unshift("Day " + m.day + ": " + ev[1]); m.news = m.news.slice(0, 8); }
   }
   function mktInit() { if (S.mkt && S.mkt.hold) { Object.values(S.mkt.hold).forEach(h => { if (h) S.cash += h.cost; }); } const m = { day: 0, hist: {}, hold: {}, news: [] }; STOCKS.forEach(st => { m.hist[st[0]] = [st[2]]; }); S.mkt = m; for (let i = 0; i < 60; i++) mktStep(null, true); m.day = 0; }
   const px = sym => { const h = S.mkt.hist[sym]; return h[h.length - 1]; };
   function stocks(el) {
-    if (!S.mkt || S.mkt.v !== 2) { mktInit(); S.mkt.v = 2; save(); } const m = S.mkt; let val = 0, cost = 0; STOCKS.forEach(st => { const h = m.hold[st[0]]; if (h) { val += h.n * px(st[0]); cost += h.cost; } });
+    if (!S.mkt || S.mkt.v !== 2) { mktInit(); S.mkt.v = 2; save(); } maybeCrash(); crashToast(true); const m = S.mkt; let val = 0, cost = 0; STOCKS.forEach(st => { const h = m.hold[st[0]]; if (h) { val += h.n * px(st[0]); cost += h.cost; } });
     el.innerHTML = `<p class="note">The Space Stock Market! These are <b>pretend companies</b> and <b>pretend money</b>. Prices change every time you launch, or when you press "Wait a day". Real stocks can go down as well as up, and real investing is a job for grown-ups.</p>
       <div class="rc-bankbox"><div>Cash <b>${money(S.cash)}</b></div><div>Market day <b>${m.day}</b></div><div>Shares you own are worth <b>${money(val)}</b> (you paid ${money(cost)}) · profit <b class="${val - cost >= 0 ? "okc" : "badc"}">${money(val - cost)}</b></div><div class="rc-sm">Every trade costs a 0.5% fee. Spreading your money over several companies is safer than putting it all in one.</div></div>
       <button class="close" id="mkWait" type="button">Wait a day</button>
