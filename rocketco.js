@@ -742,6 +742,14 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
     if (S.wk.w < w) { const mine = S.ok - S.wk.base, scores = RIVALS.map(r => [r[0], rivalScore(r, S.wk.w)]), rank = 1 + scores.filter(z => z[1] > mine).length, prize = [0, 5000000, 2000000, 1000000][rank] ? [0, 5000000, 2000000, 1000000][rank] * (tier() + 1) : 0;
       S.cash += prize; S.cup = { rank, mine, prize, top: scores.sort((a, b) => b[1] - a[1])[0] }; S.wk = { w, base: S.ok }; save(); }
   }
+  // family league: everybody who has a profile on THIS computer (nothing goes online)
+  function familyRows() {
+    const rd = k => { try { return JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { return null; } };
+    const me = dealMe(), users = rd("mindlab-users") || {}, rows = [];
+    Object.keys(users).forEach(id => { const d = id === me ? S : rd("u:" + id + ":" + KEY); if (d && typeof d.ok === "number") rows.push({ n: users[id].name || "Player", co: d.company || "", ok: d.ok, earned: d.earned || 0, me: id === me }); });
+    if (!me) rows.push({ n: "Guest", co: S.company, ok: S.ok, earned: S.earned || 0, me: true }); else { const g = rd(KEY); if (g && typeof g.ok === "number") rows.push({ n: "Guest", co: g.company || "", ok: g.ok, earned: g.earned || 0, me: false }); }
+    return rows.sort((a, b) => b.ok - a.ok || b.earned - a.earned);
+  }
   function compTab(el) {
     compCheck(); const t = tier(), w = Math.floor(Date.now() / WEEK), mine = S.ok - S.wk.base; S.beat = S.beat || {};
     let won = [];
@@ -752,6 +760,8 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
       ${won.length ? `<div class="rc-bsfx"><b class="okc">You passed ${won.map(esc).join(", ")}!</b> Prize money added!</div>` : ""}
       ${S.cup ? `<div class="rc-bsfx"><b>Last week's cup:</b> you finished <b>#${S.cup.rank}</b> with ${S.cup.mine} good launches (best rival: ${esc(S.cup.top[0])}, ${S.cup.top[1]}). ${S.cup.prize ? `You won <b class="okc">${money(S.cup.prize)}</b>!` : "Top 3 win money. Try again this week!"}</div>` : ""}
       <h3>Leaderboard (all good launches)</h3><div class="rc-lb">${rows.map((r, i) => `<div class="rc-lbr ${r.me ? "me" : ""}"><span>${i + 1}</span><b>${r.n.includes("(YOU)") ? r.n : esc(r.n)}${r.real ? ' <small class="rc-sm">(real company)</small>' : ""}</b><i style="width:${Math.max(2, r.v / max * 100)}%;background:${r.c}"></i><em>${r.v.toLocaleString()}</em></div>`).join("")}</div>
+      <h3>Family league</h3><p class="rc-sm">Race the other players who use <b>this computer</b> (like a brother, sister or parent). Everybody needs their own profile (the sign-in button at the top). Nothing is sent online, and please use nicknames, not real names.</p>
+      ${(() => { const f = familyRows(); return f.length > 1 ? `<div class="rc-lb">${f.map((r, i) => `<div class="rc-lbr ${r.me ? "me" : ""}"><span>${["1st", "2nd", "3rd"][i] || i + 1}</span><b>${esc(r.n)}${r.co ? ' <small class="rc-sm">' + esc(r.co) + "</small>" : ""}${r.me ? " (YOU)" : ""}</b><em>${r.ok.toLocaleString()} launches · ${money(r.earned)} earned</em></div>`).join("")}</div>` : '<div class="rc-bsfx">Only you so far! Ask a family member to make their own profile on this computer and play Rocket Company. Then they show up here.</div>'; })()}
       <h3>Weekly cup</h3><p class="rc-sm">Your good launches this week: <b>${mine}</b>. The cup ends in about <b>${days.toFixed(1)} days</b>. 1st place wins ${money(5000000 * (t + 1))}, 2nd ${money(2000000 * (t + 1))}, 3rd ${money(1000000 * (t + 1))}. The rivals usually do: ${wk.map(z => esc(z[0]) + " " + z[1] + "-" + z[2]).join(", ")}.</p>`;
   }
   // ---------------- stock market (pretend companies, pretend money) ----------------
