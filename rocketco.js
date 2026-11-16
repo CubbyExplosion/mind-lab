@@ -1071,8 +1071,9 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
     const L = des.stages.length, mc = document.createElement("canvas").getContext("2d"); mc.canvas.width = 300; mc.canvas.height = 6000; const rScale = Math.max(.12, Math.min(1, 230 / (5900 - drawRocket(mc, des, 150, 5900, 1.2, { flame: 0 }))));
     app.innerHTML = `<div class="rc-launch"><canvas id="rcL" width="640" height="420"></canvas><div class="rc-tele" id="rcT"></div><div class="rc-deploy" id="rcD" hidden><p>Your rocket is at <b>${esc(D.name)}</b>! Press <b>Deploy</b> when the marker is in the <b class="okc">green zone</b>.</p><div class="rc-dbar"><i class="zone" id="rcZ"></i><i class="mk" id="rcM"></i></div><button class="close" id="rcDep" type="button">Deploy ${esc(sname)}!</button></div></div>`;
     const cv = document.getElementById("rcL"), x = cv.getContext("2d"), tele = document.getElementById("rcT"), dep = document.getElementById("rcD"), zone = document.getElementById("rcZ"), mk = document.getElementById("rcM");
-    let tCr = 0, tLd = 0, t0 = 0, raf = 0, done = false, parts = [], boomed = false, phase = "climb", tOrbit = 0, tDep = 0, deployOK = false, z0 = .2 + Math.random() * .4, marker = 0;
+    let skipCr = false, tCr = 0, tLd = 0, t0 = 0, raf = 0, done = false, parts = [], boomed = false, phase = "climb", tOrbit = 0, tDep = 0, deployOK = false, z0 = .2 + Math.random() * .4, marker = 0;
     const CLIMB = 9; snd("launch");
+    tele.onclick = e => { if (e.target && e.target.id === "rcSkip") skipCr = true; };
     zone.style.left = z0 * 100 + "%"; zone.style.width = "34%";
     document.getElementById("rcDep").onclick = () => { if (phase !== "orbit") return; deployOK = marker >= z0 && marker <= z0 + .34; phase = "deploying"; tDep = performance.now(); dep.hidden = true; snd(deployOK ? "pop" : "wrong"); };
     const finish = res => {
@@ -1116,7 +1117,8 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
       if (phase === "cruise" || phase === "land") { // flying across space to the place, then landing
         const key = PBODY[c.dest] || "moon", rn2 = mkr(hsh(c.dest)), isL = D.kind === "L", short = outcome === "short";
         if (phase === "cruise") {
-          const TR = 6000, q = Math.min(1, (ts - tCr) / TR), fr = short ? Math.max(.2, Math.min(.8, a.dv / a.need * .8)) : 1, pq = Math.min(q, fr * q / Math.max(q, .0001) * (short ? 1 : 1)), mq = short ? Math.min(q * fr, fr) : q;
+          const TR0 = Math.max(3000, (Math.log10(Math.max(1000, D.alt)) - 4) * 3000); if (skipCr) { tCr = ts - TR0; skipCr = false; }
+          const TR = Math.max(3000, (Math.log10(Math.max(1000, D.alt)) - 4) * 3000), q = Math.min(1, (ts - tCr) / TR), fr = short ? Math.max(.2, Math.min(.8, a.dv / a.need * .8)) : 1, pq = Math.min(q, fr * q / Math.max(q, .0001) * (short ? 1 : 1)), mq = short ? Math.min(q * fr, fr) : q;
           starsBg(x, 640, 420, rn2, 130);
           drawBody(x, "earth", 90 - q * 70, 340 + q * 60, 150 - q * 110, rn2);
           drawBody(x, key, 540, 150, 12 + q * q * 70, rn2, ts / 1000);
@@ -1125,7 +1127,7 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
           x.save(); x.translate(ex, ey); x.rotate(ang); drawRocket(x, { ...des, look: { ...des.look, pieces: [] } }, 0, 22, Math.min(.5, .4 * rScale * 1.2 + .05), { flame: short && q >= 1 ? 0 : 1 }); x.restore();
           if (!short || q < 1) parts.push({ x: ex - 6, y: ey + 6, vx: -30, vy: 18, l: .7, c: "#ffc060" });
           label(short && q >= 1 ? "Out of speed! The engines went quiet..." : "Flying to " + D.name + "...", 26);
-          tele.innerHTML = `<span>Going to <b>${esc(D.name)}</b></span><span>Distance <b>${Math.round(D.alt * mq).toLocaleString()} km</b></span><span>${short && q >= 1 ? "Out of speed" : "Cruising"}</span>`;
+          const days = D.alt * mq / 20 / 86400, tt = days >= 730 ? (days / 365).toFixed(1) + " years" : Math.max(1, Math.round(days)) + " days"; tele.innerHTML = `<span>Going to <b>${esc(D.name)}</b></span><span>Distance <b>${Math.round(D.alt * mq).toLocaleString()} km</b></span><span>Trip time <b>${tt}</b></span><span>${short && q >= 1 ? "Out of speed" : "Cruising"}</span><button type="button" class="hintbtn" id="rcSkip">Skip ahead</button>`;
           parts = parts.filter(z => (z.l -= .016) > 0); parts.forEach(z => { z.x += z.vx * .016; z.y += z.vy * .016; x.globalAlpha = Math.max(0, z.l); x.fillStyle = z.c; x.fillRect(z.x, z.y, 3, 3); }); x.globalAlpha = 1;
           if (q >= 1 && !fin) { if (short) { finishLater("short", ts); } else if (isL) { phase = "land"; tLd = ts; } else { phase = "orbit"; tOrbit = ts; dep.hidden = c.trip; snd("hum"); if (c.trip) finishLater("ok", ts); } }
         } else {
