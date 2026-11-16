@@ -338,14 +338,15 @@ urancloud|Uranus: cloud station|16700|2700000000|L
 uranicy|Uranus: icy depths platform|16750|2700000000|L
 nepcloud|Neptune: cloud station|17000|4300000000|L
 nepwind|Neptune: windy platform|17050|4300000000|L`;
+  const tierOfDv = dv => dv <= 2500 ? 0 : dv <= 9800 ? 1 : dv <= 11500 ? 2 : dv <= 12800 ? 3 : dv <= 13500 ? 4 : dv <= 14000 ? 5 : dv <= 14500 ? 6 : dv <= 15200 ? 7 : dv <= 15800 ? 8 : dv <= 16200 ? 9 : dv <= 16700 ? 10 : dv <= 17000 ? 11 : 12;
   const DESTS = {}, DLIST = [];
-  PLACES.split("\n").forEach(r => { const f = r.split("|"), dv = +f[2], tier = dv <= 2500 ? 0 : dv <= 9800 ? 1 : dv <= 11500 ? 2 : dv <= 12800 ? 3 : dv <= 13700 ? 4 : dv <= 15000 ? 5 : 6; const d = { id: f[0], name: f[1], dv, alt: +f[3], kind: f[4], tier, spd: Math.min(14, dv / 1000 * .8), mult: f[0] === "sub" ? .17 : Math.max(.5, Math.pow(dv / 9400, 3)) }; DESTS[d.id] = d; DLIST.push(d); });
+  PLACES.split("\n").forEach(r => { const f = r.split("|"), dv = +f[2], tier = tierOfDv(dv); const d = { id: f[0], name: f[1], dv, alt: +f[3], kind: f[4], tier, spd: Math.min(14, dv / 1000 * .8), mult: f[0] === "sub" ? .17 : Math.max(.5, Math.pow(dv / 9400, 3)) }; DESTS[d.id] = d; DLIST.push(d); });
   // 1000 made-up planets: each needs 2x the normal speed. They show up at the level their "normal" speed belongs to.
   const XPB = {};
   { let q = 12345; const rq = () => (q = (Math.imul(q, 1664525) + 1013904223) >>> 0) / 4294967296, pk = a => a[Math.floor(rq() * a.length)];
     const A = ["Zor", "Kel", "Vyn", "Tal", "Mir", "Qua", "Nex", "Oru", "Pyr", "Lum", "Dra", "Ixa", "Bel", "Cry", "Hal", "Syl", "Yor", "Fen", "Gal", "Ura"], B = ["on", "ia", "ara", "is", "us", "ex", "oth", "ine", "ora", "ium", "ax", "ell", "una", "ion", "ova"], KEYS = ["moon", "mars", "mercury", "venus", "io", "europa", "titan", "pluto", "jupiter", "saturn", "uranus", "neptune"];
     for (let i = 0; i < 1000; i++) {
-      const base = Math.round((2600 + Math.pow(i / 999, 1.15) * 14300 + rq() * 200) / 10) * 10, dv = base * 2, tier = base <= 2500 ? 0 : base <= 9800 ? 1 : base <= 11500 ? 2 : base <= 12800 ? 3 : base <= 13700 ? 4 : base <= 15000 ? 5 : 6;
+      const base = Math.round((2600 + Math.pow(i / 999, 1.15) * 14300 + rq() * 200) / 10) * 10, dv = base * 2, tier = tierOfDv(base);
       const d = { id: "xp" + i, name: pk(A) + pk(B) + " " + (100 + i) + " (new planet)", dv, alt: Math.round(3e5 * Math.pow(10, (base - 2600) / 14300 * 4.6) * (.7 + rq() * .6)), kind: "L", tier, spd: Math.min(14, dv / 1000 * .8), mult: Math.max(.5, Math.pow(dv / 9400, 3)), fake: 1, hue: Math.floor(rq() * 360) };
       DESTS[d.id] = d; DLIST.push(d); XPB[d.id] = pk(KEYS);
     }
@@ -362,8 +363,8 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
   const FACTS = ["Rocket engines work by throwing gas out the back very fast. That pushes the rocket the other way (Newton's third law).", "To stay in orbit around Earth you need to go about 7.8 kilometres every second!", "Rockets drop stages because empty tanks are just dead weight.", "The rocket equation says: the more you want to speed up, the more fuel you need, and fuel itself needs more fuel to lift it.", "Isp (specific impulse) is how long one kilogram of fuel can make one kilogram of push. Higher means more efficient.", "Hydrogen is the lightest fuel, so it gives the best Isp, but it is bulky so the tanks are large.", "Thrust-to-weight ratio must be more than 1 at liftoff, or the rocket just sits on the pad.", "Gravity pulls on a rocket the whole time it climbs, so some of your fuel is wasted just fighting gravity.", "The Moon has 1/6 of Earth's gravity, so landing there needs far less fuel than leaving Earth.", "Escape velocity from Earth is about 11.2 kilometres per second.", "Solid rocket boosters cannot be shut off once they are lit.", "Reusable rockets land back on Earth so the expensive parts can fly again.", "Air gets thinner as you go up, so engines made for space can be more efficient up there.", "A rocket at liftoff is mostly fuel: often 90% of its mass!", "Satellites in high orbit (like TV satellites) stay above the same spot on Earth.", "Mars is so far away that signals take between 4 and 24 minutes to get there.", "Delta-v (change in speed) is how rocket scientists measure how far a rocket can go.", "More engines means more thrust, but also more weight and more things that can go wrong.", "Rocket scientists test engines many times on the ground to make them more reliable.", "The first artificial satellite, Sputnik, was launched in 1957."];
   const CUSTOMERS = ["TeleStar Corp", "Blue Marble Weather", "Moon Mining Inc", "School Satellite Club", "Mars Dream Agency", "Deep Sea Data Ltd", "Orbit TV", "Galaxy Maps", "Star Farm Co", "Comet Research Lab", "Aurora Space Station", "Nova Telecom", "Little Planet Radio", "Polar Ice Watch", "Sunrise Energy"];
   const THINGS = { sub: ["science experiment", "weather probe", "school experiment box", "cloud sensor"], leo: ["weather satellite", "school cubesat", "space telescope", "station module", "photo satellite"], gto: ["TV satellite", "radio satellite", "weather satellite", "phone satellite"], moon: ["moon rover", "moon lander", "moon base cargo", "moon orbiter"], mars: ["Mars lander", "Mars rover", "Mars orbiter", "Mars base cargo"] };
-  const TIERS = [0, 3, 8, 15, 25, 40, 60];
-  const TIERNAMES = ["Garage startup", "Small launcher", "Rising company", "Moon contractor", "Mars pioneer", "Heavy-lift giant", "Space empire"];
+  const TIERS = [0, 3, 8, 15, 25, 40, 60, 85, 115, 150, 200, 260, 340];
+  const TIERNAMES = ["Garage startup", "Small launcher", "Rising company", "Moon contractor", "Mars pioneer", "Heavy-lift giant", "Space empire", "Solar system boss", "Outer planet ace", "Deep space legend", "Star-gate builder", "Galaxy captain", "Universe master"];
   // pieces you can buy for the satellite: they weigh something, cost money and earn a bonus when it works
   const SATP = { solar: ["Big solar panels", 40, 25000, 6], ant: ["Better antenna", 20, 30000, 5], cam: ["HD camera", 35, 60000, 9], bat: ["Battery pack", 50, 20000, 4], thr: ["Thrusters for fixes", 30, 45000, 6], sci: ["Science sensors", 25, 50000, 7], shield: ["Radiation shield", 45, 35000, 5], fuel: ["Extra fuel (longer life)", 60, 20000, 5], mirror: ["Star mirror", 70, 90000, 12], laser: ["Laser link", 40, 120000, 14], cpu: ["Backup computer", 15, 40000, 6], gold: ["Gold-plated coat", 5, 15000, 2] };
   const SATNAMES = ["Starling", "Comet Jr", "Skyeye", "Orbiter One", "Moonbeam", "Sparkle", "Pathfinder", "Aurora", "Nimbus", "Voyager Kid", "Lumi", "Zippy"];
@@ -383,7 +384,7 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
   const bodyOf = d => { if (d.fake) return "new"; const k = PBODY[d.id] || "moon"; if (d.kind === "S") return "earth"; if (k === "earth") return "earth"; if (k === "moon") return "moon"; if (k === "mars") return "mars"; if (k === "phobos" || k === "deimos") return "small"; if (k === "io") return "io"; if (k === "venus") return "venus"; if (k === "mercury") return "mercury"; if (["jupiter", "saturn", "uranus", "neptune"].includes(k)) return "gas"; if (k === "sunpass" || k === "l1" || k === "gateway") return k === "gateway" ? "moon" : "sun"; if (PARENT[k] && PARENT[k] !== "earth" && PARENT[k] !== "mars") return "icy"; if (k === "pluto" || k === "triton" || k === "enceladus" || k === "titan") return "icy"; return POTATO[k] ? "small" : "icy"; };
   const payloadFor = d => { const b = bodyOf(d), l = PAYLOADS.filter(p => p[1].includes(d.kind) && p[2] === b); return l.length ? pick(l)[0] : null; };
   function makeContract() {
-    const t = tier(), cap = [400, 800, 2500, 6000, 15000, 40000, 100000][t];
+    const t = tier(), cap = [400, 800, 2500, 6000, 15000, 40000, 100000, 150000, 250000, 400000, 650000, 1000000, 2000000][t];
     const open = DLIST.filter(d => d.tier <= t && (!d.fake || Math.random() < .25)), near = open.filter(d => d.tier >= t - 1), pool = Math.random() < .5 && near.length ? near : open, d = pick(pool);
     const maxKg = d.id === "sub" ? 800 : d.dv <= 9400 ? 100000 : 100000 * Math.exp(-(d.dv - 9400) / 1900), hi = Math.max(60, Math.min(cap, maxKg)), lo = Math.max(30, hi * .08);
     let kg = Math.round(rr(lo, hi) / 10) * 10; const heavy = Math.random() < .12 + t * .02; if (heavy) kg = Math.round(kg * 1.5 / 10) * 10;
@@ -948,7 +949,7 @@ nepwind|Neptune: windy platform|17050|4300000000|L`;
       S.dealPaid[id] = 1; S.cash += pay; S.earned += pay; save(); snd("star"); render(); });
   }
   // ---------------- loans ----------------
-  const LIMITS = [1500000, 3000000, 6000000, 12500000, 25000000, 50000000, 125000000], RATE = .01;
+  const LIMITS = [1500000, 3000000, 6000000, 12500000, 25000000, 50000000, 125000000, 200000000, 350000000, 500000000, 800000000, 1200000000, 2000000000], RATE = .01;
   function bank(el) {
     const lim = LIMITS[tier()], avail = Math.max(0, lim - S.debt);
     const amts = [500000, 1000000, 5000000, 10000000, 25000000, 100000000].filter(a => a <= lim);
